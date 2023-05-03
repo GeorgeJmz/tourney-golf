@@ -1,21 +1,35 @@
-import firebase from 'firebase/app'
-import 'firebase/auth'
+import { initializeApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
+import { getFirestore, addDoc, collection } from 'firebase/firestore'
+import type { IUser } from '../models/User'
 import 'firebase/database'
 import 'firebase/storage'
 
 const firebaseConfig = {
-  apiKey: 'API_KEY',
-  authDomain: 'PROJECT_ID.firebaseapp.com',
-  // The value of `databaseURL` depends on the location of the database
-  databaseURL: 'https://DATABASE_NAME.firebaseio.com',
-  projectId: 'PROJECT_ID',
-  storageBucket: 'PROJECT_ID.appspot.com',
-  messagingSenderId: 'SENDER_ID',
-  appId: 'APP_ID',
-  // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-  measurementId: 'G-MEASUREMENT_ID'
+  apiKey: process.env.REACT_APP_APIKEY,
+  authDomain: process.env.REACT_APP_AUTHDOMAIN,
+  projectId: process.env.REACT_APP_PROJECTID,
+  storageBucket: process.env.REACT_APP_STORAGEBUCKET,
+  messagingSenderId: process.env.REACT_APP_MESSAGINGSENDERID,
+  appId: process.env.REACT_APP_APPID
 }
 
-firebase.initializeApp(firebaseConfig)
+export const firebase = initializeApp(firebaseConfig)
+export const auth = getAuth()
+export const db = getFirestore()
 
-export default firebase
+export const createUser = async (user: IUser): Promise<IUser> => {
+  try {
+    const credentials = await createUserWithEmailAndPassword(
+      auth,
+      user.email,
+      user.password
+    )
+    user.id = credentials.user?.uid
+    await addDoc(collection(db, 'users'), user)
+    return user
+  } catch (error) {
+    console.error(error)
+    throw error
+  }
+}
