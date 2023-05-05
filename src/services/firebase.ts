@@ -25,8 +25,13 @@ export const createUser = async (user: IUser): Promise<IUser> => {
       user.email,
       user.password
     )
-    user.id = credentials.user?.uid
-    await addDoc(collection(db, 'users'), user)
+    const firebaseUser = {
+      email: user.email,
+      id: credentials.user?.uid,
+      name: user.name,
+      lastName: user.lastName
+    }
+    await addDoc(collection(db, 'users'), firebaseUser)
     return user
   } catch (error) {
     console.error(error)
