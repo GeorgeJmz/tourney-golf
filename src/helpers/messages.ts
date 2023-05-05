@@ -8,11 +8,12 @@ export const messages: MessagesType = {
     'Email/password accounts are not enabled. Enable them in the Firebase Console, under the Auth tab.',
   'auth/weak-password':
     'The password is not strong enough. It should be at least 6 characters long.',
-  'user-created': 'Congratulations! Your account has been successfully created.',
+  'user-created':
+    'Congratulations! Your account has been successfully created.',
   'loading-message': 'Please wait...'
 }
 
 export enum Messages {
   'USER_CREATED' = 'user-created',
-  'LOADING' = 'loading-message'
+  'LOADING' = 'loading-message',
 }

@@ -1,13 +1,15 @@
 import React from 'react'
 import { observer } from 'mobx-react'
-import { useForm } from './hooks/useForm'
-import { accountFields } from './helpers/getAccountFields'
-import type UserViewModel from './UserViewModel'
+import { useForm } from '../../../../hooks/useForm'
+import { accountFields } from '../../../../helpers/getAccountFields'
+import type UserViewModel from '../../../../viewModels/UserViewModel'
 
-interface CreateAccountProps {
+interface CreateAccountFormProps {
   userViewModel: UserViewModel
 }
-const CreateAccount: React.FC<CreateAccountProps> = ({ userViewModel }) => {
+const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
+  userViewModel
+}) => {
   const { values, handleInputChange, isValid } = useForm(accountFields)
 
   const handleAccount = async (
@@ -45,4 +47,4 @@ const CreateAccount: React.FC<CreateAccountProps> = ({ userViewModel }) => {
   )
 }
 
-export default observer(CreateAccount)
+export default observer(CreateAccountForm)
