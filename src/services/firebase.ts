@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 import { getFirestore, addDoc, collection } from 'firebase/firestore'
+import type { FirebaseError } from 'firebase/app'
 import type { IUser } from '../models/User'
 import 'firebase/database'
 import 'firebase/storage'
@@ -34,7 +35,7 @@ export const createUser = async (user: IUser): Promise<IUser> => {
     await addDoc(collection(db, 'users'), firebaseUser)
     return user
   } catch (error) {
-    console.error(error)
-    throw error
+    const code = error as FirebaseError
+    throw code
   }
 }

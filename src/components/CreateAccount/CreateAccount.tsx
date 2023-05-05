@@ -15,19 +15,15 @@ const CreateAccount: React.FC<CreateAccountProps> = ({ userViewModel }) => {
   ): Promise<void> => {
     event.preventDefault()
     if (isValid()) {
-      try {
-        await userViewModel.createUser({
-          id: '',
-          name: values.name,
-          lastName: values.lastName,
-          email: values.email,
-          password: values.password,
-          ghinNumber: '',
-          handicap: 0
-        })
-      } catch (error) {
-        console.log(error)
-      }
+      await userViewModel.createUser({
+        id: '',
+        name: values.name,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        ghinNumber: '',
+        handicap: 0
+      })
     }
   }
 
