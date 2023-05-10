@@ -6,6 +6,7 @@ import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import Login from "./views/Login/Login";
 import Welcome from "./views/Welcome/Welcome";
 import Dashboard from "./views/Dashboard/Dashboard";
+import { Container, Paper } from "@mui/material";
 import { useAuth } from "./hooks/useUserContext";
 import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -14,19 +15,31 @@ function App(): JSX.Element {
   const { user } = useAuth();
   return (
     <div className="App">
-      <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth user={user}>
-              <Dashboard />
-            </RequireAuth>
-          }
-        />
-      </Routes>
+      <Container
+        maxWidth="lg"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Paper elevation={3} sx={{ width: "50%", height: "60vh" }}>
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/create-account" element={<CreateAccount />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <RequireAuth user={user}>
+                  <Dashboard />
+                </RequireAuth>
+              }
+            />
+          </Routes>
+        </Paper>
+      </Container>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}

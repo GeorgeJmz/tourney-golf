@@ -3,10 +3,12 @@ import { observer } from "mobx-react";
 import { useForm } from "../../../../hooks/useForm";
 import { accountFields } from "../../../../helpers/getAccountFields";
 import type UserViewModel from "../../../../viewModels/UserViewModel";
+import { Button, TextField, Box } from "@mui/material";
 
 interface CreateAccountFormProps {
   userViewModel: UserViewModel;
 }
+
 const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
   userViewModel,
 }) => {
@@ -30,20 +32,31 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
   };
 
   return (
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    <form onSubmit={handleAccount}>
+    <Box
+      component="form"
+      sx={{
+        "& > :not(style)": { m: 1, width: "25ch" },
+      }}
+      noValidate
+      autoComplete="off"
+      onSubmit={handleAccount}
+    >
       {accountFields.map((inputElement, key) => (
-        <input
+        <TextField
           key={key}
           type={inputElement.input}
           name={inputElement.name}
-          placeholder={inputElement.placeholder}
+          label={inputElement.placeholder}
           value={values[inputElement.name]}
           onChange={handleInputChange}
+          margin="normal"
+          required
         />
       ))}
-      <button type="submit">Create Account</button>
-    </form>
+      <Button type="submit" variant="contained" disabled={!isValid()}>
+        Create Account
+      </Button>
+    </Box>
   );
 };
 

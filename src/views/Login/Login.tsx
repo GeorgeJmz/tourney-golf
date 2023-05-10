@@ -4,6 +4,7 @@ import UserViewModel from "../../viewModels/UserViewModel";
 import LoginForm from "./components/LoginForm/LoginForm";
 import { Navigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useUserContext";
+import { Button, Stack, Typography } from "@mui/material";
 
 const Login: React.FC = () => {
   const userViewModel = new UserViewModel();
@@ -11,18 +12,43 @@ const Login: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div>
+    <React.Fragment>
       {user && <Navigate to="/dashboard" state={{ from: location }} replace />}
       {!user && (
-        <div>
+        <Stack
+          direction="column"
+          justifyContent="center"
+          alignItems="center"
+          spacing={3}
+          sx={{ height: "100%" }}
+        >
+          <Typography
+            variant="h3"
+            sx={{
+              fontStyle: "italic",
+              fontWeight: 800,
+              fontSize: "48px",
+              lineHeight: "39px",
+              textAlign: "center",
+              letterSpacing: "-4px",
+              textTransform: "uppercase",
+              maxWidth: "250px",
+            }}
+          >
+            Tourney Golf
+          </Typography>
           <LoginForm userViewModel={userViewModel} />
-          <p>Don't have an account?</p>
-          <Link to="/create-account">
-            <button>Create an account</button>
-          </Link>
-        </div>
+          <div>
+            <Typography variant="body1">Don't have an account?</Typography>
+            <Link to="/create-account">
+              <Button variant="text" size="large">
+                Create an Account
+              </Button>
+            </Link>
+          </div>
+        </Stack>
       )}
-    </div>
+    </React.Fragment>
   );
 };
 
