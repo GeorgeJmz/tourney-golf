@@ -34,7 +34,7 @@ const Welcome: React.FC = () => {
             Tourney Golf
           </Typography>
           <div>
-            <Typography variant="h5">
+            <Typography variant="h5" color="primary.main">
               Take your golf game to the next level.
             </Typography>
             <Typography
@@ -42,7 +42,7 @@ const Welcome: React.FC = () => {
               sx={{
                 maxWidth: "400px",
                 textAlign: "center",
-                margin: "auto",
+                margin: "10px auto",
               }}
             >
               Track your progress, connect with other players, and master your
@@ -55,11 +55,19 @@ const Welcome: React.FC = () => {
             </Button>
           </Link>
           <div>
-            <Typography variant="body1">
+            <Typography
+              variant="body1"
+              sx={{
+                maxWidth: "400px",
+                textAlign: "center",
+                margin: "0 auto 20px auto",
+                fontSize: "0.9rem",
+              }}
+            >
               Join the community and start playing like a pro today.
             </Typography>
             <Link to="/create-account">
-              <Button variant="text" color="secondary" size="large">
+              <Button variant="outlined" color="secondary" size="large">
                 Create an Account
               </Button>
             </Link>

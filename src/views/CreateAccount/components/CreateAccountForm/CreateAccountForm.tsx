@@ -53,7 +53,13 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
           required
         />
       ))}
-      <Button type="submit" variant="contained" disabled={!isValid()}>
+      <Button
+        type="submit"
+        variant="contained"
+        disabled={!isValid()}
+        size="large"
+        sx={{ minWidth: "250px" }}
+      >
         Create Account
       </Button>
     </Box>

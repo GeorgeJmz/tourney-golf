@@ -24,7 +24,10 @@ function App(): JSX.Element {
           minHeight: "100vh",
         }}
       >
-        <Paper elevation={3} sx={{ width: "50%", height: "60vh" }}>
+        <Paper
+          elevation={3}
+          sx={{ width: "95%", height: "95vh", padding: "0 20px" }}
+        >
           <Routes>
             <Route path="/" element={<Welcome />} />
             <Route path="/create-account" element={<CreateAccount />} />

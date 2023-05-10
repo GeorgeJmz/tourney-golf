@@ -38,9 +38,23 @@ const CreateAccount: React.FC = () => {
           </Typography>
           <CreateAccountForm userViewModel={userViewModel} />
           <div>
-            <Typography variant="body1">Have an account?</Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                maxWidth: "400px",
+                textAlign: "center",
+                margin: "20px auto 10px",
+                fontSize: "0.9rem",
+              }}
+            >
+              Have an account?
+            </Typography>
             <Link to="/login">
-              <Button variant="text" size="large">
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{ minWidth: "250px" }}
+              >
                 Login
               </Button>
             </Link>

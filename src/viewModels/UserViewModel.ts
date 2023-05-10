@@ -33,7 +33,7 @@ class UserViewModel {
         render: displayMessage,
         type: toast.TYPE.SUCCESS,
         isLoading: false,
-        autoClose: 5000,
+        autoClose: 800,
       });
     } catch (error) {
       const codeError = (error as FirebaseError).code;
@@ -42,7 +42,7 @@ class UserViewModel {
         render: displayError,
         type: toast.TYPE.ERROR,
         isLoading: false,
-        autoClose: 5000,
+        autoClose: 800,
       });
     }
   }
@@ -57,7 +57,7 @@ class UserViewModel {
         render: displayMessage,
         type: toast.TYPE.SUCCESS,
         isLoading: false,
-        autoClose: 5000,
+        autoClose: 800,
       });
     } catch (error) {
       const codeError = (error as FirebaseError).code;
@@ -66,7 +66,7 @@ class UserViewModel {
         render: displayError,
         type: toast.TYPE.ERROR,
         isLoading: false,
-        autoClose: 5000,
+        autoClose: 800,
       });
     }
   }
