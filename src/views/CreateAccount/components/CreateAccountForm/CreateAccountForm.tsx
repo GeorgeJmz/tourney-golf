@@ -1,33 +1,33 @@
-import React from 'react'
-import { observer } from 'mobx-react'
-import { useForm } from '../../../../hooks/useForm'
-import { accountFields } from '../../../../helpers/getAccountFields'
-import type UserViewModel from '../../../../viewModels/UserViewModel'
+import React from "react";
+import { observer } from "mobx-react";
+import { useForm } from "../../../../hooks/useForm";
+import { accountFields } from "../../../../helpers/getAccountFields";
+import type UserViewModel from "../../../../viewModels/UserViewModel";
 
 interface CreateAccountFormProps {
-  userViewModel: UserViewModel
+  userViewModel: UserViewModel;
 }
 const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
-  userViewModel
+  userViewModel,
 }) => {
-  const { values, handleInputChange, isValid } = useForm(accountFields)
+  const { values, handleInputChange, isValid } = useForm(accountFields);
 
   const handleAccount = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
-    event.preventDefault()
+    event.preventDefault();
     if (isValid()) {
       await userViewModel.createUser({
-        id: '',
+        id: "",
         name: values.name,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
-        ghinNumber: '',
-        handicap: 0
-      })
+        ghinNumber: "",
+        handicap: 0,
+      });
     }
-  }
+  };
 
   return (
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -42,9 +42,9 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
           onChange={handleInputChange}
         />
       ))}
-      <button type="submit">Login</button>
+      <button type="submit">Create Account</button>
     </form>
-  )
-}
+  );
+};
 
-export default observer(CreateAccountForm)
+export default observer(CreateAccountForm);
