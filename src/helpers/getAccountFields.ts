@@ -1,15 +1,19 @@
-const validateEmail = (email: string): boolean => {
+export const validateEmail = (email: string): boolean => {
   const re = /\S+@\S+\.\S+/;
   return re.test(email);
 };
 
-const validatePassword = (password: string): boolean => {
+export const validatePassword = (password: string): boolean => {
   const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
   return re.test(password);
 };
 
-const validateString = (str: string): boolean => {
+export const validateString = (str: string): boolean => {
   return str.trim().length > 3;
+};
+
+export const validateNumbers = (): boolean => {
+  return true;
 };
 
 export const accountFields = [

@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SelectChangeEvent } from "@mui/material/Select";
 
-export interface FormInputs {
+export interface IOptionsForm {
+  displayName: string;
+  value: string;
+}
+export interface IFormInputs {
   name: string;
   type: string;
   placeholder: string;
   input: string;
+  options?: IOptionsForm[];
   rule: (value: string) => boolean;
 }
 
@@ -18,11 +24,11 @@ type Validation<T> = {
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const useForm = <T extends Record<string, unknown>>(
-  inputs: FormInputs[]
+  inputs: IFormInputs[]
 ) => {
   const [values, setValues] = useState<FormValues<T>>(
     Object.fromEntries(
-      inputs.map(({ name, type }) => [name, type === "string" ? "" : 0])
+      inputs.map(({ name, type }) => [name, type === "string" ? "" : ""])
     ) as FormValues<T>
   );
   const [validations, setValidations] = useState<Validation<T>>({});
@@ -63,11 +69,39 @@ export const useForm = <T extends Record<string, unknown>>(
     }));
   };
 
+  const handleSliderChange = (
+    event: Event,
+    newValue: number | number[],
+    name: string
+  ) => {
+    if (typeof newValue === "number") {
+      setValues((prevValues) => ({
+        ...prevValues,
+        [name]: newValue,
+      }));
+    }
+  };
+
+  const handleSelectChange = (event: SelectChangeEvent, name: string) => {
+    const { value } = event.target;
+    setValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
+    }));
+  };
+
   const isValid = (): boolean => {
     const errorValues = Object.values(validations);
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     return errorValues.every((v) => !v);
   };
 
-  return { values, handleInputChange, validations, isValid };
+  return {
+    values,
+    handleInputChange,
+    validations,
+    isValid,
+    handleSliderChange,
+    handleSelectChange,
+  };
 };

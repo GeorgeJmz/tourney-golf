@@ -8,6 +8,8 @@ import {
 import {
   getFirestore,
   addDoc,
+  doc,
+  setDoc,
   collection,
   getDocs,
   query,
@@ -17,6 +19,7 @@ import type { FirebaseError } from "firebase/app";
 import type { IUser } from "../models/User";
 import "firebase/database";
 import "firebase/storage";
+import { ITournament } from "../models/Tournament";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -87,4 +90,29 @@ export const getUserByUID = async (uid: string): Promise<IUser | null> => {
     user = doc.data();
   });
   return user;
+};
+
+export const createTournament = async (
+  tournament: ITournament
+): Promise<string> => {
+  try {
+    const doc = await addDoc(collection(db, "tournament"), tournament);
+    return doc.id;
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const updateTournament = async (
+  documentId: string,
+  updatedData: Partial<ITournament>
+): Promise<void> => {
+  try {
+    const documentRef = doc(db, "tournament", documentId);
+    await setDoc(documentRef, updatedData, { merge: true });
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
 };
