@@ -15,6 +15,7 @@ class UserViewModel {
       user: observable,
       setUser: action,
       createUser: action,
+      getUserId: action,
     });
   }
 
@@ -22,6 +23,9 @@ class UserViewModel {
     this.user = user;
   }
 
+  getUserId(): string {
+    return this.user.id;
+  }
   async createUser(user: IUser): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
