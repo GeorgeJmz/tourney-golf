@@ -20,7 +20,7 @@ const PlayoffsSetup: React.FC<PlayoffsSetupFormProps> = ({
     <div>
       <Grid container>
         <Grid item xs={12}>
-          PlayoffsSetup
+          Playoffs Setup
         </Grid>
         <Grid item xs={6}>
           <FormControl fullWidth>
