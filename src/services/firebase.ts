@@ -20,6 +20,7 @@ import type { IUser } from "../models/User";
 import "firebase/database";
 import "firebase/storage";
 import { ITournament } from "../models/Tournament";
+import { IMatch } from "../models/Match";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -92,6 +93,21 @@ export const getUserByUID = async (uid: string): Promise<IUser | null> => {
   return user;
 };
 
+//create a function that returns a lists of users that could match with the letters that the user is typing
+export const getUsersByName = async (
+  name: string
+): Promise<Array<IUser> | null> => {
+  const userCollection = collection(db, "users");
+  const userQuery = query(userCollection, where("name", "==", name));
+  const querySnapshot = await getDocs(userQuery);
+  const users: Array<IUser> = [];
+  querySnapshot.forEach((doc) => {
+    users.push(doc.data() as unknown as IUser);
+    console.log(doc.data());
+  });
+  return users;
+};
+
 export const createTournament = async (
   tournament: ITournament
 ): Promise<string> => {
@@ -110,6 +126,42 @@ export const updateTournament = async (
 ): Promise<void> => {
   try {
     const documentRef = doc(db, "tournament", documentId);
+    await setDoc(documentRef, updatedData, { merge: true });
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const getTournamentsByID = async (
+  id: string
+): Promise<Array<ITournament> | null> => {
+  const tournamentCollection = collection(db, "tournament");
+  const userQuery = query(tournamentCollection, where("author", "==", id));
+  const querySnapshot = await getDocs(userQuery);
+  const tournaments = [] as Array<ITournament>;
+  querySnapshot.forEach((doc) => {
+    tournaments.push(doc.data() as unknown as ITournament);
+  });
+  return tournaments as Array<ITournament>;
+};
+
+export const createMatch = async (match: IMatch): Promise<string> => {
+  try {
+    const doc = await addDoc(collection(db, "match"), match);
+    return doc.id;
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const updateMatch = async (
+  documentId: string,
+  updatedData: Partial<IMatch>
+): Promise<void> => {
+  try {
+    const documentRef = doc(db, "match", documentId);
     await setDoc(documentRef, updatedData, { merge: true });
   } catch (error) {
     const code = error as FirebaseError;

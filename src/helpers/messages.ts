@@ -20,11 +20,13 @@ export const messages: MessagesType = {
   "tournament-created":
     "Congratulations! Your tournament has been successfully created.",
   "tournament-updated": "Tournament Updated",
+  "match-created": "Congratulations! Your match has been successfully created.",
+  "match-updated": "Match Updated",
   "user-logged": "Welcome.",
   "loading-message": "Please wait...",
-  "ok": "Operation successful.",
-  "cancelled": "The operation was cancelled.",
-  "unknown": "An unknown error occurred. Please try again later.",
+  ok: "Operation successful.",
+  cancelled: "The operation was cancelled.",
+  unknown: "An unknown error occurred. Please try again later.",
   "invalid-argument":
     "An invalid argument was provided. Please check your input and try again.",
   "deadline-exceeded":
@@ -36,14 +38,14 @@ export const messages: MessagesType = {
     "The resource has been exhausted. Please try again later.",
   "failed-precondition":
     "The operation failed due to a precondition. Please try again later.",
-  "aborted": "The operation was aborted. Please try again.",
+  aborted: "The operation was aborted. Please try again.",
   "out-of-range":
     "The operation is out of range. Please check your input and try again.",
-  "unimplemented": "The operation is not implemented or not supported.",
-  "internal": "An internal error occurred. Please try again later.",
-  "unavailable": "The service is currently unavailable. Please try again later.",
+  unimplemented: "The operation is not implemented or not supported.",
+  internal: "An internal error occurred. Please try again later.",
+  unavailable: "The service is currently unavailable. Please try again later.",
   "data-loss": "An unrecoverable data loss or corruption occurred.",
-  "unauthenticated": "You are not authenticated to perform this operation.",
+  unauthenticated: "You are not authenticated to perform this operation.",
 };
 
 export enum Messages {
@@ -52,4 +54,6 @@ export enum Messages {
   "LOADING" = "loading-message",
   "TOURNAMENT_CREATED" = "tournament-created",
   "TOURNAMENT_UPDATED" = "tournament-updated",
+  "MATCH_CREATED" = "match-created",
+  "MATCH_UPDATED" = "match-updated",
 }

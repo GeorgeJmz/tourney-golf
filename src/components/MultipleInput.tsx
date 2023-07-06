@@ -6,15 +6,19 @@ import FormHelperText from "@mui/material/FormHelperText";
 import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 import type { ITournamentElement } from "../helpers/getTournamentFields";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import Box from "@mui/material/Box";
+import ListItemText from "@mui/material/ListItemText";
 
-interface SelectInputProps {
+interface MultipleInputProps {
   inputElement: ITournamentElement;
   isError: boolean;
   onChangeHandler: (event: SelectChangeEvent<string>) => void;
   error: string | undefined;
-  value: string | number | undefined;
+  value: string;
 }
-export const SelectInput: React.FC<SelectInputProps> = ({
+export const MultipleInput: React.FC<MultipleInputProps> = ({
   inputElement,
   isError,
   onChangeHandler,
@@ -27,16 +31,25 @@ export const SelectInput: React.FC<SelectInputProps> = ({
         {inputElement.placeholder}
       </InputLabel>
       <Select
+        multiple
         labelId="demo-simple-select-helper-label"
         id="demo-simple-select-helper"
-        value={value as string}
+        value={value}
         label={inputElement.placeholder}
+        renderValue={(selected) => (
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {Array.isArray(selected)
+              ? selected.map((value) => <Chip key={value} label={value} />)
+              : selected}
+          </Box>
+        )}
         error={isError}
         onChange={onChangeHandler}
       >
         {inputElement.options?.map((option, key) => (
           <MenuItem key={`${key}-${option.displayName}`} value={option.value}>
-            {option.displayName}
+            <Checkbox checked={value.indexOf(option.value) > -1} />
+            <ListItemText primary={option.displayName} />
           </MenuItem>
         ))}
       </Select>

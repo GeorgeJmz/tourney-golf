@@ -1,21 +1,18 @@
 import React from "react";
 import { observer } from "mobx-react";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
 import TournamentViewModel from "../../../../viewModels/TournamentViewModel";
-import TextField from "@mui/material/TextField";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import EditIcon from "@mui/icons-material/Edit";
 import { Button } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
+import { useFormik } from "formik";
+import { DateInput } from "../../../../components/DateInput";
+import { SwitchInput } from "../../../../components/SwitchInput";
+import { MultipleInput } from "../../../../components/MultipleInput";
+import {
+  rules,
+  rulesFields,
+  rulesFieldsValidations,
+} from "../../../../helpers/getTournamentFields";
 
 interface RulesSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -28,11 +25,72 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
   handleNext,
   handlePrev,
 }) => {
+  const validationSchema = rulesFieldsValidations;
+  const formik = useFormik({
+    initialValues: rulesFields,
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      console.log(values);
+    },
+  });
+
   return (
-    <div>
-      <Grid container>
+    <form onSubmit={formik.handleSubmit}>
+      <Grid container spacing={2}>
+        {rules.map((inputElement, key) => {
+          const isError = Boolean(
+            formik.touched[inputElement.name] &&
+              Boolean(formik.errors[inputElement.name])
+          );
+          if (inputElement.input === "multiple") {
+            return (
+              <MultipleInput
+                inputElement={inputElement}
+                isError={isError}
+                onChangeHandler={(e) =>
+                  formik.setFieldValue(inputElement.name, e.target.value)
+                }
+                value={formik.values[inputElement.name] as unknown as string}
+                error={formik.errors[inputElement.name]}
+                key={key}
+              />
+            );
+          }
+          if (inputElement.input === "switch") {
+            return (
+              <SwitchInput
+                inputElement={inputElement}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                  formik.setFieldValue(inputElement.name, event.target.checked)
+                }
+                value={formik.values[inputElement.name] as unknown as boolean}
+                key={key}
+              />
+            );
+          }
+          return (
+            <DateInput
+              inputElement={inputElement}
+              isError={isError}
+              onChange={(value: string | null) => {
+                formik.setFieldValue(inputElement.name, value);
+              }}
+              error={
+                formik.touched[inputElement.name]
+                  ? formik.errors[inputElement.name]
+                  : ""
+              }
+              value={formik.values[inputElement.name] as unknown as string}
+              key={key}
+            />
+          );
+        })}
         <Grid item xs={12}>
-          RulesSetup
+          <FormControl fullWidth>
+            <Button type="submit" variant="contained" size="large">
+              {"Save"}
+            </Button>
+          </FormControl>
         </Grid>
         <Grid item xs={6}>
           <FormControl fullWidth>
@@ -60,7 +118,7 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
           </FormControl>
         </Grid>
       </Grid>
-    </div>
+    </form>
   );
 };
 

@@ -6,4 +6,6 @@ coverage/
 **/.pnp.*
 /dist*/
 node_modules/
-
+.firebase
+.github
+build/

@@ -16,6 +16,7 @@ export interface IPlayer {
   id: string;
   email: string;
   name: string;
+  strokes?: number;
   handicap?: number;
 }
 

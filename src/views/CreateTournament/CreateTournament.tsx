@@ -17,11 +17,11 @@ import { observer } from "mobx-react";
 
 import UserViewModel from "../../viewModels/UserViewModel";
 
-interface CreateTournamentProps {
+interface ICreateTournamentProps {
   user: UserViewModel;
 }
 
-const CreateTournament: React.FC<CreateTournamentProps> = ({ user }) => {
+const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const userId = React.useMemo(() => user.getUserId(), []);
   const tournamentViewModel = React.useMemo(
@@ -31,7 +31,6 @@ const CreateTournament: React.FC<CreateTournamentProps> = ({ user }) => {
   if (tournamentViewModel.getAuthor() === "") {
     tournamentViewModel.setAuthor(userId);
   }
-  const tournamentName = tournamentViewModel.getTournamentName();
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -67,16 +66,16 @@ const CreateTournament: React.FC<CreateTournamentProps> = ({ user }) => {
         />
       ),
     },
-    {
-      label: "Playoffs Setup",
-      component: (
-        <PlayoffsSetup
-          tournamentViewModel={tournamentViewModel}
-          handleNext={handleNext}
-          handlePrev={handlePrev}
-        />
-      ),
-    },
+    // {
+    //   label: "Playoffs Setup",
+    //   component: (
+    //     <PlayoffsSetup
+    //       tournamentViewModel={tournamentViewModel}
+    //       handleNext={handleNext}
+    //       handlePrev={handlePrev}
+    //     />
+    //   ),
+    // },
     {
       label: "Player Setup",
       component: (
@@ -100,8 +99,7 @@ const CreateTournament: React.FC<CreateTournamentProps> = ({ user }) => {
   ];
 
   return (
-    <Box>
-      <Typography>{tournamentName || "Create Tournament"}</Typography>
+    <Box sx={{ background: "white", p: 3 }}>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((step, index) => (
           <Step key={step.label} completed={index < activeStep}>
