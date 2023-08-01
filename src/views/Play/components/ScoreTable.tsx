@@ -6,6 +6,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 interface IScoreTableProps {
@@ -84,14 +85,39 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
         marginBottom: "50px",
       }}
     >
-      <Table aria-label="score table">
+      <Table aria-label="score table" style={{ tableLayout: "fixed" }}>
         <TableHead>
           <TableRow>
-            <TableCell align="center">Hole</TableCell>
-            <TableCell align="center">{currentTeeBoxDisplayName}</TableCell>
-            <TableCell align="center">Hcp</TableCell>
-            <TableCell align="center">Par</TableCell>
-            <TableCell align="center">Score</TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
+            >
+              Hole
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
+            >
+              {currentTeeBoxDisplayName}
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
+            >
+              Hcp
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
+            >
+              Par
+            </TableCell>
+            <TableCell
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: "100px" }}
+            >
+              Score
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -100,15 +126,44 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
             const distance = value;
             const hcp = currentHcp[key];
             const par = currentPar[key];
-            const score = authorScores[key] || "-";
+            const score = authorScores[key];
             const returnElement = [
               <StyledTableRow>
-                <TableCell align="center">{hole}</TableCell>
-                <TableCell align="center">{distance}</TableCell>
-                <TableCell align="center">{hcp}</TableCell>
-                <TableCell align="center">{par}</TableCell>
-                <TableCell align="center" onClick={() => onOpenModal(key)}>
-                  {score}
+                <TableCell
+                  align="center"
+                  sx={{ border: 0.5, color: "ActiveBorder" }}
+                >
+                  {hole}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ border: 0.5, color: "ActiveBorder" }}
+                >
+                  {distance}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ border: 0.5, color: "ActiveBorder" }}
+                >
+                  {hcp}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ border: 0.5, color: "ActiveBorder" }}
+                >
+                  {par}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{ border: 0.5, color: "ActiveBorder" }}
+                >
+                  <Button
+                    type="button"
+                    size="large"
+                    onClick={() => onOpenModal(key)}
+                  >
+                    {score || "Enter Score"}
+                  </Button>
                 </TableCell>
               </StyledTableRow>,
             ];

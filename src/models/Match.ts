@@ -4,6 +4,8 @@ export interface IMatch {
   courseDisplayName: string;
   teeBox: string;
   teeBoxDisplayName: string;
+  scoresId: Array<string>;
+  winner: string;
 }
 
 export default class MatchModel implements IMatch {
@@ -12,6 +14,8 @@ export default class MatchModel implements IMatch {
   courseDisplayName = "";
   teeBox = "";
   teeBoxDisplayName = "";
+  winner = "";
+  scoresId = ["", ""];
 
   constructor(init?: Partial<MatchModel>) {
     Object.assign(this, init);

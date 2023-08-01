@@ -9,15 +9,13 @@ import {
   TableRow,
   Paper,
 } from "@mui/material";
-import ScoreViewModel from "../../../viewModels/ScoreViewModel";
+import MatchViewModel from "../../../viewModels/MatchViewModel";
 
 interface HorizontalScoreCardProps {
-  players: Array<ScoreViewModel>;
+  match: MatchViewModel;
 }
 
-const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
-  players,
-}) => {
+const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
   const renderHoleHeaders = () => {
     const holes = [
       "HOLES",
@@ -30,7 +28,11 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
     return (
       <TableRow>
         {holes.map((hole, index) => (
-          <TableCell key={index} align="center">
+          <TableCell
+            key={index}
+            align="center"
+            sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
+          >
             {hole}
           </TableCell>
         ))}
@@ -38,15 +40,64 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
     );
   };
 
+  const renderScore = (index: number, rowIndex: number) => {
+    const currentPlayer = match.players[rowIndex];
+    //Gross
+    if (index === 18) {
+      return currentPlayer.score.total;
+    }
+    //Net
+    if (index === 19) {
+      return currentPlayer.score.totalNet;
+    }
+    //HDCP
+    if (index === 20) {
+      return currentPlayer.score.strokes;
+    }
+    //TEAM
+    if (index === 21) {
+      return "-";
+    }
+
+    const hasHandicap =
+      currentPlayer.score.scoreHoles[index] &&
+      currentPlayer.score.scoreHolesHP[index];
+    const getScoreWithHP = hasHandicap
+      ? `${currentPlayer.score.scoreHoles[index]}/${
+          currentPlayer.score.scoreHoles[index] - 1
+        }`
+      : currentPlayer.score.scoreHoles[index];
+    const scoreComponent = (
+      <div style={{ position: "relative" }}>
+        <span>{getScoreWithHP || "-"}</span>{" "}
+        <span
+          style={{
+            position: "absolute",
+            top: -15,
+            right: -10,
+            color: "InfoText",
+          }}
+        >
+          {hasHandicap ? "1" : ""}
+        </span>
+      </div>
+    );
+    return scoreComponent;
+  };
+
   const renderPlayerRow = (player: string, rowIndex: number) => {
     return (
       <TableRow key={rowIndex}>
-        <TableCell>{player}</TableCell>
+        <TableCell sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}>
+          {player}
+        </TableCell>
         {Array.from({ length: 22 }, (_, index) => (
-          <TableCell key={index} align="center">
-            {index === 18
-              ? players[rowIndex].score.total
-              : players[rowIndex].score.scoreHoles[index] || "-"}
+          <TableCell
+            key={index}
+            align="center"
+            sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
+          >
+            {renderScore(index, rowIndex)}
           </TableCell>
         ))}
       </TableRow>
@@ -54,33 +105,24 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   };
 
   const renderPlayerRows = () => {
-    return players.map((player, index) =>
+    return match.players.map((player, index) =>
       renderPlayerRow(player.score.player, index)
     );
   };
 
   const renderResultsRows = () => {
-    const winners = Array(18)
-      .fill(0)
-      .map((_, index) => {
-        const holeScores = players.map(
-          (player) => player.score.scoreHoles[index]
-        );
-        const minScore = Math.min(...holeScores);
-        const winners = players.filter(
-          (player) => player.score.scoreHoles[index] === minScore
-        );
-        return winners.length === 1 ? winners : minScore !== 0 ? winners : [];
-      });
-
     return (
       <TableRow>
-        <TableCell>LG</TableCell>
-        {Array.from({ length: 22 }, (_, index) => (
-          <TableCell key={index} align="center">
-            {index >= 18
-              ? "-"
-              : winners[index].map((player) => player.score.player).join(", ")}
+        <TableCell sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}>
+          MATCH
+        </TableCell>
+        {match.winByHole.map((winner, index) => (
+          <TableCell
+            key={index}
+            align="center"
+            sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
+          >
+            {index >= 18 ? "-" : winner}
           </TableCell>
         ))}
       </TableRow>
@@ -89,18 +131,22 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
 
   return (
     <TableContainer component={Paper}>
-      <Table>
+      <Table style={{ tableLayout: "fixed" }}>
         <TableHead>{renderHoleHeaders()}</TableHead>
         <TableBody>{renderPlayerRows()}</TableBody>
         <TableBody>{renderResultsRows()}</TableBody>
-        <TableFooter>
+        {match.match.winner !== "" && <TableFooter>
           {" "}
           <TableRow>
-            <TableCell colSpan={23} align="center">
-              Player Wons the match{" "}
+            <TableCell
+              colSpan={23}
+              align="center"
+              sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
+            >
+              {match.match.winner}
             </TableCell>
           </TableRow>
-        </TableFooter>
+        </TableFooter>}
       </Table>
     </TableContainer>
   );

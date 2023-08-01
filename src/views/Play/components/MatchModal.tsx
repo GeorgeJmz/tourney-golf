@@ -24,7 +24,7 @@ interface IMatchModalProps {
   isOpen: boolean;
   players: Array<ScoreViewModel>;
   onCloseModal: () => void;
-  onSetScore: () => void;
+  onSetScore: (temporalScores: Array<number>, hole: number) => void;
   //onUpdateScore: (value: string) => void;
 }
 
@@ -163,10 +163,8 @@ export const MatchModal: React.FC<IMatchModalProps> = ({
                 variant="contained"
                 size="large"
                 onClick={() => {
-                  temporalScores.forEach((score, key) => {
-                    players[key].setHoleScore(hole - 1, score);
-                  });
-                  onSetScore();
+                  const correctHole = hole - 1;
+                  onSetScore(temporalScores, correctHole);
                 }}
               >
                 Score

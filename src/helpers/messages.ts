@@ -22,6 +22,7 @@ export const messages: MessagesType = {
   "tournament-updated": "Tournament Updated",
   "match-created": "Congratulations! Your match has been successfully created.",
   "match-updated": "Match Updated",
+  "score-created": "Congratulations! Your score has been successfully created.",
   "user-logged": "Welcome.",
   "loading-message": "Please wait...",
   ok: "Operation successful.",
@@ -56,4 +57,5 @@ export enum Messages {
   "TOURNAMENT_UPDATED" = "tournament-updated",
   "MATCH_CREATED" = "match-created",
   "MATCH_UPDATED" = "match-updated",
+  "SCORE_CREATED" = "score-created",
 }

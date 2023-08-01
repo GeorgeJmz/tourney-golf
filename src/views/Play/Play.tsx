@@ -11,11 +11,12 @@ import {
 } from "../../helpers/getTournamentFields";
 import { Invitations } from "../../components/Invitations";
 import { MatchModal } from "./components/MatchModal";
-import MatchViewModel from "../../viewModels/MatchViewModel";
+import PlayViewModel from "../../viewModels/PlayViewModel";
 import CourseList from "./components/CourseList";
 import { GolfCourse } from "../../services/courses";
 import { ScoreTable } from "./components/ScoreTable";
 import HorizontalScoreCard from "./components/HorizontalScoreCard";
+import { useNavigate } from "react-router-dom";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -44,35 +45,49 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const Play: React.FC<IPlayProps> = ({ user }) => {
-  const matchViewModel = React.useMemo(() => new MatchViewModel(), []);
-  if (matchViewModel.getAuthor() === "") {
-    matchViewModel.setAuthor(user.getUserId());
+  const playViewModel = React.useMemo(() => new PlayViewModel(), []);
+  const navigate = useNavigate();
+
+  if (playViewModel.getAuthor() === "") {
+    playViewModel.setAuthor(user);
   }
   const onSaveHandler = () => {
-    if (matchViewModel.currentStep === 2) {
-      matchViewModel.createMatch(matchViewModel.match);
+    if (playViewModel.currentStep === 2) {
+      playViewModel.createMatch();
+      setTimeout(() => navigate("/dashboard"), 3000);
+    } else {
+      playViewModel.setCurrentStep(playViewModel.currentStep + 1);
     }
-    matchViewModel.setCurrentStep(matchViewModel.currentStep + 1);
   };
   const validationSchema = invitationsFieldsValidations;
-  const emailList = matchViewModel.getEmailList();
+  const emailList = playViewModel.getEmailList();
   const onSubmitHandler = (email: string, name: string, strokes: number) => {
-    matchViewModel.addEmailToList(email, name, strokes);
+    playViewModel.addEmailToList(email, name, strokes);
   };
+  const onUpdateHandler = (
+    email: string,
+    name: string,
+    strokes: number,
+    key: number
+  ) => {
+    playViewModel.updateEmailList(email, name, strokes, key);
+  };
+
   const handleCloseModal = () => {
-    matchViewModel.setModal(false);
+    playViewModel.setModal(false);
   };
   const handleOpenModal = (key: number) => {
-    matchViewModel.setModal(true);
-    matchViewModel.setModalValues(key);
+    playViewModel.setModal(true);
+    playViewModel.setModalValues(key);
   };
-  const onSetScore = () => matchViewModel.setScoreModal();
+  const onSetScore = (temporalScores: Array<number>, hole: number) =>
+    playViewModel.setScoreModal(temporalScores, hole);
 
   const onOpenCourse = (id: string) => {
-    matchViewModel.openCloseCourse(id);
+    playViewModel.openCloseCourse(id);
   };
   const onSelectTeeBox = (course: GolfCourse, id: string) =>
-    matchViewModel.selectTeeBox(course, id);
+    playViewModel.selectTeeBox(course, id);
   const submitButtonText = ["Choose course", "Start Match", "End Match"];
 
   const [value, setValue] = React.useState(1);
@@ -80,7 +95,6 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
-
   return (
     <div>
       <Box
@@ -92,52 +106,57 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           p: 3,
         }}
       >
-        {matchViewModel.currentStep === 0 && (
+        {playViewModel.currentStep === 0 && (
           <CourseList
-            courses={matchViewModel.courses}
-            currentTeeBox={matchViewModel.currentTeeBox}
+            courses={playViewModel.courses}
+            currentTeeBox={playViewModel.currentTeeBox}
             onOpenCourse={onOpenCourse}
             onSelectTeeBox={onSelectTeeBox}
           />
         )}
-        {matchViewModel.currentStep === 1 && (
+        {playViewModel.currentStep === 1 && (
           <Invitations
             fields={invitationsMatch}
             emailList={emailList}
             validationSchema={validationSchema}
             onSubmit={onSubmitHandler}
+            onUpdate={onUpdateHandler}
           />
         )}
-        {matchViewModel.currentStep === 2 && (
+        {playViewModel.currentStep === 2 && (
           <React.Fragment>
             <Tabs value={value} onChange={handleChange} centered>
               <Tab label="Round" />
               <Tab label="Score" />
             </Tabs>
             <TabPanel value={value} index={0}>
-              <HorizontalScoreCard players={matchViewModel.players} />
+              <React.Fragment>
+                {playViewModel.matches.map((match) => (
+                  <HorizontalScoreCard match={match} />
+                ))}
+              </React.Fragment>
             </TabPanel>
             <TabPanel value={value} index={1}>
               <ScoreTable
-                currentDistance={matchViewModel.currentDistance}
+                currentDistance={playViewModel.currentDistance}
                 currentTeeBoxDisplayName={
-                  matchViewModel.currentTeeBoxDisplayName
+                  playViewModel.currentTeeBoxDisplayName
                 }
-                currentHcp={matchViewModel.currentHcp}
-                currentPar={matchViewModel.currentPar}
-                currentOut={matchViewModel.players[0].score.out}
-                currentIn={matchViewModel.players[0].score.in}
-                currentTotal={matchViewModel.players[0].score.total}
-                authorScores={matchViewModel.players[0].score.scoreHoles}
+                currentHcp={playViewModel.currentHcp}
+                currentPar={playViewModel.currentPar}
+                currentOut={playViewModel.allPlayers[0].score.out}
+                currentIn={playViewModel.allPlayers[0].score.in}
+                currentTotal={playViewModel.allPlayers[0].score.total}
+                authorScores={playViewModel.allPlayers[0].score.scoreHoles}
                 onOpenModal={handleOpenModal}
               />
 
               <MatchModal
-                hole={parseInt(matchViewModel.holeModal)}
-                par={parseInt(matchViewModel.parModal)}
+                hole={parseInt(playViewModel.holeModal)}
+                par={parseInt(playViewModel.parModal)}
                 onSetScore={onSetScore}
-                players={matchViewModel.players}
-                isOpen={matchViewModel.openModal}
+                players={playViewModel.allPlayers}
+                isOpen={playViewModel.openModal}
                 onCloseModal={handleCloseModal}
               />
             </TabPanel>
@@ -147,7 +166,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         <Fab
           color="primary"
           variant="extended"
-          disabled={matchViewModel.currentTeeBox === ""}
+          disabled={playViewModel.currentTeeBox === ""}
           onClick={onSaveHandler}
           sx={{
             position: "fixed",
@@ -156,7 +175,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             marginLeft: "-125px",
           }}
         >
-          {submitButtonText[matchViewModel.currentStep]}
+          {submitButtonText[playViewModel.currentStep]}
         </Fab>
       </Box>
     </div>

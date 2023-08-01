@@ -31,6 +31,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   useEffect(() => {
     if (user) {
       user.getTournaments();
+      user.getMatches();
     }
   }, []);
   return (
@@ -59,6 +60,29 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </ListItem>
         </Paper>
       )}
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Typography gutterBottom align="left" variant="h6" component="div">
+            Manage your Previous Matches
+          </Typography>
+        </Grid>
+        {user.matches.map((match) => (
+          <Grid item xs={6} md={4} lg={3} key={match.course}>
+            <Card>
+              <CardActionArea>
+                <CardContent>
+                <Typography variant="body1" color="text.secondary">
+                    {match.courseDisplayName} - {match.teeBoxDisplayName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Winner - {match.winner}
+                  </Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">

@@ -21,6 +21,7 @@ import "firebase/database";
 import "firebase/storage";
 import { ITournament } from "../models/Tournament";
 import { IMatch } from "../models/Match";
+import { IScore } from "../models/Score";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -146,6 +147,19 @@ export const getTournamentsByID = async (
   return tournaments as Array<ITournament>;
 };
 
+export const getMatchesByID = async (
+  id: string
+): Promise<Array<IMatch> | null> => {
+  const tournamentCollection = collection(db, "match");
+  const userQuery = query(tournamentCollection, where("author", "==", id));
+  const querySnapshot = await getDocs(userQuery);
+  const matches = [] as Array<IMatch>;
+  querySnapshot.forEach((doc) => {
+    matches.push(doc.data() as unknown as IMatch);
+  });
+  return matches as Array<IMatch>;
+};
+
 export const createMatch = async (match: IMatch): Promise<string> => {
   try {
     const doc = await addDoc(collection(db, "match"), match);
@@ -163,6 +177,16 @@ export const updateMatch = async (
   try {
     const documentRef = doc(db, "match", documentId);
     await setDoc(documentRef, updatedData, { merge: true });
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const createScore = async (score: IScore): Promise<string> => {
+  try {
+    const doc = await addDoc(collection(db, "score"), score);
+    return doc.id;
   } catch (error) {
     const code = error as FirebaseError;
     throw code;

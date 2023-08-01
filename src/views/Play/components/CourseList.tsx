@@ -9,7 +9,7 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Collapse from "@mui/material/Collapse";
-import type { IGolfCourse } from "../../../viewModels/MatchViewModel";
+import type { IGolfCourse } from "../../../viewModels/PlayViewModel";
 import type { GolfCourse } from "../../../services/courses";
 
 interface ICourseList {

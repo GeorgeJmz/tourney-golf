@@ -31,6 +31,7 @@ interface InvitationsProps {
   validationSchema: yup.ObjectSchema<IInvitationsInputElement>;
   playersLeft?: number;
   onSubmit: (email: string, name: string, strokes: number) => void;
+  onUpdate: (email: string, name: string, strokes: number, key: number) => void;
 }
 
 export const Invitations: React.FC<InvitationsProps> = ({
@@ -39,6 +40,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
   validationSchema,
   playersLeft,
   onSubmit,
+  onUpdate,
 }) => {
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [matchingUsers, setMatchingUsers] = useState<IUser[]>([]);
@@ -63,7 +65,6 @@ export const Invitations: React.FC<InvitationsProps> = ({
     }
   };
 
-  console.log("selectedUser", selectedUser);
   const isDisabled = playersLeft !== undefined ? playersLeft === 0 : false;
   const playersLeftText =
     playersLeft !== undefined ? `${playersLeft} left` : "";
@@ -144,7 +145,21 @@ export const Invitations: React.FC<InvitationsProps> = ({
                       {name}
                     </TableCell>
                     <TableCell align="left">{email}</TableCell>
-                    <TableCell align="left">{strokes}</TableCell>
+                    <TableCell align="left">
+                      <TextField
+                        label="Strokes"
+                        variant="outlined"
+                        defaultValue={strokes}
+                        onBlur={(event) => {
+                          const value = parseInt(event.target.value);
+                          if (value >= 0) {
+                            onUpdate(email || "", name || "", value, index);
+                          } else {
+                            event.target.value = "0";
+                          }
+                        }}
+                      />
+                    </TableCell>
                     <TableCell align="right">
                       <IconButton edge="end" aria-label="comments">
                         <DeleteIcon />
