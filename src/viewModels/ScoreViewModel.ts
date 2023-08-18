@@ -8,7 +8,7 @@ import { createScore } from "../services/firebase";
 
 class ScoreViewModel {
   score: ScoreModel = new ScoreModel();
-
+  currentPar: Array<number> = [];
   constructor() {
     makeObservable(this, {
       score: observable,
@@ -24,25 +24,54 @@ class ScoreViewModel {
 
   setHoleScore(hole: number, score: number) {
     this.score.scoreHoles[hole] = score;
+    //score === 1 = Hole in one === 10 points
+    const isHoleHP =
+      this.score.scoreHolesHP[hole] && this.score.scoreHoles[hole];
+    const strokesVsPar = isHoleHP
+      ? score - 1 - this.currentPar[hole]
+      : score - this.currentPar[hole];
+    let points = 0;
+    if (strokesVsPar === -4) {
+      points = 6;
+    }
+    if (strokesVsPar === -3) {
+      points = 5;
+    }
+    if (strokesVsPar === -2) {
+      points = 4;
+    }
+    if (strokesVsPar === -1) {
+      points = 3;
+    }
+    if (strokesVsPar === 0) {
+      points = 2;
+    }
+    if (strokesVsPar === 1) {
+      points = 1;
+    }
+    if (strokesVsPar >= 2) {
+      points = 0;
+    }
+    if (score === 1) {
+      points = 10;
+    }
+
+    this.score.teamPoints[hole] = points;
+
+    this.score.teamPoints[hole] = points;
     this.updateIn();
     this.updateOut();
     this.updateTotal();
     this.updateTotalNet();
   }
   updateTotal() {
-    this.score.total = this.score.scoreHoles
+    this.score.totalGross = this.score.scoreHoles
       ? this.score.scoreHoles.reduce((a, b) => a + b, 0)
       : 0;
   }
 
   updateTotalNet() {
-    this.score.totalNet = this.score.scoreHoles
-      ? this.score.scoreHoles.reduce(
-          (a, b, index) =>
-            this.score.scoreHolesHP[index] && b ? a + b - 1 : a + b,
-          0
-        )
-      : 0;
+    this.score.totalNet = this.score.totalGross - this.score.handicap;
   }
   updateIn() {
     this.score.in = this.score.scoreHoles
@@ -55,19 +84,23 @@ class ScoreViewModel {
       : 0;
   }
 
-  setPlayer(player: string, playerId: string, strokes: number) {
+  setPlayer(player: string, playerId: string, handicap: number) {
     this.score.player = player;
     this.score.idPlayer = playerId;
-    this.score.strokes = strokes;
+    this.score.handicap = handicap;
   }
 
-  setDifferenceHandicap = (difference: number, currentPar: Array<number>) => {
+  setDifferenceHandicap = (
+    difference: number,
+    hcp: Array<number>,
+    par: Array<number>
+  ) => {
     const outHcp = Math.floor(difference / 2) + (difference % 2);
     const inHcp = Math.ceil(difference / 2) - (difference % 2);
-
+    this.currentPar = par;
     const pars = {
-      OUT: currentPar.slice(0, 9),
-      IN: currentPar.slice(9, 18),
+      OUT: hcp.slice(0, 9),
+      IN: hcp.slice(9, 18),
     };
 
     const outHcpArray = this.getArrayPosition(pars.OUT, outHcp);

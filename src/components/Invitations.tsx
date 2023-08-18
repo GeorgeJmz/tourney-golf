@@ -30,8 +30,13 @@ interface InvitationsProps {
   emailList: Array<Partial<IPlayer>>;
   validationSchema: yup.ObjectSchema<IInvitationsInputElement>;
   playersLeft?: number;
-  onSubmit: (email: string, name: string, strokes: number) => void;
-  onUpdate: (email: string, name: string, strokes: number, key: number) => void;
+  onSubmit: (email: string, name: string, handicap: number) => void;
+  onUpdate: (
+    email: string,
+    name: string,
+    handicap: number,
+    key: number
+  ) => void;
 }
 
 export const Invitations: React.FC<InvitationsProps> = ({
@@ -49,7 +54,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
     initialValues: invitationsFields,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      onSubmit(values.email, values.name, values.strokes || 0);
+      onSubmit(values.email, values.name, values.handicap || 0);
     },
   });
 
@@ -74,11 +79,14 @@ export const Invitations: React.FC<InvitationsProps> = ({
         <Typography variant="h6">Invite Players</Typography>
         <Autocomplete
           options={matchingUsers}
-          getOptionLabel={(user) => user.name}
+          getOptionLabel={(user) =>
+            `${user.name} ${user.lastName} - ${user.email}`
+          }
           value={selectedUser}
           onChange={(event, value) => {
             setSelectedUser(value);
-            formik.setFieldValue(fields[0].name, value?.name || "");
+            const name = `${value?.name} ${value?.lastName}` || "";
+            formik.setFieldValue(fields[0].name, name);
             formik.setFieldValue(fields[1].name, value?.email || "");
           }}
           onInputChange={handleInputChange}
@@ -131,12 +139,12 @@ export const Invitations: React.FC<InvitationsProps> = ({
                 <TableRow>
                   <TableCell align="left">Name</TableCell>
                   <TableCell align="left">Email</TableCell>
-                  <TableCell align="left">Strokes</TableCell>
+                  <TableCell align="left">Handicap</TableCell>
                   <TableCell align="right">Delete</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {emailList.map(({ email, name, strokes }, index) => (
+                {emailList.map(({ email, name, handicap }, index) => (
                   <TableRow
                     key={`${email}-${name}-${index}`}
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
@@ -147,9 +155,9 @@ export const Invitations: React.FC<InvitationsProps> = ({
                     <TableCell align="left">{email}</TableCell>
                     <TableCell align="left">
                       <TextField
-                        label="Strokes"
+                        label="Handicap"
                         variant="outlined"
-                        defaultValue={strokes}
+                        defaultValue={handicap}
                         onBlur={(event) => {
                           const value = parseInt(event.target.value);
                           if (value >= 0) {

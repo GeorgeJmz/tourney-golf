@@ -24,7 +24,6 @@ interface SendInvitationsProps {
   fields: ITournamentElement[];
   emailList: Array<Partial<IPlayer>>;
   validationSchema: yup.ObjectSchema<IStep2InputElement>;
-  playersLeft?: number;
   onSubmit: (email: string, name: string) => void;
 }
 
@@ -32,7 +31,6 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
   fields,
   emailList,
   validationSchema,
-  playersLeft,
   onSubmit,
 }) => {
   const formik = useFormik({
@@ -40,12 +38,12 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       onSubmit(values.email, values.name);
+      formik.setValues(step2Fields); // Reset the form values
     },
   });
 
-  const isDisabled = playersLeft !== undefined ? playersLeft === 0 : false;
-  const playersLeftText =
-    playersLeft !== undefined ? `${playersLeft} left` : "";
+  const isDisabled = false;
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid container spacing={2}>
@@ -82,10 +80,10 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
           </FormControl>
         </Grid>
         <Grid item xs={12}>
-          <Typography>{`${emailList.length} players invited ${playersLeftText}`}</Typography>
+          <Typography>{`${emailList.length} players invited`}</Typography>
         </Grid>
         <Grid item xs={12} justifyContent="center" alignItems="center">
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ marginBottom: "50px" }}>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>

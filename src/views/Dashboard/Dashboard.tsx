@@ -22,12 +22,19 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { CardActionArea } from "@mui/material";
 import Grid from "@mui/material/Grid";
+import moment from "moment-timezone";
 
 interface IDashboardProps {
   user: UserViewModel;
 }
 const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   const [value, setValue] = React.useState(0);
+  const formatDate = (eventDate: number, eventTimezone: string) => {
+    const formattedDate = moment(eventDate)
+      .tz(eventTimezone)
+      .format("MMMM Do YYYY, h:mm a");
+    return formattedDate;
+  };
   useEffect(() => {
     if (user) {
       user.getTournaments();
@@ -71,11 +78,12 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             <Card>
               <CardActionArea>
                 <CardContent>
-                <Typography variant="body1" color="text.secondary">
+                  <Typography variant="body1" color="text.secondary">
                     {match.courseDisplayName} - {match.teeBoxDisplayName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Winner - {match.winner}
+                    Winner - {match.winner} -{" "}
+                    {formatDate(parseInt(match.date[0]), match.date[1])}
                   </Typography>
                 </CardContent>
               </CardActionArea>

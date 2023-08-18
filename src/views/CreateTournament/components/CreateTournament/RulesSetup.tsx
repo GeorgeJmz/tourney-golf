@@ -30,7 +30,14 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
     initialValues: rulesFields,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
+      const newValues = {
+        calcuta: values.calcuta,
+        playoffs: values.playoffs,
+        startDate: values.startDate?.toString(),
+        endDate: values.cutOffDate?.toString(),
+      };
+      await tournamentViewModel.updateTournament(newValues);
+      handleNext();
     },
   });
 
@@ -86,6 +93,13 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
           );
         })}
         <Grid item xs={12}>
+          <FormControl>
+            <Button type="submit" variant="contained" size="large">
+              {"Save and next step"}
+            </Button>
+          </FormControl>
+        </Grid>
+        {/* <Grid item xs={12}>
           <FormControl fullWidth>
             <Button type="submit" variant="contained" size="large">
               {"Save"}
@@ -116,7 +130,7 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
     </form>
   );

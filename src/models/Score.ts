@@ -3,11 +3,12 @@ export interface IScore {
   idPlayer: string;
   scoreHoles: Array<number>;
   scoreHolesHP: Array<number>;
-  strokes: number;
+  handicap: number;
   out: number;
   in: number;
-  total: number;
+  totalGross: number;
   totalNet: number;
+  teamPoints: Array<number>;
 }
 
 export default class ScoreModel implements IScore {
@@ -15,11 +16,12 @@ export default class ScoreModel implements IScore {
   idPlayer = "";
   scoreHoles: Array<number> = [];
   scoreHolesHP: Array<number> = [];
-  strokes = 0;
+  handicap = 0;
   out = 0;
   in = 0;
-  total = 0;
+  totalGross = 0;
   totalNet = 0;
+  teamPoints: Array<number> = [];
 
   constructor(init?: Partial<ScoreModel>) {
     Object.assign(this, init);

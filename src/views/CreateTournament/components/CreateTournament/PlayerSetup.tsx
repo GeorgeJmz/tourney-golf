@@ -43,11 +43,22 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
         fields={step2}
         emailList={emailList}
         validationSchema={validationSchema}
-        playersLeft={playersLeft}
         onSubmit={onSubmitHandler}
       />
       <Grid container spacing={2}>
-        <Grid item xs={6}>
+        <Grid item xs={12}>
+          <FormControl>
+            <Button
+              type="button"
+              variant="contained"
+              size="large"
+              onClick={onNextHandler}
+            >
+              {"Save and next step"}
+            </Button>
+          </FormControl>
+        </Grid>
+        {/* <Grid item xs={6}>
           <FormControl fullWidth>
             <Button
               type="button"
@@ -71,7 +82,7 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid>*/}
       </Grid>
     </React.Fragment>
   );

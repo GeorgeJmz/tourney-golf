@@ -61,16 +61,16 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
   const validationSchema = invitationsFieldsValidations;
   const emailList = playViewModel.getEmailList();
-  const onSubmitHandler = (email: string, name: string, strokes: number) => {
-    playViewModel.addEmailToList(email, name, strokes);
+  const onSubmitHandler = (email: string, name: string, handicap: number) => {
+    playViewModel.addEmailToList(email, name, handicap);
   };
   const onUpdateHandler = (
     email: string,
     name: string,
-    strokes: number,
+    handicap: number,
     key: number
   ) => {
-    playViewModel.updateEmailList(email, name, strokes, key);
+    playViewModel.updateEmailList(email, name, handicap, key);
   };
 
   const handleCloseModal = () => {
@@ -144,10 +144,14 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 }
                 currentHcp={playViewModel.currentHcp}
                 currentPar={playViewModel.currentPar}
-                currentOut={playViewModel.allPlayers[0].score.out}
-                currentIn={playViewModel.allPlayers[0].score.in}
-                currentTotal={playViewModel.allPlayers[0].score.total}
-                authorScores={playViewModel.allPlayers[0].score.scoreHoles}
+                currentOut={playViewModel.matches[0].players[0].score.out}
+                currentIn={playViewModel.matches[0].players[0].score.in}
+                currentTotal={
+                  playViewModel.matches[0].players[0].score.totalGross
+                }
+                authorScores={
+                  playViewModel.matches[0].players[0].score.scoreHoles
+                }
                 onOpenModal={handleOpenModal}
               />
 

@@ -104,7 +104,6 @@ export const getUsersByName = async (
   const users: Array<IUser> = [];
   querySnapshot.forEach((doc) => {
     users.push(doc.data() as unknown as IUser);
-    console.log(doc.data());
   });
   return users;
 };

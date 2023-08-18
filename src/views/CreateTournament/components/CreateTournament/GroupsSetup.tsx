@@ -163,7 +163,19 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
       </DragDropContext>
 
       <Grid container>
-        <Grid item xs={6}>
+        <Grid item xs={12}>
+          <FormControl>
+            <Button
+              type="button"
+              variant="contained"
+              size="large"
+              onClick={onNextHandler}
+            >
+              {"Save and Finish"}
+            </Button>
+          </FormControl>
+        </Grid>
+        {/* <Grid item xs={6}>
           <FormControl fullWidth>
             <Button
               type="button"
@@ -187,7 +199,7 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
     </div>
   );

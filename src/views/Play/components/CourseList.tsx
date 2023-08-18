@@ -28,7 +28,7 @@ const CourseList: React.FC<ICourseList> = ({
   return (
     <List>
       {courses.map(({ course, isOpen }) => (
-        <React.Fragment>
+        <React.Fragment key={course.id}>
           <ListItemButton
             onClick={() => onOpenCourse(course.id)}
             key={course.id}

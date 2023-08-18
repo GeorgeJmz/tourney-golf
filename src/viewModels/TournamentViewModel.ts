@@ -62,6 +62,15 @@ class TournamentViewModel {
     };
   }
 
+  // getRulesValues(): IRulesInputElement {
+  //   return {
+  //     calcuta: this.tournament,
+  //     playoffs: values.playoffs,
+  //       startDate: values.startDate?.toString(),
+  //       endDate: values.cutOffDate?.toString(),
+  //   };
+  // }
+
   getTournamentName(): string {
     return this.tournament.name;
   }
@@ -157,7 +166,7 @@ class TournamentViewModel {
     }
   }
 
-  async updateTournament(tournament: ITournament): Promise<void> {
+  async updateTournament(tournament: Partial<ITournament>): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     try {
@@ -166,7 +175,8 @@ class TournamentViewModel {
         author: this.author,
       });
 
-      this.setTournament(tournament);
+      console.log(tournament);
+      //this.setTournament(tournament);
       const displayMessage = getMessages(Messages.TOURNAMENT_UPDATED);
       toast.update(cuToast, {
         render: displayMessage,

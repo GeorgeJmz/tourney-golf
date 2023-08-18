@@ -6,8 +6,8 @@ export interface ITournament {
   groups: number;
   playersPerGroup: IGroup[];
   playType: string;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   playOffsDate?: Date;
   calcuta?: boolean;
 }

@@ -32,55 +32,55 @@ export const step1: Array<ITournamentElement> = [
     input: "select",
     size: {
       xs: 12,
-      md: 6,
-      lg: 6,
+      md: 4,
+      lg: 4,
     },
     options: [
-      { displayName: "Tourney", value: "tourney" },
+      // { displayName: "Tourney", value: "tourney" },
       { displayName: "Tourney + Team Play", value: "teamplay" },
     ],
   },
-  {
-    name: "players",
-    placeholder: "Number of Players",
-    input: "number",
-    size: {
-      xs: 12,
-      md: 6,
-      lg: 6,
-    },
-  },
-  {
-    name: "groups",
-    placeholder: "Number of Groups",
-    input: "number",
-    size: {
-      xs: 12,
-      md: 6,
-      lg: 6,
-    },
-  },
+  // {
+  //   name: "players",
+  //   placeholder: "Number of Players",
+  //   input: "number",
+  //   size: {
+  //     xs: 12,
+  //     md: 4,
+  //     lg: 4,
+  //   },
+  // },
   {
     name: "playType",
     placeholder: "Type of Play",
     input: "select",
     size: {
       xs: 12,
-      md: 6,
-      lg: 6,
+      md: 4,
+      lg: 4,
     },
     options: [
-      { displayName: "Match Play", value: "matchPlay" },
-      { displayName: "Stroke Play", value: "strokePlay" },
+      //{ displayName: "Match Play", value: "matchPlay" },
+      //{ displayName: "Stroke Play", value: "strokePlay" },
       { displayName: "Match + Stroke Play", value: "matchstrokePlay" },
     ],
+  },
+  {
+    name: "groups",
+    placeholder: "Number of Teams",
+    input: "number",
+    size: {
+      xs: 12,
+      md: 4,
+      lg: 4,
+    },
   },
 ];
 
 export interface IStep1InputElement {
   name: string;
   type: string | "";
-  players: number | "";
+  //players: number | "";
   groups: number | "";
   playType: string | "";
   [key: string]: string | number | "";
@@ -89,7 +89,7 @@ export interface IStep1InputElement {
 export const step1Fields: IStep1InputElement = {
   name: "",
   type: "",
-  players: "",
+  //players: 20,
   groups: "",
   playType: "",
 };
@@ -102,21 +102,21 @@ export const step1FieldsValidations: yup.ObjectSchema<IStep1InputElement> = yup
       .required("Tournament Name is required")
       .min(4, "Tournament Name should be of minimum 4 characters length"),
     type: yup.string().required("Tournament type is required"),
-    players: yup
-      .number()
-      .min(2, "Min")
-      .max(100, "Max")
-      .required("Number of Players is required"),
+    // players: yup
+    //   .number()
+    //   .min(2, "Min")
+    //   .max(100, "Max")
+    //   .required("Number of Players is required"),
     groups: yup
       .number()
       .required("Number of Groups is required")
-      .min(1, "Minimum of 1 group is required")
-      .when("players", (players, schema) => {
-        return schema.max(
-          players as unknown as number,
-          "Number of groups cannot exceed the number of players"
-        );
-      }),
+      .min(1, "Minimum of 1 group is required"),
+    // .when("players", (players, schema) => {
+    //   return schema.max(
+    //     players as unknown as number,
+    //     "Number of groups cannot exceed the number of players"
+    //   );
+    // }),
     playType: yup.string().required("Play type is required"),
   });
 
@@ -142,8 +142,8 @@ export const invitationsMatch: Array<ITournamentElement> = [
     },
   },
   {
-    name: "strokes",
-    placeholder: "Strokes",
+    name: "handicap",
+    placeholder: "Handicap",
     input: "text",
     size: {
       xs: 12,
@@ -155,14 +155,14 @@ export const invitationsMatch: Array<ITournamentElement> = [
 export interface IInvitationsInputElement {
   email: string;
   name: string;
-  strokes: number | "";
+  handicap: number | "";
   [key: string]: string | number | "";
 }
 
 export const invitationsFields: IInvitationsInputElement = {
   email: "",
   name: "",
-  strokes: "",
+  handicap: "",
 };
 
 export const invitationsFieldsValidations: yup.ObjectSchema<IInvitationsInputElement> =
@@ -176,7 +176,7 @@ export const invitationsFieldsValidations: yup.ObjectSchema<IInvitationsInputEle
       .string()
       .required("PLayer Name is required")
       .min(4, "PLayer Name should be of minimum 4 characters length"),
-    strokes: yup.number().required("Strokes are required"),
+    handicap: yup.number().required("Handicap are required"),
   });
 
 export const rules: Array<ITournamentElement> = [

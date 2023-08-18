@@ -33,7 +33,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
         author: "",
         name: values.name,
         tournamentType: values.type,
-        players: values.players || 0,
+        players: 20,
         groups: values.groups || 0,
         playersPerGroup: [],
         playType: values.playType,
@@ -64,6 +64,10 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
                 key={key}
               />
             );
+          }
+          // Remove This validation when we have the backend
+          if (inputElement.name === "players") {
+            return <p></p>;
           }
           if (inputElement.input === "number") {
             return (
@@ -97,14 +101,14 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
             />
           );
         })}
-        <Grid item xs={8}>
-          <FormControl fullWidth>
+        <Grid item xs={12}>
+          <FormControl>
             <Button type="submit" variant="contained" size="large">
-              {isNewTournament ? "Save" : "Update"}
+              {isNewTournament ? "Save and next step" : "Update Tournament"}
             </Button>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        {/* <Grid item xs={4}>
           <FormControl fullWidth>
             <Button
               type="button"
@@ -116,7 +120,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
     </form>
   );

@@ -77,7 +77,7 @@ class PlayViewModel {
         newMatch.setAuthor(this.author);
         newMatch.setPlayers([author, player]);
         // Set TeeBox and Course
-        newMatch.match = this.match;
+        newMatch.setMatch(this.match);
 
         newMatch.currentDistance = this.currentDistance;
         newMatch.currentHcp = this.currentHcp;
@@ -103,7 +103,13 @@ class PlayViewModel {
     scores.forEach((score, key) => {
       this.allPlayers[key].setHoleScore(hole, score);
     });
-    this.matches.forEach((match) => match.calculateWinners());
+    const author = scores[0];
+    const allScores = [...scores].slice(1);
+    const allScoresMatches = allScores.map((score) => [author, score]);
+    this.matches.forEach((match, key) => {
+      match.setHoleScores(allScoresMatches[key], hole);
+      match.calculateWinners();
+    });
     this.setModal(false);
   }
 
@@ -113,23 +119,24 @@ class PlayViewModel {
 
   setAuthor(author: UserViewModel): void {
     this.author = author;
-    this.addEmailToList(this.author.user.email, this.author.user.name, 0);
+    const name = `${this.author.user.name} ${this.author.user.lastName}`;
+    this.addEmailToList(this.author.user.email, name, 0);
   }
 
   getSelectedTeeBox() {
     return this.match.teeBox;
   }
 
-  addEmailToList(email: string, name: string, strokes: number): void {
-    this.emailList.push({ name, email, strokes });
+  addEmailToList(email: string, name: string, handicap: number): void {
+    this.emailList.push({ name, email, handicap });
     const player = new ScoreViewModel();
-    player.setPlayer(name, email, strokes);
+    player.setPlayer(name, email, handicap);
     this.allPlayers.push(player);
   }
 
-  updateEmailList(email: string, name: string, strokes: number, key: number) {
-    this.emailList[key] = { name, email, strokes };
-    this.allPlayers[key].setPlayer(name, email, strokes);
+  updateEmailList(email: string, name: string, handicap: number, key: number) {
+    this.emailList[key] = { name, email, handicap };
+    this.allPlayers[key].setPlayer(name, email, handicap);
   }
 
   getEmailList(): Array<Partial<IPlayer>> {
