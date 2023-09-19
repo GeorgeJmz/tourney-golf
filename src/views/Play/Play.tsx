@@ -60,7 +60,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     }
   };
   const validationSchema = invitationsFieldsValidations;
-  const emailList = playViewModel.getEmailList();
+  const emailList = playViewModel.emailList;
   const onSubmitHandler = (email: string, name: string, handicap: number) => {
     playViewModel.addEmailToList(email, name, handicap);
   };
@@ -71,6 +71,10 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     key: number
   ) => {
     playViewModel.updateEmailList(email, name, handicap, key);
+  };
+
+  const onRemoveHandler = (key: number) => {
+    playViewModel.removeEmailFromList(key);
   };
 
   const handleCloseModal = () => {
@@ -121,6 +125,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             validationSchema={validationSchema}
             onSubmit={onSubmitHandler}
             onUpdate={onUpdateHandler}
+            onDelete={onRemoveHandler}
           />
         )}
         {playViewModel.currentStep === 2 && (

@@ -30,12 +30,8 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
         ? "createTournament"
         : "updateTournament";
       const newValues = {
-        author: "",
         name: values.name,
         tournamentType: values.type,
-        players: 20,
-        groups: values.groups || 0,
-        playersPerGroup: [],
         playType: values.playType,
       };
       await tournamentViewModel[tournamentAction](newValues);
@@ -104,7 +100,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
         <Grid item xs={12}>
           <FormControl>
             <Button type="submit" variant="contained" size="large">
-              {isNewTournament ? "Save and next step" : "Update Tournament"}
+              {isNewTournament ? "Save and next step" : "Update Tourney"}
             </Button>
           </FormControl>
         </Grid>

@@ -19,21 +19,22 @@ interface PlayerSetupFormProps {
 const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
   tournamentViewModel,
   handleNext,
-  handlePrev,
 }) => {
   const validationSchema = step2FieldsValidations;
-  const emailList = tournamentViewModel.getEmailList();
-  const players = tournamentViewModel.getPlayers();
-  const playersLeft = players - emailList.length;
+  const emailList = tournamentViewModel.emailList;
   const onSubmitHandler = (email: string, name: string) => {
     tournamentViewModel.addEmailToList(email, name);
   };
 
+  const onEditHandler = (email: string, name: string, index: number) => {
+    tournamentViewModel.editEmailList(email, name, index);
+  };
+
+  const onRemoveHandler = (key: number) => {
+    tournamentViewModel.removeEmailFromList(key);
+  };
+
   const onNextHandler = () => {
-    const i = tournamentViewModel.getPlayersPerGroup();
-    if (i.length === 0) {
-      tournamentViewModel.setupGroups();
-    }
     handleNext();
   };
 
@@ -44,6 +45,8 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
         emailList={emailList}
         validationSchema={validationSchema}
         onSubmit={onSubmitHandler}
+        onEdit={onEditHandler}
+        onDelete={onRemoveHandler}
       />
       <Grid container spacing={2}>
         <Grid item xs={12}>

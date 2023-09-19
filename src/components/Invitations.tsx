@@ -31,6 +31,7 @@ interface InvitationsProps {
   validationSchema: yup.ObjectSchema<IInvitationsInputElement>;
   playersLeft?: number;
   onSubmit: (email: string, name: string, handicap: number) => void;
+  onDelete: (index: number) => void;
   onUpdate: (
     email: string,
     name: string,
@@ -46,10 +47,10 @@ export const Invitations: React.FC<InvitationsProps> = ({
   playersLeft,
   onSubmit,
   onUpdate,
+  onDelete,
 }) => {
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
   const [matchingUsers, setMatchingUsers] = useState<IUser[]>([]);
-
   const formik = useFormik({
     initialValues: invitationsFields,
     validationSchema: validationSchema,
@@ -169,9 +170,15 @@ export const Invitations: React.FC<InvitationsProps> = ({
                       />
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton edge="end" aria-label="comments">
-                        <DeleteIcon />
-                      </IconButton>
+                      {index !== 0 && (
+                        <IconButton
+                          edge="end"
+                          aria-label="comments"
+                          onClick={() => onDelete(index)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

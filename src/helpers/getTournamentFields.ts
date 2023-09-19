@@ -32,8 +32,8 @@ export const step1: Array<ITournamentElement> = [
     input: "select",
     size: {
       xs: 12,
-      md: 4,
-      lg: 4,
+      md: 6,
+      lg: 6,
     },
     options: [
       // { displayName: "Tourney", value: "tourney" },
@@ -46,8 +46,8 @@ export const step1: Array<ITournamentElement> = [
   //   input: "number",
   //   size: {
   //     xs: 12,
-  //     md: 4,
-  //     lg: 4,
+  //     md: 6,
+  //     lg: 6,
   //   },
   // },
   {
@@ -56,8 +56,8 @@ export const step1: Array<ITournamentElement> = [
     input: "select",
     size: {
       xs: 12,
-      md: 4,
-      lg: 4,
+      md: 6,
+      lg: 6,
     },
     options: [
       //{ displayName: "Match Play", value: "matchPlay" },
@@ -65,23 +65,23 @@ export const step1: Array<ITournamentElement> = [
       { displayName: "Match + Stroke Play", value: "matchstrokePlay" },
     ],
   },
-  {
-    name: "groups",
-    placeholder: "Number of Teams",
-    input: "number",
-    size: {
-      xs: 12,
-      md: 4,
-      lg: 4,
-    },
-  },
+  // {
+  //   name: "groups",
+  //   placeholder: "Number of Teams",
+  //   input: "number",
+  //   size: {
+  //     xs: 12,
+  //     md: 4,
+  //     lg: 4,
+  //   },
+  // },
 ];
 
 export interface IStep1InputElement {
   name: string;
   type: string | "";
   //players: number | "";
-  groups: number | "";
+  //groups: number | "";
   playType: string | "";
   [key: string]: string | number | "";
 }
@@ -90,7 +90,7 @@ export const step1Fields: IStep1InputElement = {
   name: "",
   type: "",
   //players: 20,
-  groups: "",
+  //groups: "",
   playType: "",
 };
 
@@ -107,10 +107,10 @@ export const step1FieldsValidations: yup.ObjectSchema<IStep1InputElement> = yup
     //   .min(2, "Min")
     //   .max(100, "Max")
     //   .required("Number of Players is required"),
-    groups: yup
-      .number()
-      .required("Number of Groups is required")
-      .min(1, "Minimum of 1 group is required"),
+    // groups: yup
+    //   .number()
+    //   .required("Number of Groups is required")
+    //   .min(1, "Minimum of 1 group is required"),
     // .when("players", (players, schema) => {
     //   return schema.max(
     //     players as unknown as number,
@@ -174,8 +174,8 @@ export const invitationsFieldsValidations: yup.ObjectSchema<IInvitationsInputEle
       .min(4, "Email should be of minimum 4 characters length"),
     name: yup
       .string()
-      .required("PLayer Name is required")
-      .min(4, "PLayer Name should be of minimum 4 characters length"),
+      .required("Player Name is required")
+      .min(4, "Player Name should be of minimum 4 characters length"),
     handicap: yup.number().required("Handicap are required"),
   });
 
@@ -307,6 +307,6 @@ export const step2FieldsValidations: yup.ObjectSchema<IStep2InputElement> = yup
       .min(4, "Email should be of minimum 4 characters length"),
     name: yup
       .string()
-      .required("PLayer Name is required")
-      .min(4, "PLayer Name should be of minimum 4 characters length"),
+      .required("Player Name is required")
+      .min(4, "Player Name should be of minimum 4 characters length"),
   });

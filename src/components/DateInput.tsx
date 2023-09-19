@@ -5,6 +5,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import type { ITournamentElement } from "../helpers/getTournamentFields";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import Grid from "@mui/material/Grid";
+import dayjs from "dayjs";
 
 interface DateInputProps {
   inputElement: ITournamentElement;
@@ -29,7 +30,7 @@ export const DateInput: React.FC<DateInputProps> = ({
     >
       <FormControl fullWidth margin="normal" error={isError}>
         <DatePicker
-          value={value}
+          value={dayjs(value) as unknown as string}
           onChange={onChange}
           label={inputElement.placeholder}
         />

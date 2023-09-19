@@ -4,18 +4,17 @@ import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
-import Button from "@mui/material/Button";
-import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import TourneySetup from "./components/CreateTournament/TourneySetup";
 import PlayerSetup from "./components/CreateTournament/PlayerSetup";
 import GroupsSetup from "./components/CreateTournament/GroupsSetup";
+import TeamSetup from "./components/CreateTournament/TeamSetup";
+import ConferenceSetup from "./components/CreateTournament/ConferenceSetup";
 import RulesSetup from "./components/CreateTournament/RulesSetup";
 import TournamentViewModel from "../../viewModels/TournamentViewModel";
-import PlayoffsSetup from "./components/CreateTournament/PlayoffsSetup";
 import { observer } from "mobx-react";
 
 import UserViewModel from "../../viewModels/UserViewModel";
+import CalendarsSetup from "./components/CreateTournament/CalendarsSetup";
 
 interface ICreateTournamentProps {
   user: UserViewModel;
@@ -66,16 +65,6 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
         />
       ),
     },
-    // {
-    //   label: "Playoffs Setup",
-    //   component: (
-    //     <PlayoffsSetup
-    //       tournamentViewModel={tournamentViewModel}
-    //       handleNext={handleNext}
-    //       handlePrev={handlePrev}
-    //     />
-    //   ),
-    // },
     {
       label: "Player Setup",
       component: (
@@ -99,13 +88,31 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
     {
       label: "Conference Setup",
       component: (
-        <p>Conference Setup</p>
+        <ConferenceSetup
+          tournamentViewModel={tournamentViewModel}
+          handleNext={handleNext}
+          handlePrev={handlePrev}
+        />
       ),
     },
     {
       label: "Teams Setup",
       component: (
-        <p>Teams Setup</p>
+        <TeamSetup
+          tournamentViewModel={tournamentViewModel}
+          handleNext={handleNext}
+          handlePrev={handlePrev}
+        />
+      ),
+    },
+    {
+      label: "Rules & Calendars",
+      component: (
+        <CalendarsSetup
+          tournamentViewModel={tournamentViewModel}
+          handleNext={handleNext}
+          handlePrev={handlePrev}
+        />
       ),
     },
   ];
@@ -114,13 +121,8 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
     <Box sx={{ background: "white", p: 3 }}>
       <Stepper activeStep={activeStep} orientation="vertical">
         {steps.map((step, index) => (
-          <Step key={step.label} completed={index < activeStep}>
+          <Step key={step.label}>
             <StepLabel
-              optional={
-                index === 2 ? (
-                  <Typography variant="caption">Last step</Typography>
-                ) : null
-              }
               onClick={() => handleStepClick(index)}
               StepIconProps={{ completed: index < activeStep }}
             >

@@ -10,9 +10,9 @@ import { SwitchInput } from "../../../../components/SwitchInput";
 import { MultipleInput } from "../../../../components/MultipleInput";
 import {
   rules,
-  rulesFields,
   rulesFieldsValidations,
 } from "../../../../helpers/getTournamentFields";
+import dayjs from "dayjs";
 
 interface RulesSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -27,14 +27,15 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
 }) => {
   const validationSchema = rulesFieldsValidations;
   const formik = useFormik({
-    initialValues: rulesFields,
+    initialValues: tournamentViewModel.getRulesValues(),
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       const newValues = {
         calcuta: values.calcuta,
-        playoffs: values.playoffs,
+        playOffs: values.playoffs,
         startDate: values.startDate?.toString(),
-        endDate: values.cutOffDate?.toString(),
+        cutOffDate: values.cutOffDate?.toString(),
+        matchesPerRound: values.matchesPerRound,
       };
       await tournamentViewModel.updateTournament(newValues);
       handleNext();
@@ -80,7 +81,7 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
               inputElement={inputElement}
               isError={isError}
               onChange={(value: string | null) => {
-                formik.setFieldValue(inputElement.name, value);
+                formik.setFieldValue(inputElement.name, dayjs(value).format());
               }}
               error={
                 formik.touched[inputElement.name]

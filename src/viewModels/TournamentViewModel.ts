@@ -5,9 +5,11 @@ import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
 import TournamentModel from "../models/Tournament";
-import type { IStep1InputElement } from "../helpers/getTournamentFields";
+import type {
+  IStep1InputElement,
+  IRulesInputElement,
+} from "../helpers/getTournamentFields";
 import type { ITournament, IGroup, IPlayer } from "../models/Tournament";
-import { faker } from "@faker-js/faker";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -28,16 +30,21 @@ class TournamentViewModel {
       getAuthor: action,
       getTournamentName: action,
       getEmailList: action,
+      addEmailToList: action,
+      editEmailList: action,
+      removeEmailFromList: action,
       getPlayers: action,
       getGroups: action,
       getPlayersPerGroup: action,
-      setupGroups: action,
       movePlayer: action,
     });
   }
 
-  setTournament(tournament: ITournament): void {
-    this.tournament = tournament;
+  setTournament(tournament: Partial<ITournament>): void {
+    // console.log(JSON.stringify({...tournament}, null, 2));
+    // console.log(JSON.stringify({...this.tournament}, null, 2));
+    // console.log(JSON.stringify({...this.tournament, ...tournament}, null, 2));
+    this.tournament = { ...this.tournament, ...tournament };
   }
 
   setAuthor(id: string): void {
@@ -57,19 +64,19 @@ class TournamentViewModel {
       name: this.tournament.name,
       type: this.tournament.tournamentType,
       players: this.tournament.players,
-      groups: this.tournament.groups,
       playType: this.tournament.playType,
     };
   }
 
-  // getRulesValues(): IRulesInputElement {
-  //   return {
-  //     calcuta: this.tournament,
-  //     playoffs: values.playoffs,
-  //       startDate: values.startDate?.toString(),
-  //       endDate: values.cutOffDate?.toString(),
-  //   };
-  // }
+  getRulesValues(): IRulesInputElement {
+    return {
+      calcuta: this.tournament.calcuta,
+      playoffs: this.tournament.playOffs,
+      startDate: this.tournament.startDate,
+      cutOffDate: this.tournament.cutOffDate,
+      matchesPerRound: this.tournament.matchesPerRound,
+    };
+  }
 
   getTournamentName(): string {
     return this.tournament.name;
@@ -77,6 +84,16 @@ class TournamentViewModel {
 
   addEmailToList(email: string, name: string): void {
     this.emailList.push({ name, email });
+  }
+
+  editEmailList(email: string, name: string, index: number): void {
+    this.emailList[index] = { name, email };
+  }
+
+  removeEmailFromList(key: number): void {
+    const newEmailList = [...this.emailList];
+    newEmailList.splice(key, 1);
+    this.emailList = newEmailList;
   }
 
   getEmailList(): Array<Partial<IPlayer>> {
@@ -88,27 +105,6 @@ class TournamentViewModel {
   }
   getGroups(): number {
     return this.tournament.groups;
-  }
-
-  setupGroups(): void {
-    const players = this.emailList.map(({ email, name }, key) => ({
-      id: `${email}-${key}`,
-      email: email,
-      name: name,
-      handicap: faker.number.int(20),
-    })) as Array<IPlayer>;
-
-    this.tournament.playersPerGroup = Array.from(
-      Array(this.tournament.groups).keys()
-    ).map((i) => ({
-      id: `group${i}`,
-      name: `Group ${i + 1}`,
-      isEditing: false,
-      players: [],
-    }));
-
-    this.tournament.playersPerGroup[0].players = players;
-    this.updateTournament(this.tournament);
   }
 
   getPlayersPerGroup(): Array<IGroup> {
@@ -132,11 +128,23 @@ class TournamentViewModel {
       this.tournament.playersPerGroup[indexGroup].players.filter((a) => a);
   }
 
-  updatePlayersPerGroup(): void {
+  updatePlayersPerGroup(groups: IGroup[]): void {
+    this.tournament.playersPerGroup = groups;
+    this.tournament.groups = groups.length - 1;
     this.updateTournament(toJS(this.tournament));
   }
 
-  async createTournament(tournament: ITournament): Promise<void> {
+  updateTeams(teams: IGroup[]): void {
+    this.tournament.teams = teams;
+    this.updateTournament(toJS(this.tournament));
+  }
+
+  updateConference(conference: IGroup[]): void {
+    this.tournament.conference = conference;
+    this.updateTournament(toJS(this.tournament));
+  }
+
+  async createTournament(tournament: Partial<ITournament>): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     try {
@@ -170,13 +178,18 @@ class TournamentViewModel {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     try {
+      const thisTournament = toJS(this.tournament);
       await updateTournament(this.idTournament, {
+        ...thisTournament,
         ...tournament,
         author: this.author,
       });
 
-      console.log(tournament);
-      //this.setTournament(tournament);
+      this.setTournament({
+        ...thisTournament,
+        ...tournament,
+        author: this.author,
+      });
       const displayMessage = getMessages(Messages.TOURNAMENT_UPDATED);
       toast.update(cuToast, {
         render: displayMessage,

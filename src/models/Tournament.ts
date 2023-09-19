@@ -5,11 +5,15 @@ export interface ITournament {
   players: number;
   groups: number;
   playersPerGroup: IGroup[];
+  teams: IGroup[];
+  conference: IGroup[];
   playType: string;
-  startDate?: string;
-  endDate?: string;
+  startDate: string;
+  cutOffDate: string;
   playOffsDate?: Date;
-  calcuta?: boolean;
+  calcuta: boolean;
+  playOffs: boolean;
+  matchesPerRound: string[];
 }
 
 export interface IPlayer {
@@ -26,7 +30,8 @@ export interface IGroup {
   isEditing: boolean;
   players: IPlayer[];
 }
-
+const endDate = new Date();
+endDate.setDate(endDate.getDate() + 15);
 export default class TournamentModel implements ITournament {
   author = "";
   name = "";
@@ -34,7 +39,14 @@ export default class TournamentModel implements ITournament {
   players = 0;
   groups = 0;
   playersPerGroup = [] as Array<IGroup>;
+  teams = [] as Array<IGroup>;
   playType = "";
+  calcuta = false;
+  playOffs = false;
+  startDate = new Date().toISOString();
+  cutOffDate = endDate.toISOString();
+  matchesPerRound = [] as string[];
+  conference = [] as Array<IGroup>;
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

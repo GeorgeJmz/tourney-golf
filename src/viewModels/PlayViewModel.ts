@@ -60,6 +60,7 @@ class PlayViewModel {
       setAuthor: action,
       getEmailList: action,
       addEmailToList: action,
+      removeEmailFromList: action,
       setModal: action,
       setModalValues: action,
       setScoreModal: action,
@@ -137,6 +138,15 @@ class PlayViewModel {
   updateEmailList(email: string, name: string, handicap: number, key: number) {
     this.emailList[key] = { name, email, handicap };
     this.allPlayers[key].setPlayer(name, email, handicap);
+  }
+
+  removeEmailFromList(key: number): void {
+    const newEmailList = [...this.emailList];
+    const newAllPlayers = [...this.allPlayers];
+    newEmailList.splice(key, 1);
+    newAllPlayers.splice(key, 1);
+    this.emailList = newEmailList;
+    this.allPlayers = newAllPlayers;
   }
 
   getEmailList(): Array<Partial<IPlayer>> {

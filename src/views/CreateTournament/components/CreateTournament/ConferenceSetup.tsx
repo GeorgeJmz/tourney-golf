@@ -6,48 +6,53 @@ import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import {
   DragDrop,
-  DragDropType,
   IGroupDraggable,
+  DragDropType,
 } from "../../../../components/DragDrop";
 import type { IPlayer } from "../../../../models/Tournament";
-interface GroupsSetupFormProps {
+
+interface ConferenceSetupProps {
   tournamentViewModel: TournamentViewModel;
   handleNext: () => void;
   handlePrev: () => void;
 }
 
-const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
+const ConferenceSetup: React.FC<ConferenceSetupProps> = ({
   tournamentViewModel,
   handleNext,
   handlePrev,
 }) => {
-  const [groups, setGroups] = React.useState<Array<IGroupDraggable>>([]);
+  const [conferences, setConferences] = React.useState<Array<IGroupDraggable>>(
+    []
+  );
 
   const onNextHandler = () => {
-    if (groups.length > 0) {
-      tournamentViewModel.updatePlayersPerGroup(groups);
-    }
+    tournamentViewModel.updateConference(conferences);
     handleNext();
   };
 
-  const players = tournamentViewModel.emailList.map(({ email, name }, key) => ({
-    id: `${email}-${key}`,
-    email: email,
-    name: name,
-    handicap: 10,
-  })) as Array<IPlayer>;
+  const conference = tournamentViewModel.tournament.playersPerGroup.map(
+    ({ id, name }, key) => ({
+      id: `${id}-${key}`,
+      email: name,
+      name: name,
+      handicap: 10,
+    })
+  ) as Array<IPlayer>;
 
   const isNextDisabled =
-    tournamentViewModel.tournament.playersPerGroup.length === 0 &&
-    groups.length === 0;
+    tournamentViewModel.tournament.conference.length === 0 &&
+    conferences.length === 0;
 
   return (
     <div>
       <DragDrop
-        typeOfDraggable={DragDropType.Groups}
-        listOfDraggable={players}
-        onUpdateGroups={(groups) => setGroups(groups)}
-        initialGroups={tournamentViewModel.tournament.playersPerGroup}
+        typeOfDraggable={DragDropType.Conferences}
+        listOfDraggable={conference.filter(
+          (player) => player.id !== "group0-0"
+        )}
+        onUpdateGroups={(conference) => setConferences(conference)}
+        initialGroups={tournamentViewModel.tournament.conference}
       />
 
       <Grid container>
@@ -57,8 +62,8 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
               type="button"
               variant="contained"
               size="large"
-              disabled={isNextDisabled}
               onClick={onNextHandler}
+              disabled={isNextDisabled}
             >
               {"Save and next step"}
             </Button>
@@ -69,4 +74,4 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
   );
 };
 
-export default observer(GroupsSetup);
+export default observer(ConferenceSetup);

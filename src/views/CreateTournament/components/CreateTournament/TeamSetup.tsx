@@ -1,5 +1,6 @@
 import React from "react";
 import { observer } from "mobx-react";
+
 import TournamentViewModel from "../../../../viewModels/TournamentViewModel";
 import { Button } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
@@ -10,22 +11,23 @@ import {
   IGroupDraggable,
 } from "../../../../components/DragDrop";
 import type { IPlayer } from "../../../../models/Tournament";
-interface GroupsSetupFormProps {
+
+interface TeamSetupProps {
   tournamentViewModel: TournamentViewModel;
   handleNext: () => void;
   handlePrev: () => void;
 }
 
-const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
+const TeamSetup: React.FC<TeamSetupProps> = ({
   tournamentViewModel,
   handleNext,
   handlePrev,
 }) => {
-  const [groups, setGroups] = React.useState<Array<IGroupDraggable>>([]);
+  const [teams, setTeams] = React.useState<Array<IGroupDraggable>>([]);
 
   const onNextHandler = () => {
-    if (groups.length > 0) {
-      tournamentViewModel.updatePlayersPerGroup(groups);
+    if (teams.length > 0) {
+      tournamentViewModel.updateTeams(teams);
     }
     handleNext();
   };
@@ -38,16 +40,15 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
   })) as Array<IPlayer>;
 
   const isNextDisabled =
-    tournamentViewModel.tournament.playersPerGroup.length === 0 &&
-    groups.length === 0;
+    tournamentViewModel.tournament.teams.length === 0 && teams.length === 0;
 
   return (
     <div>
       <DragDrop
-        typeOfDraggable={DragDropType.Groups}
+        typeOfDraggable={DragDropType.Teams}
         listOfDraggable={players}
-        onUpdateGroups={(groups) => setGroups(groups)}
-        initialGroups={tournamentViewModel.tournament.playersPerGroup}
+        onUpdateGroups={(teams) => setTeams(teams)}
+        initialGroups={tournamentViewModel.tournament.teams}
       />
 
       <Grid container>
@@ -57,8 +58,8 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
               type="button"
               variant="contained"
               size="large"
-              disabled={isNextDisabled}
               onClick={onNextHandler}
+              disabled={isNextDisabled}
             >
               {"Save and next step"}
             </Button>
@@ -69,4 +70,4 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
   );
 };
 
-export default observer(GroupsSetup);
+export default observer(TeamSetup);

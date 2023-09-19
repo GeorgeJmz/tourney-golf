@@ -22,6 +22,8 @@ import "firebase/storage";
 import { ITournament } from "../models/Tournament";
 import { IMatch } from "../models/Match";
 import { IScore } from "../models/Score";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -35,6 +37,7 @@ const firebaseConfig = {
 export const firebase = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const db = getFirestore();
+export const storage = getStorage();
 
 export const createUser = async (user: IUser): Promise<IUser> => {
   try {
@@ -109,7 +112,7 @@ export const getUsersByName = async (
 };
 
 export const createTournament = async (
-  tournament: ITournament
+  tournament: Partial<ITournament>
 ): Promise<string> => {
   try {
     const doc = await addDoc(collection(db, "tournament"), tournament);
@@ -189,5 +192,28 @@ export const createScore = async (score: IScore): Promise<string> => {
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
+  }
+};
+
+export const uploadPdf = async (file: File, name: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, "pdfs/" + name);
+    const snap = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snap.ref);
+    return url;
+  } catch (error) {
+    const code = error as FirebaseError;
+    return "";
+  }
+};
+
+export const getPdfUrl = async (name: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, "pdfs/" + name);
+    const url = await getDownloadURL(storageRef);
+    return url;
+  } catch (error) {
+    const code = error as FirebaseError;
+    return "";
   }
 };

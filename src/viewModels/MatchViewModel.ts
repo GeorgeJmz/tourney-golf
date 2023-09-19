@@ -65,7 +65,7 @@ class MatchViewModel {
       const playersB = this.players[1];
 
       winnerStrokePlay =
-        playersA.score.totalNet > playersB.score.totalNet
+        playersA.score.totalNet < playersB.score.totalNet
           ? playersA.score.player + " wins stoke play "
           : playersB.score.player + " wins stoke play  ";
       winnerStrokePlay =
