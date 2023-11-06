@@ -2,6 +2,8 @@ import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import Paper from "@mui/material/Paper";
 import Avatar from "@mui/material/Avatar";
+import AvatarGroup from "@mui/material/AvatarGroup";
+
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
@@ -20,9 +22,11 @@ import { Link } from "react-router-dom";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import { CardActionArea } from "@mui/material";
+import { Button, CardActionArea } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import moment from "moment-timezone";
+import { convertDate } from "../../helpers/convertDate";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 interface IDashboardProps {
   user: UserViewModel;
@@ -38,7 +42,8 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   useEffect(() => {
     if (user) {
       user.getTournaments();
-      user.getMatches();
+      //user.getMatches();
+      user.getActiveTournaments();
     }
   }, []);
   return (
@@ -67,7 +72,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </ListItem>
         </Paper>
       )}
-      <Grid container spacing={2}>
+      {/* <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
             Manage your Previous Matches
@@ -90,35 +95,73 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             </Card>
           </Grid>
         ))}
-      </Grid>
-      <Grid container spacing={2}>
+      </Grid> */}
+      <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            Manage your tournaments
+            <EmojiEventsIcon /> Tourney Action
           </Typography>
+        </Grid>
+        {user.activeTournaments.map((tournament) => (
+          <Grid item xs={6} md={4} lg={3} key={tournament.name}>
+            <Link to={`/tournament/${tournament.id}`}>
+              <Card>
+                <CardActionArea>
+                  <CardContent sx={{ textAlign: "left" }}>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {tournament.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {`${convertDate(tournament.startDate)} - ${convertDate(
+                        tournament.cutOffDate
+                      )}`}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Link>
+          </Grid>
+        ))}
+      </Grid>
+      <Grid container spacing={2} sx={{ mt: 1, pb: 4 }}>
+        <Grid item xs={6}>
+          <Typography gutterBottom align="left" variant="h6" component="div">
+            <EmojiEventsIcon /> Tourney Admin
+          </Typography>
+        </Grid>
+        <Grid item xs={6} sx={{ textAlign: "right" }}>
+          <Link to="/create-tournament">
+            <Button variant="outlined" size="small">
+              New Tourney
+            </Button>
+          </Link>
         </Grid>
         {user.tournaments.map((tournament) => (
           <Grid item xs={6} md={4} lg={3} key={tournament.name}>
-            <Card>
-              <CardActionArea>
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    {tournament.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {tournament.tournamentType}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {tournament.players}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+            <Link to={`/manage-tournament/${tournament.id}`}>
+              <Card>
+                <CardActionArea>
+                  <CardContent sx={{ textAlign: "left" }}>
+                    <Typography gutterBottom variant="h6" component="div">
+                      {tournament.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {tournament?.playersList?.length || 0} Players
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {`${convertDate(tournament.startDate)} - ${convertDate(
+                        tournament.cutOffDate
+                      )}`}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Link>
           </Grid>
         ))}
       </Grid>
 
-      <Box sx={{ "& > :not(style)": { m: 1 } }}>
+      {/* <Box sx={{ "& > :not(style)": { m: 1 } }}>
         <Link to="/create-tournament">
           <Fab variant="extended">
             <AddIcon color="primary" sx={{ mr: 1 }} />
@@ -133,8 +176,8 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             Play
           </Fab>
         </Link>
-      </Box>
-      <Paper
+      </Box> */}
+      {/* <Paper
         sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
         elevation={3}
       >
@@ -149,7 +192,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           <BottomNavigationAction label="Play" icon={<SportsGolfIcon />} />
           <BottomNavigationAction label="Stats" icon={<AssessmentIcon />} />
         </BottomNavigation>
-      </Paper>
+      </Paper> */}
     </div>
   );
 };

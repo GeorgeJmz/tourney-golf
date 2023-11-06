@@ -1,18 +1,20 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 import { Messages } from "../helpers/messages";
 import MatchModel from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
-import { createMatch } from "../services/firebase";
+import { createMatch, updatePlayer } from "../services/firebase";
 import ScoreViewModel from "./ScoreViewModel";
 import UserViewModel from "./UserViewModel";
 import moment from "moment-timezone";
+import { ITournamentPlayer } from "../models/Player";
 
 class MatchViewModel {
   match: MatchModel = new MatchModel();
   author: UserViewModel = new UserViewModel();
   idMatch = "";
+  tournamentId = "";
   currentDistance: Array<number> = [];
   currentHcp: Array<number> = [];
   currentPar: Array<number> = [];
@@ -20,12 +22,14 @@ class MatchViewModel {
   players: Array<ScoreViewModel> = [];
   differenceHP: Array<number> = [];
   winByHole: Array<string> = [];
+  winnerMatch: Array<string> = [];
 
   constructor() {
     makeObservable(this, {
       match: observable,
       author: observable,
       idMatch: observable,
+      tournamentId: observable,
       currentDistance: observable,
       currentHcp: observable,
       currentPar: observable,
@@ -66,8 +70,8 @@ class MatchViewModel {
 
       winnerStrokePlay =
         playersA.score.totalNet < playersB.score.totalNet
-          ? playersA.score.player + " wins stoke play "
-          : playersB.score.player + " wins stoke play  ";
+          ? playersA.score.player + " wins stroke play "
+          : playersB.score.player + " wins stroke play  ";
       winnerStrokePlay =
         playersA.score.totalNet === playersB.score.totalNet
           ? "Stroke Play Draw"
@@ -93,17 +97,18 @@ class MatchViewModel {
       if (scoreA === 0 && scoreB === 0) {
         winners.push("");
         winner = "";
+        this.winnerMatch = [""];
       } else if (currentMatchResult === 0) {
         winners.push("AS");
         winner = "Match All Square";
+        this.winnerMatch = [playersA.score.idPlayer, playersB.score.idPlayer];
       } else {
         const strokeUp = Math.abs(currentMatchResult);
         const diff = 18 - strokeUp;
-        winner =
-          currentMatchResult > 0
-            ? playersA.score.player + " wins match "
-            : // (18 - diff - 1)
-              playersB.score.player + " wins match ";
+        const tempWinner =
+          currentMatchResult > 0 ? playersA.score : playersB.score;
+        winner = tempWinner.player + " wins match ";
+        this.winnerMatch = [tempWinner.idPlayer];
         // Math.abs(currentMatchResult) +
         // " & " +
         // (18 - diff - 1);
@@ -156,6 +161,52 @@ class MatchViewModel {
     try {
       const scoresIds = this.players.map(async (p) => await p.createScore());
       this.match.scoresId = await Promise.all(scoresIds);
+      console.log(toJS(this.players), "players ---");
+      console.log(this.tournamentId, "tournamentId ---");
+      console.log(this.match.scoresId, "matchId ---");
+      const playersMail = [
+        this.players[0].score.idPlayer,
+        this.players[1].score.idPlayer,
+      ];
+      const winnerStrokePlay =
+        this.players[0].score.totalNet < this.players[1].score.totalNet
+          ? playersMail[0]
+          : playersMail[1];
+      const winnerMatch = this.winnerMatch;
+      const strokePlayPoints =
+        this.players[0].score.totalNet < this.players[1].score.totalNet
+          ? [3, 0]
+          : [0, 3];
+      const teamPoints = [
+        this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
+        this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
+      ] as Array<number>;
+      const matchsPoints =
+        winnerMatch.length > 1
+          ? [1, 1]
+          : this.winnerMatch.includes(playersMail[0])
+          ? [3, 0]
+          : [0, 3];
+
+      console.log(playersMail, "playersMail ---");
+      for (const playerMail of playersMail) {
+        const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
+        const playerUpdated = {
+          email: playerMail,
+          opponent: playersMail[index === 0 ? 1 : 0],
+          pointsMatch: matchsPoints[index],
+          pointsStroke: strokePlayPoints[index],
+          pointsTeam: teamPoints[index],
+          tournamentId: this.tournamentId,
+          scoreId: this.match.scoresId[index],
+          // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
+          // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
+          // ties: winnerMatch.includes(playerMail) ? [] : [],
+        };
+        const uP = await updatePlayer({ ...playerUpdated });
+        console.log("Player updated");
+      }
+
       const getCurrentMoment = () => {
         const currentMoment = moment();
         return {

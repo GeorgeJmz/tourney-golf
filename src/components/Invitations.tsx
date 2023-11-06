@@ -22,10 +22,10 @@ import type { IPlayer } from "../models/Tournament";
 import type { IInvitationsInputElement } from "../helpers/getTournamentFields";
 import { invitationsFields } from "../helpers/getTournamentFields";
 import * as yup from "yup";
-import { getUsersByName } from "../services/firebase";
 import type { IUser } from "../models/User";
 
 interface InvitationsProps {
+  playersToInvite: IUser[];
   fields: ITournamentElement[];
   emailList: Array<Partial<IPlayer>>;
   validationSchema: yup.ObjectSchema<IInvitationsInputElement>;
@@ -42,6 +42,7 @@ interface InvitationsProps {
 
 export const Invitations: React.FC<InvitationsProps> = ({
   fields,
+  playersToInvite,
   emailList,
   validationSchema,
   playersLeft,
@@ -50,7 +51,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
   onDelete,
 }) => {
   const [selectedUser, setSelectedUser] = useState<IUser | null>(null);
-  const [matchingUsers, setMatchingUsers] = useState<IUser[]>([]);
+  const [matchingUsers, setMatchingUsers] = useState<IUser[]>(playersToInvite);
   const formik = useFormik({
     initialValues: invitationsFields,
     validationSchema: validationSchema,
@@ -63,12 +64,14 @@ export const Invitations: React.FC<InvitationsProps> = ({
     event: React.SyntheticEvent<Element, Event>,
     value: string
   ) => {
-    if (value) {
-      const users = await getUsersByName(value);
-      setMatchingUsers(users || []);
-    } else {
-      setMatchingUsers([]);
-    }
+    const users = playersToInvite; //await getUsersByName(value);
+    setMatchingUsers(users || []);
+    // if (value) {
+    //   const users = playersToInvite;//await getUsersByName(value);
+    //   setMatchingUsers(users || []);
+    // } else {
+    //   setMatchingUsers([]);
+    // }
   };
 
   const isDisabled = playersLeft !== undefined ? playersLeft === 0 : false;
@@ -80,13 +83,11 @@ export const Invitations: React.FC<InvitationsProps> = ({
         <Typography variant="h6">Invite Players</Typography>
         <Autocomplete
           options={matchingUsers}
-          getOptionLabel={(user) =>
-            `${user.name} ${user.lastName} - ${user.email}`
-          }
+          getOptionLabel={(user) => `${user.name} - ${user.email}`}
           value={selectedUser}
           onChange={(event, value) => {
             setSelectedUser(value);
-            const name = `${value?.name} ${value?.lastName}` || "";
+            const name = `${value?.name}` || "";
             formik.setFieldValue(fields[0].name, name);
             formik.setFieldValue(fields[1].name, value?.email || "");
           }}

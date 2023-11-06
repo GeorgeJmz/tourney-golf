@@ -2,8 +2,9 @@ import { action, makeObservable, observable } from "mobx";
 import {
   createUser,
   login,
-  getTournamentsByID,
+  getTournamentsByAuthorID,
   getMatchesByID,
+  getTournamentsById,
 } from "../services/firebase";
 import type { IUser } from "../models/User";
 import { Messages } from "../helpers/messages";
@@ -17,6 +18,7 @@ import { IMatch } from "../models/Match";
 class UserViewModel {
   user: UserModel = new UserModel();
   tournaments: Array<ITournament> = [];
+  activeTournaments: Array<ITournament> = [];
   matches: Array<IMatch> = [];
 
   constructor() {
@@ -29,8 +31,8 @@ class UserViewModel {
     });
   }
 
-  setUser(user: IUser): void {
-    this.user = user;
+  setUser(user: Partial<IUser>): void {
+    this.user = { ...this.user, ...user };
   }
 
   getUserId(): string {
@@ -39,7 +41,7 @@ class UserViewModel {
   getUserName(): string {
     return this.user.name;
   }
-  async createUser(user: IUser): Promise<void> {
+  async createUser(user: Partial<IUser>): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     try {
@@ -92,7 +94,7 @@ class UserViewModel {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     try {
-      this.tournaments = (await getTournamentsByID(this.user.id)) || [];
+      this.tournaments = (await getTournamentsByAuthorID(this.user.id)) || [];
       const displayMessage = getMessages(Messages.USER_LOGGED);
       toast.update(cuToast, {
         render: displayMessage,
@@ -109,6 +111,31 @@ class UserViewModel {
         isLoading: false,
         autoClose: 800,
       });
+    }
+  }
+
+  async getActiveTournaments(): Promise<void> {
+    //const displayLoading = getMessages(Messages.LOADING);
+    //const cuToast = toast.loading(displayLoading);
+    try {
+      const actives = await getTournamentsById(this.user.activeTournaments);
+      console.log(actives);
+      this.activeTournaments = actives || [];
+      // toast.update(cuToast, {
+      //   render: displayMessage,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    } catch (error) {
+      const codeError = (error as FirebaseError).code;
+      const displayError = getMessages(codeError);
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
     }
   }
 

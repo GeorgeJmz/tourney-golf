@@ -24,6 +24,7 @@ export enum DragDropType {
 }
 
 interface DragDropProps {
+  numberOfOptions: number;
   typeOfDraggable: DragDropType;
   listOfDraggable: Array<IPlayer>;
   onUpdateGroups: (groups: Array<IGroupDraggable>) => void;
@@ -48,6 +49,7 @@ export const DragDrop: React.FC<DragDropProps> = ({
   onUpdateGroups,
   initialGroups,
   typeOfDraggable,
+  numberOfOptions,
 }) => {
   const initialGroupsState = toJS(initialGroups);
   const isFirstRender = initialGroupsState?.length.toString();
@@ -116,11 +118,12 @@ export const DragDrop: React.FC<DragDropProps> = ({
       md: 4,
       lg: 4,
     },
-    options: [
-      { displayName: "2", value: "2" },
-      { displayName: "3", value: "3" },
-      { displayName: "4", value: "4" },
-    ],
+    options: Array(numberOfOptions)
+      .fill(0)
+      .map((_, i) => ({
+        displayName: `${i + 1}`,
+        value: `${i + 1}`,
+      })),
   };
 
   const movePlayer = (
@@ -226,12 +229,12 @@ export const DragDrop: React.FC<DragDropProps> = ({
               >
                 <Card>
                   <CardContent>
-                    {index !== 0 && (
+                    {/* {index !== 0 && (
                       <GroupTitle
                         group={a}
                         onUpdateTitleGroup={onUpdateTitleGroupHandler}
                       />
-                    )}
+                    )} */}
                     <Droppable droppableId={a.id}>
                       {(provided, snapshot) => (
                         <div
@@ -243,6 +246,8 @@ export const DragDrop: React.FC<DragDropProps> = ({
                             padding: 4,
                             minHeight: 100,
                             display: "flex",
+                            flexWrap: "wrap",
+                            overflowY: "scroll",
                           }}
                         >
                           {a.players.map((player, playerIndex) => (
@@ -264,13 +269,17 @@ export const DragDrop: React.FC<DragDropProps> = ({
                                       maxWidth: 300,
                                     }}
                                   >
-                                    <CardContent>
+                                    <CardContent
+                                      style={{
+                                        paddingBottom: "16px",
+                                      }}
+                                    >
                                       <Typography variant="body2" component="p">
                                         {player.name}
                                       </Typography>
-                                      <Typography variant="body2" component="p">
+                                      {/* <Typography variant="body2" component="p">
                                         {player.email}
-                                      </Typography>
+                                      </Typography> */}
                                     </CardContent>
                                   </Card>
                                 </div>

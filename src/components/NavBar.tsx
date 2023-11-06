@@ -49,12 +49,20 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setTitle("Dashboard");
       setIsBackButton(false);
     }
+    if (location.pathname.includes("/tournament/")) {
+      setTitle("Tournament");
+      setIsBackButton(true);
+    }
     if (location.pathname === "/create-tournament") {
       setTitle("Create Tournament");
       setIsBackButton(true);
     }
     if (location.pathname === "/play") {
       setTitle("Play");
+      setIsBackButton(true);
+    }
+    if (location.pathname.includes("/manage-tournament/")) {
+      setTitle("Manage Tournament");
       setIsBackButton(true);
     }
   }, [location]);

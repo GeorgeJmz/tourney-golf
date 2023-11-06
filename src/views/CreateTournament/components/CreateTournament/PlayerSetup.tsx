@@ -21,7 +21,7 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
   handleNext,
 }) => {
   const validationSchema = step2FieldsValidations;
-  const emailList = tournamentViewModel.emailList;
+  const emailList = tournamentViewModel.tournament.playersList;
   const onSubmitHandler = (email: string, name: string) => {
     tournamentViewModel.addEmailToList(email, name);
   };
@@ -35,6 +35,11 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
   };
 
   const onNextHandler = () => {
+    if (tournamentViewModel.tournament.playersList.length > 0) {
+      tournamentViewModel.updateTournament({
+        playersList: tournamentViewModel.tournament.playersList,
+      });
+    }
     handleNext();
   };
 

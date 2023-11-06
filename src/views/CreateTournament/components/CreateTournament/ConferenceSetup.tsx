@@ -4,12 +4,9 @@ import TournamentViewModel from "../../../../viewModels/TournamentViewModel";
 import { Button } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
-import {
-  DragDrop,
-  IGroupDraggable,
-  DragDropType,
-} from "../../../../components/DragDrop";
-import type { IPlayer } from "../../../../models/Tournament";
+import { DragDropv2, DragDropType } from "../../../../components/DragDropv2";
+import { toJS } from "mobx";
+import type { ITournamentGroup } from "../../../../models/Tournament";
 
 interface ConferenceSetupProps {
   tournamentViewModel: TournamentViewModel;
@@ -22,37 +19,48 @@ const ConferenceSetup: React.FC<ConferenceSetupProps> = ({
   handleNext,
   handlePrev,
 }) => {
-  const [conferences, setConferences] = React.useState<Array<IGroupDraggable>>(
-    []
-  );
-
   const onNextHandler = () => {
-    tournamentViewModel.updateConference(conferences);
+    tournamentViewModel.saveEmailList();
     handleNext();
   };
 
-  const conference = tournamentViewModel.tournament.playersPerGroup.map(
-    ({ id, name }, key) => ({
-      id: `${id}-${key}`,
-      email: name,
-      name: name,
-      handicap: 10,
-    })
-  ) as Array<IPlayer>;
+  const onUpdateGroups = (conferences: Array<ITournamentGroup>) => {
+    tournamentViewModel.updateConferencesList(conferences);
+  };
+  const onUpdateGroupPlayers = (conference: string, groupId: string) => {
+    console.log(conference, groupId, "group, idPlayer");
+    tournamentViewModel.updateConferenceGroup(conference, groupId);
+  };
+
+  console.log(toJS(tournamentViewModel.tournament.groupsList), "groupsList");
 
   const isNextDisabled =
-    tournamentViewModel.tournament.conference.length === 0 &&
-    conferences.length === 0;
+    tournamentViewModel.tournament.groupsList.filter(
+      (group) => group.conference === "" || group.conference === "0initial"
+    ).length > 0;
 
   return (
     <div>
-      <DragDrop
+      {/* <DragDrop
+        numberOfOptions={6}
         typeOfDraggable={DragDropType.Conferences}
         listOfDraggable={conference.filter(
           (player) => player.id !== "group0-0"
         )}
         onUpdateGroups={(conference) => setConferences(conference)}
         initialGroups={tournamentViewModel.tournament.conference}
+      /> */}
+
+      <DragDropv2
+        numberOfOptions={8}
+        typeOfDraggable={DragDropType.Conferences}
+        listOfDraggable={tournamentViewModel.tournament.groupsList}
+        groupsDraggable={tournamentViewModel.tournament.groupsList}
+        listOfGroups={tournamentViewModel.tournament.conferencesList}
+        onUpdateGroups={(groups) => onUpdateGroups(groups)}
+        onUpdateGroupPlayers={(group, idPlayer) =>
+          onUpdateGroupPlayers(group, idPlayer)
+        }
       />
 
       <Grid container>

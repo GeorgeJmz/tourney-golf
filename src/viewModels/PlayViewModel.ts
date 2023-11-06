@@ -24,6 +24,7 @@ class PlayViewModel {
   currentTeeBoxDisplayName = "";
   author: UserViewModel = new UserViewModel();
   idMatch = "";
+  tournamentId = "";
   currentDistance: Array<number> = [];
   currentHcp: Array<number> = [];
   currentPar: Array<number> = [];
@@ -43,6 +44,7 @@ class PlayViewModel {
       courses: observable,
       author: observable,
       idMatch: observable,
+      tournamentId: observable,
       currentTeeBoxDisplayName: observable,
       currentDistance: observable,
       currentHcp: observable,
@@ -83,6 +85,7 @@ class PlayViewModel {
         newMatch.currentDistance = this.currentDistance;
         newMatch.currentHcp = this.currentHcp;
         newMatch.currentPar = this.currentPar;
+        newMatch.tournamentId = this.tournamentId;
 
         newMatch.setDifferenceHP();
         this.matches.push(newMatch);
@@ -220,9 +223,9 @@ class PlayViewModel {
   }
 
   async createMatch(): Promise<void> {
-    this.matches.forEach(async (match) => {
-      match.createMatch();
-    });
+    for (const match of this.matches) {
+      await match.createMatch();
+    }
   }
 }
 

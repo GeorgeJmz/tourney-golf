@@ -16,7 +16,10 @@ import CourseList from "./components/CourseList";
 import { GolfCourse } from "../../services/courses";
 import { ScoreTable } from "./components/ScoreTable";
 import HorizontalScoreCard from "./components/HorizontalScoreCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { toJS } from "mobx";
+import type { IUser } from "../../models/User";
+import { Button } from "@mui/material";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -47,14 +50,51 @@ function TabPanel(props: TabPanelProps) {
 const Play: React.FC<IPlayProps> = ({ user }) => {
   const playViewModel = React.useMemo(() => new PlayViewModel(), []);
   const navigate = useNavigate();
+  const { id } = useParams();
+  const currentTournament = React.useMemo(
+    () => user.tournaments.find((t) => t.id === id),
+    []
+  );
+
+  playViewModel.tournamentId = id || "";
+
+  const findConferenceByEmail = (email: string) => {
+    const player = currentTournament?.playersList.find(
+      (player) => player.email === email
+    );
+
+    return player?.conference;
+  };
+
+  const getPlayersByConference = (conferenceId: string) => {
+    const players = currentTournament?.playersList.filter(
+      (player) => player.conference === conferenceId
+    );
+    return players;
+  };
+
+  const playersToInvite = React.useMemo(
+    () => getPlayersByConference(findConferenceByEmail(user.user.email) || ""),
+    []
+  );
 
   if (playViewModel.getAuthor() === "") {
     playViewModel.setAuthor(user);
   }
+  const onFillResults = () => {
+    Array.from(Array(18).keys()).forEach((hole) => {
+      const scores = playViewModel.allPlayers.map((player) => {
+        const score = Math.floor(Math.random() * 10) || 3;
+        return score;
+      });
+      playViewModel.setScoreModal(scores, hole);
+    });
+  };
+
   const onSaveHandler = () => {
     if (playViewModel.currentStep === 2) {
       playViewModel.createMatch();
-      setTimeout(() => navigate("/dashboard"), 3000);
+      setTimeout(() => navigate("/dashboard"), 5000);
     } else {
       playViewModel.setCurrentStep(playViewModel.currentStep + 1);
     }
@@ -81,6 +121,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     playViewModel.setModal(false);
   };
   const handleOpenModal = (key: number) => {
+    console.log(key);
     playViewModel.setModal(true);
     playViewModel.setModalValues(key);
   };
@@ -120,6 +161,11 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         )}
         {playViewModel.currentStep === 1 && (
           <Invitations
+            playersToInvite={
+              (playersToInvite?.filter(
+                (player) => player?.email !== user.user.email
+              ) || []) as IUser[]
+            }
             fields={invitationsMatch}
             emailList={emailList}
             validationSchema={validationSchema}
@@ -172,7 +218,18 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           </React.Fragment>
         )}
 
-        <Fab
+        <Button
+          sx={{ marginTop: "20px", minWidth: "250px" }}
+          color="primary"
+          variant="contained"
+          size="large"
+          onClick={onSaveHandler}
+          disabled={playViewModel.currentTeeBox === ""}
+        >
+          {submitButtonText[playViewModel.currentStep]}
+        </Button>
+
+        {/* <Fab
           color="primary"
           variant="extended"
           disabled={playViewModel.currentTeeBox === ""}
@@ -185,7 +242,23 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           }}
         >
           {submitButtonText[playViewModel.currentStep]}
-        </Fab>
+        </Fab> */}
+        {playViewModel.currentStep === 2 && (
+          <Fab
+            color="primary"
+            variant="extended"
+            disabled={playViewModel.currentTeeBox === ""}
+            onClick={onFillResults}
+            sx={{
+              position: "fixed",
+              bottom: "16px",
+              width: 250,
+              left: "0",
+            }}
+          >
+            Mock Results
+          </Fab>
+        )}
       </Box>
     </div>
   );

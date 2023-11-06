@@ -1,36 +1,44 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
+import { observer } from "mobx-react";
+import UserViewModel from "../../viewModels/UserViewModel";
+import TournamentViewModel from "../../viewModels/TournamentViewModel";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
-import TourneySetup from "./components/CreateTournament/TourneySetup";
-import PlayerSetup from "./components/CreateTournament/PlayerSetup";
-import GroupsSetup from "./components/CreateTournament/GroupsSetup";
-import TeamSetup from "./components/CreateTournament/TeamSetup";
-import ConferenceSetup from "./components/CreateTournament/ConferenceSetup";
-import RulesSetup from "./components/CreateTournament/RulesSetup";
-import TournamentViewModel from "../../viewModels/TournamentViewModel";
+import { Box } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import { observer } from "mobx-react";
+import { useParams } from "react-router-dom";
+import TourneySetup from "./../CreateTournament/components/CreateTournament/TourneySetup";
+import RulesSetup from "./../CreateTournament/components/CreateTournament/RulesSetup";
+import PlayerSetup from "./../CreateTournament/components/CreateTournament/PlayerSetup";
+import GroupsSetup from "./../CreateTournament/components/CreateTournament/GroupsSetup";
+import ConferenceSetup from "./../CreateTournament/components/CreateTournament/ConferenceSetup";
+import TeamSetup from "./../CreateTournament/components/CreateTournament/TeamSetup";
+import CalendarsSetup from "./../CreateTournament/components/CreateTournament/CalendarsSetup";
 
-import UserViewModel from "../../viewModels/UserViewModel";
-import CalendarsSetup from "./components/CreateTournament/CalendarsSetup";
-
-interface ICreateTournamentProps {
+interface IManageTournamentProps {
   user: UserViewModel;
 }
 
-const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
+const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const userId = React.useMemo(() => user.getUserId(), []);
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
     []
   );
-  if (tournamentViewModel.getAuthor() === "") {
+  const { id } = useParams();
+  const currentTournament = React.useMemo(
+    () => user.tournaments.find((t) => t.id === id),
+    []
+  );
+
+  if (currentTournament && id && tournamentViewModel.author === "") {
+    tournamentViewModel.setTournament(currentTournament);
+    tournamentViewModel.setTournamentId(id);
     tournamentViewModel.setAuthor(userId);
   }
   const handleNext = () => {
@@ -40,11 +48,8 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
   const handleStepClick = (step: number) => {
-    if (step < activeStep) {
-      setActiveStep(step);
-    }
+    setActiveStep(step);
   };
-
   const handleReset = () => {
     tournamentViewModel.startTournament();
   };
@@ -127,7 +132,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
           <Step key={step.label}>
             <StepLabel
               onClick={() => handleStepClick(index)}
-              StepIconProps={{ completed: index < activeStep }}
+              StepIconProps={{ completed: true }}
             >
               {step.label}
             </StepLabel>
@@ -147,4 +152,4 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
   );
 };
 
-export default observer(CreateTournament);
+export default observer(ManageTournament);

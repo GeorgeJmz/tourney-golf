@@ -5,12 +5,9 @@ import TournamentViewModel from "../../../../viewModels/TournamentViewModel";
 import { Button } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
-import {
-  DragDrop,
-  DragDropType,
-  IGroupDraggable,
-} from "../../../../components/DragDrop";
-import type { IPlayer } from "../../../../models/Tournament";
+import { DragDropv2, DragDropType } from "../../../../components/DragDropv2";
+import type { ITournamentGroup } from "../../../../models/Tournament";
+import { toJS } from "mobx";
 
 interface TeamSetupProps {
   tournamentViewModel: TournamentViewModel;
@@ -23,32 +20,35 @@ const TeamSetup: React.FC<TeamSetupProps> = ({
   handleNext,
   handlePrev,
 }) => {
-  const [teams, setTeams] = React.useState<Array<IGroupDraggable>>([]);
-
   const onNextHandler = () => {
-    if (teams.length > 0) {
-      tournamentViewModel.updateTeams(teams);
-    }
+    tournamentViewModel.saveEmailList();
     handleNext();
   };
 
-  const players = tournamentViewModel.emailList.map(({ email, name }, key) => ({
-    id: `${email}-${key}`,
-    email: email,
-    name: name,
-    handicap: 10,
-  })) as Array<IPlayer>;
+  const onUpdateGroups = (teams: Array<ITournamentGroup>) => {
+    tournamentViewModel.updateTeamList(teams);
+  };
+  const onUpdateGroupPlayers = (group: string, idPlayer: string) => {
+    tournamentViewModel.updateTeamPlayers(group, idPlayer);
+  };
 
+  console.log(toJS(tournamentViewModel.tournament.playersList), "playersList");
   const isNextDisabled =
-    tournamentViewModel.tournament.teams.length === 0 && teams.length === 0;
+    tournamentViewModel.tournament.playersList.filter(
+      (player) => player.team === "" || player.team === "0initial"
+    ).length > 0;
 
   return (
     <div>
-      <DragDrop
+      <DragDropv2
+        numberOfOptions={8}
         typeOfDraggable={DragDropType.Teams}
-        listOfDraggable={players}
-        onUpdateGroups={(teams) => setTeams(teams)}
-        initialGroups={tournamentViewModel.tournament.teams}
+        listOfDraggable={tournamentViewModel.tournament.playersList}
+        listOfGroups={tournamentViewModel.tournament.teamsList}
+        onUpdateGroups={(teams) => onUpdateGroups(teams)}
+        onUpdateGroupPlayers={(group, idPlayer) =>
+          onUpdateGroupPlayers(group, idPlayer)
+        }
       />
 
       <Grid container>

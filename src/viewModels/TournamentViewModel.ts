@@ -1,31 +1,41 @@
 import { action, makeObservable, observable, toJS } from "mobx";
-import { createTournament, updateTournament } from "../services/firebase";
+import {
+  createTournament,
+  updateTournament,
+  assignActiveTourneyByEmail,
+} from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
-import TournamentModel from "../models/Tournament";
+import TournamentModel, { TournamentStatus } from "../models/Tournament";
 import type {
   IStep1InputElement,
   IRulesInputElement,
 } from "../helpers/getTournamentFields";
-import type { ITournament, IGroup, IPlayer } from "../models/Tournament";
+import type {
+  ITournament,
+  IGroup,
+  IPlayer,
+  ITournamentGroup,
+} from "../models/Tournament";
+import PlayerModel from "../models/Player";
+import { pl } from "@faker-js/faker";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
   author = "";
   idTournament = "";
-  emailList: Array<Partial<IPlayer>> = [];
 
   constructor() {
     makeObservable(this, {
       tournament: observable,
       author: observable,
       idTournament: observable,
-      emailList: observable,
       setTournament: action,
       createTournament: action,
       updateTournament: action,
+      saveEmailList: action,
       getTournamentValues: action,
       getAuthor: action,
       getTournamentName: action,
@@ -34,9 +44,15 @@ class TournamentViewModel {
       editEmailList: action,
       removeEmailFromList: action,
       getPlayers: action,
+      updateGroupList: action,
+      updateConferencesList: action,
+      updateTeamList: action,
+      updateGroupPlayers: action,
+      updateConferenceGroup: action,
+      updateTeamPlayers: action,
       getGroups: action,
       getPlayersPerGroup: action,
-      movePlayer: action,
+      startTournament: action,
     });
   }
 
@@ -57,6 +73,7 @@ class TournamentViewModel {
 
   setTournamentId(id: string): void {
     this.idTournament = id;
+    this.tournament.id = id;
   }
 
   getTournamentValues(): IStep1InputElement {
@@ -82,22 +99,34 @@ class TournamentViewModel {
     return this.tournament.name;
   }
 
+  saveEmailList(): void {
+    this.updateTournament(toJS(this.tournament));
+  }
   addEmailToList(email: string, name: string): void {
-    this.emailList.push({ name, email });
+    this.tournament.playersList.push({ name, email, id: email });
+    if (this.tournament.playersPerGroup.length > 0) {
+      const id = `${email}-${this.tournament.playersList.length - 1}`;
+      this.tournament.playersPerGroup[0].players.push({ name, email, id });
+      this.tournament.teams[0].players.push({ name, email, id });
+    }
   }
 
   editEmailList(email: string, name: string, index: number): void {
-    this.emailList[index] = { name, email };
+    this.tournament.playersList[index] = {
+      ...this.tournament.playersList[index],
+      name,
+      email,
+    };
   }
 
   removeEmailFromList(key: number): void {
-    const newEmailList = [...this.emailList];
+    const newEmailList = [...this.tournament.playersList];
     newEmailList.splice(key, 1);
-    this.emailList = newEmailList;
+    this.tournament.playersList = newEmailList;
   }
 
   getEmailList(): Array<Partial<IPlayer>> {
-    return this.emailList;
+    return this.tournament.playersList;
   }
 
   getPlayers(): number {
@@ -111,27 +140,52 @@ class TournamentViewModel {
     return this.tournament.playersPerGroup;
   }
 
-  movePlayer(
-    indexGroup: number,
-    indexPlayer: number,
-    destinationGroup: number
-  ) {
-    this.tournament.playersPerGroup[destinationGroup].players.push(
-      this.tournament.playersPerGroup[indexGroup].players[indexPlayer]
-    );
-    delete this.tournament.playersPerGroup[indexGroup].players[indexPlayer];
-    this.tournament.playersPerGroup[destinationGroup].players =
-      this.tournament.playersPerGroup[destinationGroup].players.filter(
-        (a) => a
-      );
-    this.tournament.playersPerGroup[indexGroup].players =
-      this.tournament.playersPerGroup[indexGroup].players.filter((a) => a);
-  }
-
   updatePlayersPerGroup(groups: IGroup[]): void {
     this.tournament.playersPerGroup = groups;
     this.tournament.groups = groups.length - 1;
     this.updateTournament(toJS(this.tournament));
+  }
+
+  updateGroupList(newGroups: Array<ITournamentGroup>): void {
+    this.tournament.groupsList = newGroups;
+  }
+  updateConferencesList(newConferences: Array<ITournamentGroup>): void {
+    this.tournament.conferencesList = newConferences;
+  }
+  updateTeamList(newTeams: Array<ITournamentGroup>): void {
+    this.tournament.teamsList = newTeams;
+  }
+  updateGroupPlayers(group: string, playerId: string) {
+    this.tournament.playersList = this.tournament.playersList.map((player) => {
+      if (player.id === playerId) {
+        player.group = group;
+      }
+      return player;
+    });
+  }
+
+  updateConferenceGroup(conference: string, groupId: string) {
+    this.tournament.groupsList = this.tournament.groupsList.map((group) => {
+      if (group.id === groupId) {
+        group.conference = conference;
+      }
+      return group;
+    });
+    this.tournament.playersList = this.tournament.playersList.map((player) => {
+      if (player.group === groupId) {
+        player.conference = conference;
+      }
+      return player;
+    });
+  }
+
+  updateTeamPlayers(team: string, playerId: string) {
+    this.tournament.playersList = this.tournament.playersList.map((player) => {
+      if (player.id === playerId) {
+        player.team = team;
+      }
+      return player;
+    });
   }
 
   updateTeams(teams: IGroup[]): void {
@@ -142,6 +196,29 @@ class TournamentViewModel {
   updateConference(conference: IGroup[]): void {
     this.tournament.conference = conference;
     this.updateTournament(toJS(this.tournament));
+  }
+
+  startTournament(): void {
+    this.tournament.status = TournamentStatus.PUBLISHED;
+    // Send email to all players
+    // Add tourney to user's list
+    this.tournament.playersList.forEach((player) => {
+      const nPlayer = new PlayerModel({
+        name: player.name || "",
+        email: player.email || "",
+        group: player.group || "",
+        team: player.team || "",
+        conference: player.conference || "",
+        tournamentId: this.idTournament || "",
+      });
+      console.log(toJS(nPlayer));
+      assignActiveTourneyByEmail(
+        player.email || "",
+        this.idTournament,
+        toJS(nPlayer)
+      );
+    });
+    //this.updateTournament(toJS(this.tournament));
   }
 
   async createTournament(tournament: Partial<ITournament>): Promise<void> {

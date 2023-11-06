@@ -12,6 +12,7 @@ import {
   setDoc,
   collection,
   getDocs,
+  getDoc,
   query,
   where,
 } from "firebase/firestore";
@@ -19,11 +20,12 @@ import type { FirebaseError } from "firebase/app";
 import type { IUser } from "../models/User";
 import "firebase/database";
 import "firebase/storage";
-import { ITournament } from "../models/Tournament";
+import { IPlayer, ITournament } from "../models/Tournament";
 import { IMatch } from "../models/Match";
 import { IScore } from "../models/Score";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
+import { ITournamentPlayer } from "../models/Player";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -39,11 +41,13 @@ export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
 
-export const createUser = async (user: IUser): Promise<IUser> => {
+export const createUser = async (
+  user: Partial<IUser>
+): Promise<Partial<IUser>> => {
   try {
     const credentials = await createUserWithEmailAndPassword(
       auth,
-      user.email,
+      user.email || "",
       user.password || ""
     );
     const firebaseUser = {
@@ -111,6 +115,108 @@ export const getUsersByName = async (
   return users;
 };
 
+export const getUserIdByEmail = async (email: string): Promise<string> => {
+  const userCollection = collection(db, "users");
+  const userQuery = query(userCollection, where("email", "==", email));
+  const querySnapshot = await getDocs(userQuery);
+  if (querySnapshot.empty) {
+    return "";
+  }
+  let userId = "";
+  querySnapshot.forEach((doc) => {
+    userId = doc.id;
+  });
+  return userId;
+};
+
+export const assignActiveTourneyByEmail = async (
+  email: string,
+  tournamentId: string,
+  player: Partial<ITournamentPlayer>
+) => {
+  const userId = await getUserIdByEmail(email);
+  if (userId !== "") {
+    const documentRef = doc(db, "users", userId);
+    const docSnap = await getDoc(documentRef);
+    const activeTournaments = docSnap.data()?.activeTournaments;
+    const newAdded = {
+      activeTournaments: [...new Set([...activeTournaments, tournamentId])],
+    };
+    await setDoc(documentRef, newAdded, { merge: true });
+    const newPlayer = {
+      id: userId,
+      ...player,
+    };
+    await createPlayer(newPlayer);
+  }
+};
+
+export const createPlayer = async (
+  player: Partial<ITournamentPlayer>
+): Promise<string> => {
+  try {
+    const doc = await addDoc(collection(db, "player"), player);
+    return doc.id;
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const updatePlayer = async (player: {
+  email: string;
+  opponent: string;
+  pointsMatch: number;
+  pointsStroke: number;
+  pointsTeam: number;
+  scoreId: string;
+  tournamentId: string;
+}): Promise<void> => {
+  try {
+    const userCollection = collection(db, "player");
+    const userQuery = query(
+      userCollection,
+      where("email", "==", player.email),
+      where("tournamentId", "==", player.tournamentId)
+    );
+    const querySnapshot = await getDocs(userQuery);
+    let playerData = null;
+    await querySnapshot.forEach(async (dc) => {
+      console.log(dc.id, " => ", dc.data());
+      playerData = dc.data() as ITournamentPlayer;
+      console.log(playerData, "playerData Before---------");
+      const newPlayer = {
+        ...playerData,
+        opponent: [...(playerData.opponent || []), player.opponent],
+        pointsMatch: [...(playerData.pointsMatch || []), player.pointsMatch],
+        pointsStroke: [...(playerData.pointsStroke || []), player.pointsStroke],
+        pointsTeam: [...(playerData.pointsTeam || []), player.pointsTeam],
+        scoreId: [...(playerData.scoreId || []), player.scoreId],
+      };
+      console.log(newPlayer, "newPlayer", "----->");
+      const documentRef = doc(db, "player", dc.id);
+      await setDoc(documentRef, newPlayer, { merge: true });
+      console.log("Document updated with ID: ", dc.id);
+    });
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const getPlayersByTournamentId = async (
+  id: string
+): Promise<Array<ITournamentPlayer> | null> => {
+  const playerCollection = collection(db, "player");
+  const userQuery = query(playerCollection, where("tournamentId", "==", id));
+  const querySnapshot = await getDocs(userQuery);
+  const players = [] as Array<ITournamentPlayer>;
+  querySnapshot.forEach((doc) => {
+    players.push(doc.data() as unknown as ITournamentPlayer);
+  });
+  return players as Array<ITournamentPlayer>;
+};
+
 export const createTournament = async (
   tournament: Partial<ITournament>
 ): Promise<string> => {
@@ -136,7 +242,7 @@ export const updateTournament = async (
   }
 };
 
-export const getTournamentsByID = async (
+export const getTournamentsByAuthorID = async (
   id: string
 ): Promise<Array<ITournament> | null> => {
   const tournamentCollection = collection(db, "tournament");
@@ -144,7 +250,21 @@ export const getTournamentsByID = async (
   const querySnapshot = await getDocs(userQuery);
   const tournaments = [] as Array<ITournament>;
   querySnapshot.forEach((doc) => {
-    tournaments.push(doc.data() as unknown as ITournament);
+    tournaments.push({ ...doc.data(), id: doc.id } as unknown as ITournament);
+  });
+  return tournaments as Array<ITournament>;
+};
+
+export const getTournamentsById = async (
+  ids: Array<string>
+): Promise<Array<ITournament> | null> => {
+  const tournamentCollection = collection(db, "tournament");
+  console.log(ids, "ids");
+  const userQuery = query(tournamentCollection, where("id", "in", ids));
+  const querySnapshot = await getDocs(userQuery);
+  const tournaments = [] as Array<ITournament>;
+  querySnapshot.forEach((doc) => {
+    tournaments.push({ ...doc.data(), id: doc.id } as unknown as ITournament);
   });
   return tournaments as Array<ITournament>;
 };
@@ -192,6 +312,27 @@ export const createScore = async (score: IScore): Promise<string> => {
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
+  }
+};
+
+export const getScoresByID = async (id: string): Promise<IScore | null> => {
+  console.log(id);
+  const documentRef = doc(db, "score", id);
+  console.log(documentRef, id);
+  let document = null;
+  try {
+    const docSnapshot = await getDoc(documentRef);
+    if (docSnapshot.exists()) {
+      document = docSnapshot.data();
+      console.log("Document data:", document);
+      return document as IScore;
+    } else {
+      console.log("Document does not exist.");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting document:", error);
+    return null;
   }
 };
 

@@ -121,8 +121,8 @@ export const MatchModal: React.FC<IMatchModalProps> = ({
                       onClick={() => {
                         const newScores = [...temporalScores];
                         newScores[key] = temporalScores[key] - 1;
-                        if (newScores[key] < 0) {
-                          newScores[key] = 0;
+                        if (newScores[key] < 1) {
+                          newScores[key] = 1;
                         }
                         setTemporalScores(newScores);
                       }}

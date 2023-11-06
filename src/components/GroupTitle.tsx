@@ -5,10 +5,11 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import FormControl from "@mui/material/FormControl";
 import type { IGroupDraggable } from "./DragDrop";
+import { ITournamentGroup } from "../models/Tournament";
 
 interface IGroupTitleProps {
-  group: IGroupDraggable;
-  onUpdateTitleGroup: (group: IGroupDraggable) => void;
+  group: ITournamentGroup;
+  onUpdateTitleGroup: (group: ITournamentGroup) => void;
 }
 
 export const GroupTitle: React.FC<IGroupTitleProps> = ({

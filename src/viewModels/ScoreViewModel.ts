@@ -141,7 +141,6 @@ class ScoreViewModel {
       const scoreId = await createScore({
         ...this.score,
       });
-
       const displayMessage = getMessages(Messages.SCORE_CREATED);
       toast.update(cuToast, {
         render: displayMessage,

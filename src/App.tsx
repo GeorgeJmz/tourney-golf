@@ -7,12 +7,15 @@ import Login from "./views/Login/Login";
 import Welcome from "./views/Welcome/Welcome";
 import Dashboard from "./views/Dashboard/Dashboard";
 import Play from "./views/Play/Play";
+import ManageTournament from "./views/ManageTournament/ManageTournament";
 import { useAuth } from "./hooks/useUserContext";
 import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
 import CreateTournament from "./views/CreateTournament/CreateTournament";
 import UserViewModel from "./viewModels/UserViewModel";
+import Tournament from "./views/Tournament/Tournament";
 import { NavBar } from "./components/NavBar";
+import TournamentStats from "./views/TournamentStats/TournamentStats";
 
 function App(): JSX.Element {
   const { user } = useAuth();
@@ -48,6 +51,38 @@ function App(): JSX.Element {
             />
             <Route
               path="/play"
+              element={
+                <RequireAuth user={user}>
+                  <Play user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/manage-tournament/:id"
+              element={
+                <RequireAuth user={user}>
+                  <ManageTournament user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/tournament/:id"
+              element={
+                <RequireAuth user={user}>
+                  <Tournament user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/stats-tournament/:id"
+              element={
+                <RequireAuth user={user}>
+                  <TournamentStats user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/play-tournament/:id"
               element={
                 <RequireAuth user={user}>
                   <Play user={userViewModel} />
