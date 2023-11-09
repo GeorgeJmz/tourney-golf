@@ -3,6 +3,7 @@ export interface IScore {
   idPlayer: string;
   scoreHoles: Array<number>;
   scoreHolesHP: Array<number>;
+  teamScoreHolesHP: Array<number>;
   handicap: number;
   out: number;
   in: number;
@@ -16,6 +17,7 @@ export default class ScoreModel implements IScore {
   idPlayer = "";
   scoreHoles: Array<number> = [];
   scoreHolesHP: Array<number> = [];
+  teamScoreHolesHP: Array<number> = [];
   handicap = 0;
   out = 0;
   in = 0;

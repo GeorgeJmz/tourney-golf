@@ -79,11 +79,13 @@ class MatchViewModel {
 
       const scoreA =
         playersA.score.scoreHolesHP[index] && playersA.score.scoreHoles[index]
-          ? playersA.score.scoreHoles[index] - 1
+          ? playersA.score.scoreHoles[index] -
+            playersA.score.scoreHolesHP[index]
           : playersA.score.scoreHoles[index];
       const scoreB =
         playersB.score.scoreHolesHP[index] && playersB.score.scoreHoles[index]
-          ? playersB.score.scoreHoles[index] - 1
+          ? playersB.score.scoreHoles[index] -
+            playersB.score.scoreHolesHP[index]
           : playersB.score.scoreHoles[index];
 
       if (scoreA === scoreB) {

@@ -17,9 +17,9 @@ import { GolfCourse } from "../../services/courses";
 import { ScoreTable } from "./components/ScoreTable";
 import HorizontalScoreCard from "./components/HorizontalScoreCard";
 import { useNavigate, useParams } from "react-router-dom";
-import { toJS } from "mobx";
 import type { IUser } from "../../models/User";
 import { Button } from "@mui/material";
+import { toJS } from "mobx";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -52,17 +52,18 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const currentTournament = React.useMemo(
-    () => user.tournaments.find((t) => t.id === id),
+    () => user.activeTournaments.find((t) => t.id === id),
     []
   );
 
   playViewModel.tournamentId = id || "";
 
+  console.log(toJS(currentTournament), "currentTournament");
   const findConferenceByEmail = (email: string) => {
     const player = currentTournament?.playersList.find(
       (player) => player.email === email
     );
-
+    console.log(player?.conference, "conference");
     return player?.conference;
   };
 
@@ -70,6 +71,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     const players = currentTournament?.playersList.filter(
       (player) => player.conference === conferenceId
     );
+    console.log(players, "players");
     return players;
   };
 

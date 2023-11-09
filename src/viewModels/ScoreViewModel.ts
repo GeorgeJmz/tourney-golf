@@ -26,9 +26,9 @@ class ScoreViewModel {
     this.score.scoreHoles[hole] = score;
     //score === 1 = Hole in one === 10 points
     const isHoleHP =
-      this.score.scoreHolesHP[hole] && this.score.scoreHoles[hole];
+      this.score.teamScoreHolesHP[hole] && this.score.teamScoreHolesHP[hole];
     const strokesVsPar = isHoleHP
-      ? score - 1 - this.currentPar[hole]
+      ? score - this.score.teamScoreHolesHP[hole] - this.currentPar[hole]
       : score - this.currentPar[hole];
     let points = 0;
     if (strokesVsPar === -4) {
@@ -55,8 +55,6 @@ class ScoreViewModel {
     if (score === 1) {
       points = 10;
     }
-
-    this.score.teamPoints[hole] = points;
 
     this.score.teamPoints[hole] = points;
     this.updateIn();
@@ -95,6 +93,14 @@ class ScoreViewModel {
     hcp: Array<number>,
     par: Array<number>
   ) => {
+    console.log("difference", difference);
+    console.log("teamDifference", this.score.handicap);
+    const teamOutHcp = Math.floor(this.score.handicap / 2) + (this.score.handicap % 2);
+    const teamInHcp = Math.ceil(this.score.handicap / 2) - (this.score.handicap % 2);
+    console.log("teamOutHcp", teamOutHcp);
+    console.log("teamInHcp", teamInHcp);
+
+
     const outHcp = Math.floor(difference / 2) + (difference % 2);
     const inHcp = Math.ceil(difference / 2) - (difference % 2);
     this.currentPar = par;
@@ -106,18 +112,37 @@ class ScoreViewModel {
     const outHcpArray = this.getArrayPosition(pars.OUT, outHcp);
     const inHcpArray = this.getArrayPosition(pars.IN, inHcp);
 
-    const inPars = Array(9).fill(false);
-    const outPars = Array(9).fill(false);
+    const teamOutHcpArray = this.getArrayPosition(pars.OUT, teamOutHcp);
+    const teamInHcpArray = this.getArrayPosition(pars.IN, teamInHcp);
+
+    const inPars = Array(9).fill(0);
+    const outPars = Array(9).fill(0);
+
+    const teamInPars = Array(9).fill(0);
+    const teamOutPars = Array(9).fill(0);
 
     outHcpArray.forEach((hole) => {
-      outPars[hole] = true;
+      outPars[hole] += 1;
     });
 
     inHcpArray.forEach((hole) => {
-      inPars[hole] = true;
+      inPars[hole] += 1;
+    });
+
+    teamOutHcpArray.forEach((hole) => {
+      teamOutPars[hole] += 1;
+    });
+
+    teamInHcpArray.forEach((hole) => {
+      teamInPars[hole] += 1;
     });
 
     this.score.scoreHolesHP = [...outPars, ...inPars];
+
+    this.score.teamScoreHolesHP = [...teamOutPars, ...teamInPars];
+
+    console.log("scoreHolesHP", [...outPars, ...inPars]);
+    console.log("teamScoreHolesHP", [...teamOutPars, ...teamInPars]);
   };
 
   getArrayPosition = (array: number[], values: number) => {
@@ -131,6 +156,16 @@ class ScoreViewModel {
       .slice(0, values)
       .map((value) => hashPositions[value]);
 
+    if (arrayPositions.length < values) {
+      let i = 0;
+      do {
+        arrayPositions.push(arrayPositions[i]);
+        i++;
+        if (i === arrayPositions.length) {
+          i = 0;
+        }
+      } while (arrayPositions.length < values);
+    }
     return arrayPositions;
   };
 

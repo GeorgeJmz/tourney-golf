@@ -111,7 +111,8 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
       currentPlayer.score.scoreHolesHP[indexHole];
     const getScoreWithHP = hasHandicap
       ? `${currentPlayer.score.scoreHoles[indexHole]}/${
-          currentPlayer.score.scoreHoles[indexHole] - 1
+          currentPlayer.score.scoreHoles[indexHole] -
+          currentPlayer.score.scoreHolesHP[indexHole]
         }`
       : currentPlayer.score.scoreHoles[indexHole];
     const scoreComponent = (
