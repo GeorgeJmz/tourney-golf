@@ -219,7 +219,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
             <TableRow>
               <TableCell
                 colSpan={25}
-                align="center"
+                align="right"
                 sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
               >
                 {match.match.winner}

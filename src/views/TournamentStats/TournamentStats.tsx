@@ -14,9 +14,6 @@ import {
 import Typography from "@mui/material/Typography";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
-import type { ITournamentPlayer } from "../../models/Player";
-import { getPlayersByTournamentId } from "../../services/firebase";
-import { set } from "firebase/database";
 
 interface ITournamentStatsProps {
   user: UserViewModel;
@@ -29,25 +26,6 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
     []
   );
   const { id } = useParams();
-  const [players, setPlayers] = React.useState([
-    {
-      id: 1,
-      position: 1,
-      tourneyName: "Torneo 1",
-      matchesPlayed: 3,
-      wins: 2,
-      draws: 0,
-      losses: 1,
-      matchPoints: 6,
-      medalPoints: 0,
-      totalPoints: 6,
-      grossAverage: 6,
-      handicapAverage: 6,
-      netAverage: 6,
-      teamPoints: 0,
-    },
-  ]);
-
   const currentTournament = React.useMemo(
     () => user.activeTournaments.find((t) => t.id === id),
     []
@@ -61,73 +39,25 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
 
   React.useEffect(() => {
     if (id) {
-      getPlayersByTournamentId(id).then((allPlayers) => {
-        console.log(allPlayers);
-        if (allPlayers) {
-          const newPlayers = allPlayers.map((p) => ({
-            id: Number(p.id), // Change id to a number
-            position: 0, // Add position property
-            tourneyName: p.name, // Add tourneyName property
-            matchesPlayed: p.opponent.length * 2,
-            wins:
-              p.pointsMatch.reduce(
-                (acc, curr) => (curr === 3 ? acc + 1 : acc),
-                0
-              ) +
-              p.pointsStroke.reduce(
-                (acc, curr) => (curr === 3 ? acc + 1 : acc),
-                0
-              ),
-            draws:
-              p.pointsMatch.reduce(
-                (acc, curr) => (curr === 1 ? acc + 1 : acc),
-                0
-              ) +
-              p.pointsStroke.reduce(
-                (acc, curr) => (curr === 1 ? acc + 1 : acc),
-                0
-              ),
-            losses:
-              p.pointsMatch.reduce(
-                (acc, curr) => (curr === 0 ? acc + 1 : acc),
-                0
-              ) +
-              p.pointsStroke.reduce(
-                (acc, curr) => (curr === 0 ? acc + 1 : acc),
-                0
-              ),
-            matchPoints: p.pointsMatch.reduce((acc, curr) => acc + curr, 0),
-            medalPoints: p.pointsStroke.reduce((acc, curr) => acc + curr, 0),
-            totalPoints:
-              p.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
-              p.pointsStroke.reduce((acc, curr) => acc + curr, 0),
-            grossAverage: 0,
-            handicapAverage: 0,
-            netAverage: 0,
-            teamPoints: p.pointsTeam.reduce((acc, curr) => acc + curr, 0),
-          }));
-          console.log(newPlayers);
-          setPlayers(newPlayers.sort((a, b) => b.totalPoints - a.totalPoints));
-        }
-      });
+      tournamentViewModel.getStatsPlayersByTournament();
     }
   }, [id]);
 
-  const tableRows = players.map((t, i) => (
-    <TableRow key={t.id}>
-      <TableCell>{i + 1}</TableCell>
-      <TableCell>{t.tourneyName}</TableCell>
-      <TableCell>{t.matchesPlayed}</TableCell>
-      <TableCell>{t.wins}</TableCell>
-      <TableCell>{t.draws}</TableCell>
-      <TableCell>{t.losses}</TableCell>
-      <TableCell>{t.matchPoints}</TableCell>
-      <TableCell>{t.medalPoints}</TableCell>
-      <TableCell>{t.totalPoints}</TableCell>
-      <TableCell>{t.grossAverage || "-"}</TableCell>
-      <TableCell>{t.handicapAverage || "-"}</TableCell>
-      <TableCell>{t.netAverage || "-"}</TableCell>
-      <TableCell>{t.teamPoints || "-"}</TableCell>
+  const tableRows = tournamentViewModel.statsPlayers.map((t, i) => (
+    <TableRow key={t.id} >
+      <TableCell sx={{textAlign: "center"}}>{i + 1}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.tourneyName}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.matchesPlayed}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.wins}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.draws}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.losses}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.matchPoints}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.medalPoints}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.totalPoints}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.grossAverage || "-"}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.handicapAverage || "-"}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.netAverage || "-"}</TableCell>
+      <TableCell sx={{textAlign: "center"}}>{t.teamPoints || "-"}</TableCell>
     </TableRow>
   ));
 
@@ -142,7 +72,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
             <TableRow>
               <TableCell> </TableCell>
               <TableCell> </TableCell>
-              <TableCell>Matches Played</TableCell>
+              <TableCell>Games Played</TableCell>
               <TableCell>Wins</TableCell>
               <TableCell>Draws</TableCell>
               <TableCell>Losses</TableCell>

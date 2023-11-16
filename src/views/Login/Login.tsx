@@ -47,7 +47,7 @@ const Login: React.FC = () => {
                   maxWidth: "250px",
                 }}
               >
-                Tourney Golf
+                Tee Box League
               </Typography>
               <LoginForm userViewModel={userViewModel} />
               <div>

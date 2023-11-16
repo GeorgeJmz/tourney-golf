@@ -3,6 +3,8 @@ import {
   createTournament,
   updateTournament,
   assignActiveTourneyByEmail,
+  getPlayersByTournamentId,
+  getScoresByID,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -20,12 +22,27 @@ import type {
   ITournamentGroup,
 } from "../models/Tournament";
 import PlayerModel from "../models/Player";
-import { pl } from "@faker-js/faker";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
   author = "";
   idTournament = "";
+  statsPlayers: Array<{
+    id: number;
+    position: number;
+    tourneyName: string;
+    matchesPlayed: number;
+    wins: number;
+    draws: number;
+    losses: number;
+    matchPoints: number;
+    medalPoints: number;
+    totalPoints: number;
+    grossAverage: string;
+    handicapAverage: string;
+    netAverage: string;
+    teamPoints: number;
+  }> = [];
 
   constructor() {
     makeObservable(this, {
@@ -52,8 +69,11 @@ class TournamentViewModel {
       updateTeamPlayers: action,
       getGroups: action,
       getPlayersPerGroup: action,
+      getStatsPlayersByTournament: action,
       startTournament: action,
+      statsPlayers: observable,
     });
+    this.statsPlayers = [];
   }
 
   setTournament(tournament: Partial<ITournament>): void {
@@ -219,6 +239,78 @@ class TournamentViewModel {
       );
     });
     //this.updateTournament(toJS(this.tournament));
+  }
+
+  async getStatsPlayersByTournament(): Promise<void> {
+    const players = await getPlayersByTournamentId(this.idTournament);
+
+    const getAverage = (averageOf: Array<number>): string => {
+      const average = averageOf.reduce((acc, curr) => acc + curr, 0);
+      return averageOf.length > 0
+        ? (average / averageOf.length).toFixed(1)
+        : "0";
+    };
+
+    const newPlayers = players?.map(async (player) => {
+      const gross = [] as Array<number>;
+      const handicap = [] as Array<number>;
+      const net = [] as Array<number>;
+      for (const scoreID of player.scoreId) {
+        const thisScore = await getScoresByID(scoreID);
+        gross.push(parseInt(thisScore?.totalGross?.toString() ?? "0"));
+        handicap.push(parseInt(thisScore?.handicap?.toString() ?? "0"));
+        net.push(parseInt(thisScore?.totalNet?.toString() ?? "0"));
+      }
+      console.log(handicap, "handicap");
+      await Promise.all([gross, handicap, net]);
+      const newPlayer = {
+        id: Number(player.id), // Change id to a number
+        position: 0, // Add position property
+        tourneyName: player.name, // Add tourneyName property
+        matchesPlayed: player.opponent.length * 2,
+        wins:
+          player.pointsMatch.reduce(
+            (acc, curr) => (curr === 3 ? acc + 1 : acc),
+            0
+          ) +
+          player.pointsStroke.reduce(
+            (acc, curr) => (curr === 3 ? acc + 1 : acc),
+            0
+          ),
+        draws:
+          player.pointsMatch.reduce(
+            (acc, curr) => (curr === 1 ? acc + 1 : acc),
+            0
+          ) +
+          player.pointsStroke.reduce(
+            (acc, curr) => (curr === 1 ? acc + 1 : acc),
+            0
+          ),
+        losses:
+          player.pointsMatch.reduce(
+            (acc, curr) => (curr === 0 ? acc + 1 : acc),
+            0
+          ) +
+          player.pointsStroke.reduce(
+            (acc, curr) => (curr === 0 ? acc + 1 : acc),
+            0
+          ),
+        matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
+        medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
+        totalPoints:
+          player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
+          player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
+        grossAverage: getAverage(gross),
+        handicapAverage: getAverage(handicap),
+        netAverage: getAverage(net),
+        teamPoints: player.pointsTeam.reduce((acc, curr) => acc + curr, 0),
+      };
+      await Promise.all([newPlayer]);
+      return newPlayer;
+    });
+    await Promise.all(newPlayers || []).then((values) => {
+      this.statsPlayers = values.sort((a, b) => b.totalPoints - a.totalPoints);
+    });
   }
 
   async createTournament(tournament: Partial<ITournament>): Promise<void> {

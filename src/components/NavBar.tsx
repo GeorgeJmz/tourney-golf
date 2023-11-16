@@ -46,15 +46,15 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
 
   React.useEffect(() => {
     if (location.pathname === "/dashboard") {
-      setTitle("Dashboard");
+      setTitle("Tee Box Dashboard");
       setIsBackButton(false);
     }
     if (location.pathname.includes("/tournament/")) {
-      setTitle("Tournament");
+      setTitle("League");
       setIsBackButton(true);
     }
     if (location.pathname === "/create-tournament") {
-      setTitle("Create Tournament");
+      setTitle("Create League");
       setIsBackButton(true);
     }
     if (location.pathname === "/play") {
@@ -62,7 +62,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setIsBackButton(true);
     }
     if (location.pathname.includes("/manage-tournament/")) {
-      setTitle("Manage Tournament");
+      setTitle("Manage League");
       setIsBackButton(true);
     }
   }, [location]);

@@ -49,7 +49,7 @@ const CalendarSetup: React.FC<CalendarSetupProps> = ({
               size="large"
               onClick={handleNext}
             >
-              {"Save and finish tourney setup"}
+              {"Save and finish League setup"}
             </Button>
           </FormControl>
         </Grid>

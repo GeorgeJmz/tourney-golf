@@ -64,6 +64,15 @@ export const createUser = async (
   }
 };
 
+export const createDBUser = async (user: Partial<IUser>): Promise<void> => {
+  try {
+    await addDoc(collection(db, "users"), user);
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
 export const login = async (email: string, password: string): Promise<void> => {
   try {
     const credentials = await signInWithEmailAndPassword(auth, email, password);
@@ -138,7 +147,7 @@ export const assignActiveTourneyByEmail = async (
   if (userId !== "") {
     const documentRef = doc(db, "users", userId);
     const docSnap = await getDoc(documentRef);
-    const activeTournaments = docSnap.data()?.activeTournaments;
+    const activeTournaments = docSnap.data()?.activeTournaments || [];
     const newAdded = {
       activeTournaments: [...new Set([...activeTournaments, tournamentId])],
     };

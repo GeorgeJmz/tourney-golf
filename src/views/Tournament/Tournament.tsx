@@ -2,12 +2,21 @@ import * as React from "react";
 import { observer } from "mobx-react";
 import UserViewModel from "../../viewModels/UserViewModel";
 import TournamentViewModel from "../../viewModels/TournamentViewModel";
-import { Box, Card, CardContent, CardActions, Button } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
+import { DownloadButton } from "../../components/DownloadButton";
 
 interface ITournamentPageProps {
   user: UserViewModel;
@@ -15,6 +24,16 @@ interface ITournamentPageProps {
 
 const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   const userId = React.useMemo(() => user.getUserId(), []);
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
     []
@@ -50,6 +69,14 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
             Play
           </Button>
         </Link>
+        <Button
+          variant="text"
+          color="primary"
+          disabled
+          onClick={() => console.log("Ver Resultados")}
+        >
+          Results
+        </Button>
         <Link to={`/stats-tournament/${id}`}>
           <Button
             variant="text"
@@ -59,6 +86,53 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
             Board & Stats
           </Button>
         </Link>
+        <Button
+          variant="text"
+          color="primary"
+          disabled
+          onClick={() => console.log("Ver estadísticas")}
+        >
+          Live Scores
+        </Button>
+        <Button
+          variant="text"
+          color="primary"
+          disabled
+          onClick={() => console.log("Ver estadísticas")}
+        >
+          Playoffs
+        </Button>
+        <Button variant="text" color="primary" onClick={handleClick}>
+          Rules
+        </Button>
+        <Menu
+          id="basic-menu"
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleClose}
+          MenuListProps={{
+            "aria-labelledby": "basic-button",
+          }}
+        >
+          <MenuItem>
+            <DownloadButton
+              pathName={`${currentTournament?.id}/`}
+              fileName="rules"
+            />
+          </MenuItem>
+          <MenuItem>
+            <DownloadButton
+              pathName={`${currentTournament?.id}/`}
+              fileName="calendar"
+            />
+          </MenuItem>
+          <MenuItem>
+            <DownloadButton
+              pathName={`${currentTournament?.id}/`}
+              fileName="additional files"
+            />
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );

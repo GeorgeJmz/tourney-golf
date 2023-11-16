@@ -99,7 +99,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> Tourney Action
+            <EmojiEventsIcon /> League Action
           </Typography>
         </Grid>
         {user.activeTournaments.map((tournament) => (
@@ -123,16 +123,30 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </Grid>
         ))}
       </Grid>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid item xs={12}>
+          <Typography gutterBottom align="left" variant="h6" component="div">
+            <EmojiEventsIcon /> Tee Box Challenges
+          </Typography>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid item xs={12}>
+          <Typography gutterBottom align="left" variant="h6" component="div">
+            <EmojiEventsIcon /> League History
+          </Typography>
+        </Grid>
+      </Grid>
       <Grid container spacing={2} sx={{ mt: 1, pb: 4 }}>
         <Grid item xs={6}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> Tourney Admin
+            <EmojiEventsIcon /> League Admin
           </Typography>
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "right" }}>
           <Link to="/create-tournament">
             <Button variant="outlined" size="small">
-              New Tourney
+              New League
             </Button>
           </Link>
         </Grid>

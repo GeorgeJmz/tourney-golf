@@ -43,13 +43,13 @@ const Welcome: React.FC = () => {
                   maxWidth: "250px",
                 }}
               >
-                Tourney Golf
+                Tee Box League
               </Typography>
               <div>
                 <Typography variant="h5" color="primary.main">
-                  Take your golf game to the next level.
+                Compete in your own season long league.
                 </Typography>
-                <Typography
+                {/* <Typography
                   variant="body1"
                   sx={{
                     maxWidth: "400px",
@@ -59,7 +59,7 @@ const Welcome: React.FC = () => {
                 >
                   Track your progress, connect with other players, and master
                   your swing with our golf app.
-                </Typography>
+                </Typography> */}
               </div>
               <Link to="/login">
                 <Button
@@ -76,11 +76,22 @@ const Welcome: React.FC = () => {
                   sx={{
                     maxWidth: "400px",
                     textAlign: "center",
+                    margin: "0 auto 5px auto",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  Practice with purpose - Play with an edge
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    maxWidth: "400px",
+                    textAlign: "center",
                     margin: "0 auto 20px auto",
                     fontSize: "0.9rem",
                   }}
                 >
-                  Join the community and start playing like a pro today.
+                  Be a league legend
                 </Typography>
                 <Link to="/create-account">
                   <Button variant="outlined" color="secondary" size="large">

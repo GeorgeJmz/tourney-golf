@@ -18,7 +18,7 @@ export interface ITournamentElement {
 export const step1: Array<ITournamentElement> = [
   {
     name: "name",
-    placeholder: "Tournament Name",
+    placeholder: "League Name",
     input: "text",
     size: {
       xs: 12,
@@ -28,7 +28,7 @@ export const step1: Array<ITournamentElement> = [
   },
   {
     name: "type",
-    placeholder: "Type of Tournament",
+    placeholder: "Type of League",
     input: "select",
     size: {
       xs: 12,
@@ -37,7 +37,7 @@ export const step1: Array<ITournamentElement> = [
     },
     options: [
       // { displayName: "Tourney", value: "tourney" },
-      { displayName: "Tourney + Team Play", value: "teamplay" },
+      { displayName: "League + Team Play", value: "teamplay" },
     ],
   },
   // {
@@ -61,8 +61,8 @@ export const step1: Array<ITournamentElement> = [
     },
     options: [
       //{ displayName: "Match Play", value: "matchPlay" },
-      //{ displayName: "Stroke Play", value: "strokePlay" },
-      { displayName: "Match + Stroke Play", value: "matchstrokePlay" },
+      //{ displayName: "Medal Play", value: "strokePlay" },
+      { displayName: "Match + Medal Play", value: "matchstrokePlay" },
     ],
   },
   // {
@@ -99,9 +99,9 @@ export const step1FieldsValidations: yup.ObjectSchema<IStep1InputElement> = yup
   .shape({
     name: yup
       .string()
-      .required("Tournament Name is required")
-      .min(4, "Tournament Name should be of minimum 4 characters length"),
-    type: yup.string().required("Tournament type is required"),
+      .required("League Name is required")
+      .min(4, "League Name should be of minimum 4 characters length"),
+    type: yup.string().required("League type is required"),
     // players: yup
     //   .number()
     //   .min(2, "Min")
@@ -182,7 +182,7 @@ export const invitationsFieldsValidations: yup.ObjectSchema<IInvitationsInputEle
 export const rules: Array<ITournamentElement> = [
   {
     name: "startDate",
-    placeholder: "Tourney Start Date",
+    placeholder: "League Start Date",
     input: "date",
     size: {
       xs: 12,

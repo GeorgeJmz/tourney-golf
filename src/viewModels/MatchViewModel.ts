@@ -70,11 +70,11 @@ class MatchViewModel {
 
       winnerStrokePlay =
         playersA.score.totalNet < playersB.score.totalNet
-          ? playersA.score.player + " wins stroke play "
-          : playersB.score.player + " wins stroke play  ";
+          ? playersA.score.player + " wins Medal Play "
+          : playersB.score.player + " wins Medal Play  ";
       winnerStrokePlay =
         playersA.score.totalNet === playersB.score.totalNet
-          ? "Stroke Play Draw"
+          ? "Medal Play Draw"
           : winnerStrokePlay;
 
       const scoreA =
@@ -109,7 +109,7 @@ class MatchViewModel {
         const diff = 18 - strokeUp;
         const tempWinner =
           currentMatchResult > 0 ? playersA.score : playersB.score;
-        winner = tempWinner.player + " wins match ";
+        winner = tempWinner.player + " wins Match Play";
         this.winnerMatch = [tempWinner.idPlayer];
         // Math.abs(currentMatchResult) +
         // " & " +

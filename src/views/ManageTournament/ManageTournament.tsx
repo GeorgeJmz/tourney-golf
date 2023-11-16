@@ -55,7 +55,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   };
   const steps = [
     {
-      label: "Tourney Setup",
+      label: "League Setup",
       component: (
         <TourneySetup
           tournamentViewModel={tournamentViewModel}

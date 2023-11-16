@@ -41,7 +41,7 @@ const TeamSetup: React.FC<TeamSetupProps> = ({
   return (
     <div>
       <DragDropv2
-        numberOfOptions={8}
+        numberOfOptions={20}
         typeOfDraggable={DragDropType.Teams}
         listOfDraggable={tournamentViewModel.tournament.playersList}
         listOfGroups={tournamentViewModel.tournament.teamsList}

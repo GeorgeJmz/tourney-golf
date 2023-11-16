@@ -46,7 +46,7 @@ const CreateAccount: React.FC = () => {
                   maxWidth: "250px",
                 }}
               >
-                Tourney Golf
+                Tee Box League
               </Typography>
               <CreateAccountForm userViewModel={userViewModel} />
               <div>
