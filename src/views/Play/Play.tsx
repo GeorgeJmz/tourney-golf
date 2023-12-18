@@ -56,9 +56,8 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     []
   );
 
-  playViewModel.tournamentId = id || "";
+  playViewModel.tournamentId = currentTournament?.id || "";
 
-  console.log(toJS(currentTournament), "currentTournament");
   const findConferenceByEmail = (email: string) => {
     const player = currentTournament?.playersList.find(
       (player) => player.email === email
@@ -147,10 +146,13 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       <Box
         sx={{
           width: "100%",
-          height: "100%",
+          height: "100vh",
           position: "relative",
           bgcolor: "background.paper",
-          p: 3,
+          p: 0,
+          "@media (min-width: 850px)": {
+            p: 3,
+          },
         }}
       >
         {playViewModel.currentStep === 0 && (

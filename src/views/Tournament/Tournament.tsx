@@ -10,6 +10,7 @@ import {
   Button,
   Menu,
   MenuItem,
+  Grid,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -17,6 +18,7 @@ import { useParams } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
 import { DownloadButton } from "../../components/DownloadButton";
+import { NavbarTitleContext } from "../../hooks/useNavContext";
 
 interface ITournamentPageProps {
   user: UserViewModel;
@@ -24,6 +26,7 @@ interface ITournamentPageProps {
 
 const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   const userId = React.useMemo(() => user.getUserId(), []);
+  const { setTitle } = React.useContext(NavbarTitleContext);
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -53,87 +56,96 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     tournamentViewModel.setAuthor(userId);
   }
 
+  React.useEffect(() => {
+    setTitle(currentTournament?.name || "");
+  }, [currentTournament?.name]);
+
   return (
-    <Box sx={{ background: "white", p: 3 }}>
-      <Typography gutterBottom align="left" variant="h6" component="div">
-        <EmojiEventsIcon /> {currentTournament?.name}
-      </Typography>
-      <Typography variant="body2" align="left" color="text.secondary">
-        {`${convertDate(currentTournament?.startDate || "")} - ${convertDate(
-          currentTournament?.cutOffDate || ""
-        )}`}
-      </Typography>
-      <Box sx={{ display: "flex" }}>
-        <Link to={`/play-tournament/${id}`}>
-          <Button variant="text" color="primary">
-            Play
-          </Button>
-        </Link>
-        <Button
-          variant="text"
-          color="primary"
-          disabled
-          onClick={() => console.log("Ver Resultados")}
-        >
-          Results
-        </Button>
-        <Link to={`/stats-tournament/${id}`}>
+    <Box sx={{ height: "100vh" }}>
+      <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
+        <Grid item md={2} xs={12}>
+          <Link to={`/play-tournament/${id}`}>
+            <Button variant="text" color="primary">
+              Play
+            </Button>
+          </Link>
+        </Grid>
+        <Grid item md={2} xs={12}>
+          <Link to={`/results/${id}`}>
+            <Button
+              variant="text"
+              color="primary"
+              onClick={() => console.log("Ver Resultados")}
+            >
+              Results
+            </Button>
+          </Link>
+        </Grid>
+        <Grid item md={2} xs={12}>
+          <Link to={`/stats-tournament/${id}`}>
+            <Button
+              variant="text"
+              color="primary"
+              onClick={() => console.log("Ver estadísticas")}
+            >
+              Board & Stats
+            </Button>
+          </Link>
+        </Grid>
+        <Grid item md={2} xs={12}>
           <Button
             variant="text"
             color="primary"
+            disabled
             onClick={() => console.log("Ver estadísticas")}
           >
-            Board & Stats
+            Live Scores
           </Button>
-        </Link>
-        <Button
-          variant="text"
-          color="primary"
-          disabled
-          onClick={() => console.log("Ver estadísticas")}
-        >
-          Live Scores
-        </Button>
-        <Button
-          variant="text"
-          color="primary"
-          disabled
-          onClick={() => console.log("Ver estadísticas")}
-        >
-          Playoffs
-        </Button>
-        <Button variant="text" color="primary" onClick={handleClick}>
-          Rules
-        </Button>
-        <Menu
-          id="basic-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
-          MenuListProps={{
-            "aria-labelledby": "basic-button",
-          }}
-        >
-          <MenuItem>
-            <DownloadButton
-              pathName={`${currentTournament?.id}/`}
-              fileName="rules"
-            />
-          </MenuItem>
-          <MenuItem>
-            <DownloadButton
-              pathName={`${currentTournament?.id}/`}
-              fileName="calendar"
-            />
-          </MenuItem>
-          <MenuItem>
-            <DownloadButton
-              pathName={`${currentTournament?.id}/`}
-              fileName="additional files"
-            />
-          </MenuItem>
-        </Menu>
-      </Box>
+        </Grid>
+        <Grid item md={2} xs={12}>
+          <Button
+            variant="text"
+            color="primary"
+            disabled
+            onClick={() => console.log("Ver estadísticas")}
+          >
+            Playoffs
+          </Button>
+        </Grid>
+        <Grid item md={2} xs={12}>
+          <Button variant="text" color="primary" onClick={handleClick}>
+            Rules
+          </Button>
+          <Menu
+            id="basic-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+          >
+            <MenuItem>
+              <DownloadButton
+                pathName={`${currentTournament?.id}/`}
+                fileName="rules"
+              />
+            </MenuItem>
+            <MenuItem>
+              <DownloadButton
+                pathName={`${currentTournament?.id}/`}
+                fileName="calendar"
+              />
+            </MenuItem>
+            <MenuItem>
+              <DownloadButton
+                pathName={`${currentTournament?.id}/`}
+                fileName="calcutta"
+              />
+            </MenuItem>
+          </Menu>
+        </Grid>
+      </Grid>
     </Box>
   );
 };

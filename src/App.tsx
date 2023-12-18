@@ -16,6 +16,8 @@ import UserViewModel from "./viewModels/UserViewModel";
 import Tournament from "./views/Tournament/Tournament";
 import { NavBar } from "./components/NavBar";
 import TournamentStats from "./views/TournamentStats/TournamentStats";
+import TournamentResults from "./views/TournamentResults/TournamentResults";
+import Profile from "./views/Profile/Profile";
 
 function App(): JSX.Element {
   const { user } = useAuth();
@@ -86,6 +88,22 @@ function App(): JSX.Element {
               element={
                 <RequireAuth user={user}>
                   <Play user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/results/:id"
+              element={
+                <RequireAuth user={user}>
+                  <TournamentResults user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/edit-profile"
+              element={
+                <RequireAuth user={user}>
+                  <Profile user={userViewModel} />
                 </RequireAuth>
               }
             />

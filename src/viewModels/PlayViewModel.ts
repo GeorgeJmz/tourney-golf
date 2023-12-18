@@ -1,6 +1,6 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 import { Messages } from "../helpers/messages";
-import MatchModel, { IMatch } from "../models/Match";
+import MatchModel from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
@@ -75,10 +75,13 @@ class PlayViewModel {
     if (this.currentStep === 2) {
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
+      console.log("tournamentId", this.tournamentId);
       players.forEach((player) => {
         const newMatch = new MatchViewModel();
         newMatch.setAuthor(this.author);
         newMatch.setPlayers([author, player]);
+        newMatch.tournamentId = this.tournamentId;
+        newMatch.matchResults = [];
         // Set TeeBox and Course
         newMatch.setMatch(this.match);
 
@@ -218,11 +221,8 @@ class PlayViewModel {
     this.idMatch = id;
   }
 
-  setMatch(match: IMatch): void {
-    this.match = match;
-  }
-
   async createMatch(): Promise<void> {
+    console.log("createMatch", toJS(this.matches));
     for (const match of this.matches) {
       await match.createMatch();
     }

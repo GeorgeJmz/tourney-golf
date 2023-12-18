@@ -5,6 +5,8 @@ import {
   assignActiveTourneyByEmail,
   getPlayersByTournamentId,
   getScoresByID,
+  getMatchesByID,
+  getMatchesByTournamentId,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -21,7 +23,8 @@ import type {
   IPlayer,
   ITournamentGroup,
 } from "../models/Tournament";
-import PlayerModel from "../models/Player";
+import PlayerModel, { ITournamentPlayer } from "../models/Player";
+import { IMatch } from "../models/Match";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -42,7 +45,19 @@ class TournamentViewModel {
     handicapAverage: string;
     netAverage: string;
     teamPoints: number;
+    conference: string;
+    group: string;
   }> = [];
+  statsTeams: Array<{
+    name: string;
+    playersNames: string;
+    roundsPlayed: number;
+    points: number;
+  }> = [];
+  conferencesOptions: Array<{ value: string; label: string }> = [];
+  groupsOptions: Array<{ value: string; label: string }> = [];
+  leagueResults: Array<IMatch> = [];
+  playersResultsOptions: Array<{ label: string; value: string }> = [];
 
   constructor() {
     makeObservable(this, {
@@ -72,6 +87,12 @@ class TournamentViewModel {
       getStatsPlayersByTournament: action,
       startTournament: action,
       statsPlayers: observable,
+      statsTeams: observable,
+      conferencesOptions: observable,
+      groupsOptions: observable,
+      getAllMatchesResultsByTournament: action,
+      leagueResults: observable,
+      playersResultsOptions: observable,
     });
     this.statsPlayers = [];
   }
@@ -241,6 +262,15 @@ class TournamentViewModel {
     //this.updateTournament(toJS(this.tournament));
   }
 
+  async getAllMatchesResultsByTournament(): Promise<void> {
+    const players = (await getPlayersByTournamentId(this.idTournament)) || [];
+    this.playersResultsOptions = players.map((player) => ({
+      label: player.name,
+      value: player.email,
+    }));
+    this.leagueResults = await getMatchesByTournamentId(this.idTournament);
+  }
+
   async getStatsPlayersByTournament(): Promise<void> {
     const players = await getPlayersByTournamentId(this.idTournament);
 
@@ -250,7 +280,6 @@ class TournamentViewModel {
         ? (average / averageOf.length).toFixed(1)
         : "0";
     };
-
     const newPlayers = players?.map(async (player) => {
       const gross = [] as Array<number>;
       const handicap = [] as Array<number>;
@@ -261,7 +290,6 @@ class TournamentViewModel {
         handicap.push(parseInt(thisScore?.handicap?.toString() ?? "0"));
         net.push(parseInt(thisScore?.totalNet?.toString() ?? "0"));
       }
-      console.log(handicap, "handicap");
       await Promise.all([gross, handicap, net]);
       const newPlayer = {
         id: Number(player.id), // Change id to a number
@@ -304,13 +332,61 @@ class TournamentViewModel {
         handicapAverage: getAverage(handicap),
         netAverage: getAverage(net),
         teamPoints: player.pointsTeam.reduce((acc, curr) => acc + curr, 0),
+        conference: player.conference,
+        group: player.group,
       };
       await Promise.all([newPlayer]);
       return newPlayer;
     });
+
     await Promise.all(newPlayers || []).then((values) => {
       this.statsPlayers = values.sort((a, b) => b.totalPoints - a.totalPoints);
     });
+
+    if (players) {
+      const teams: { [key: string]: Array<ITournamentPlayer> } =
+        players?.reduce((acc, curr) => {
+          const team = curr.team;
+          if (!acc[team]) {
+            acc[team] = [];
+          }
+          acc[team].push(curr);
+          return acc;
+        }, {} as { [key: string]: Array<ITournamentPlayer> });
+
+      const finalTeams = [];
+      for (const team in teams) {
+        const teamName =
+          this.tournament.teamsList.find((t) => t.id === team)?.name || "";
+        const roundsPlayed = teams[team].reduce(
+          (acc, curr) => acc + curr.pointsTeam.length,
+          0
+        );
+        const points = teams[team].reduce(
+          (acc, curr) =>
+            acc + curr.pointsTeam.reduce((acc, curr) => acc + curr, 0),
+          0
+        );
+        const newTeam = {
+          name: teamName,
+          playersNames: teams[team].map((player) => player.name).join(", "),
+          roundsPlayed,
+          points,
+        };
+        finalTeams.push(newTeam);
+      }
+      this.statsTeams = finalTeams.sort((a, b) => b.points - a.points);
+      this.conferencesOptions = this.tournament.conferencesList.map(
+        (conference) => ({
+          value: conference.id,
+          label: conference.name,
+        })
+      );
+      this.groupsOptions = this.tournament.groupsList.map((group) => ({
+        value: group.id,
+        label: group.name,
+      }));
+    }
   }
 
   async createTournament(tournament: Partial<ITournament>): Promise<void> {

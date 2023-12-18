@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./hooks/useUserContext";
+import { NavbarTitleProvider } from "./hooks/useNavContext";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "./index.css";
 import App from "./App";
@@ -25,10 +26,12 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <AuthProvider>
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <NavbarTitleProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ThemeProvider>
+    </NavbarTitleProvider>
   </AuthProvider>
 );

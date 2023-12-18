@@ -1,3 +1,6 @@
+import * as yup from "yup";
+import { ITournamentElement } from "./getTournamentFields";
+
 export const validateEmail = (email: string): boolean => {
   const re = /\S+@\S+\.\S+/;
   return re.test(email);
@@ -63,3 +66,63 @@ export const loginFields = [
     rule: validatePassword,
   },
 ];
+
+export const profileElementsSettings: Array<ITournamentElement> = [
+  {
+    name: "email",
+    placeholder: "Email",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 6,
+    },
+  },
+  {
+    name: "name",
+    placeholder: "Name",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 6,
+    },
+  },
+  {
+    name: "lastName",
+    placeholder: "Last Name",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 6,
+    },
+  },
+];
+
+export interface IProfileElement {
+  name: string;
+  lastName: string;
+  email: string;
+  [key: string]: string;
+}
+
+export const profileFields: IProfileElement = {
+  name: "",
+  lastName: "",
+  email: "",
+};
+
+export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
+  .object()
+  .shape({
+    name: yup
+      .string()
+      .required("Name is required")
+      .min(4, "Name should be of minimum 4 characters length"),
+    lastName: yup
+      .string()
+      .required("Last Name is required")
+      .min(4, "Last Name should be of minimum 4 characters length"),
+    email: yup.string().required("League type is required"),
+  });

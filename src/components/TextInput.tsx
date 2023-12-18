@@ -13,6 +13,7 @@ export interface TextInputProps {
   value: string | number | undefined;
   inputProps?: InputBaseComponentProps | undefined;
   inputRef?: React.RefObject<HTMLInputElement | null>;
+  isDisabled?: boolean;
 }
 export const TextInput: React.FC<TextInputProps> = ({
   inputElement,
@@ -22,6 +23,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   error,
   value,
   inputRef,
+  isDisabled,
 }) => {
   return (
     <Grid item xs={inputElement.size.xs} md={inputElement.size.md}>
@@ -37,6 +39,7 @@ export const TextInput: React.FC<TextInputProps> = ({
         error={isError}
         helperText={error}
         required
+        disabled={isDisabled}
         inputRef={inputRef}
       />
     </Grid>

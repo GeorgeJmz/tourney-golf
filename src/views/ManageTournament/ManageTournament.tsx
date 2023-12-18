@@ -18,6 +18,7 @@ import GroupsSetup from "./../CreateTournament/components/CreateTournament/Group
 import ConferenceSetup from "./../CreateTournament/components/CreateTournament/ConferenceSetup";
 import TeamSetup from "./../CreateTournament/components/CreateTournament/TeamSetup";
 import CalendarsSetup from "./../CreateTournament/components/CreateTournament/CalendarsSetup";
+import { useNavigate } from "react-router-dom";
 
 interface IManageTournamentProps {
   user: UserViewModel;
@@ -25,6 +26,7 @@ interface IManageTournamentProps {
 
 const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   const [activeStep, setActiveStep] = React.useState(0);
+  const navigate = useNavigate();
   const userId = React.useMemo(() => user.getUserId(), []);
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
@@ -52,6 +54,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   };
   const handleReset = () => {
     tournamentViewModel.startTournament();
+    setTimeout(() => navigate("/dashboard"), 1000);
   };
   const steps = [
     {
@@ -144,7 +147,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps are completed</Typography>
           <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-            Start Tourney
+            Done
           </Button>
         </Paper>
       )}

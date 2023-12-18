@@ -142,7 +142,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps are completed</Typography>
           <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
-            Start League
+            Done
           </Button>
         </Paper>
       )}

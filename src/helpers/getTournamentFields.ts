@@ -227,7 +227,7 @@ export const rules: Array<ITournamentElement> = [
   },
   {
     name: "calcuta",
-    placeholder: "Calcuta",
+    placeholder: "Calcutta",
     input: "switch",
     size: {
       xs: 12,

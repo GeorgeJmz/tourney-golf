@@ -36,9 +36,9 @@ const CalendarSetup: React.FC<CalendarSetupProps> = ({
         </Grid>
         <Grid item xs={4}>
           <UploadButton
-            buttonText="Additional Files"
+            buttonText="Calcutta PDF"
             pathName={`${tournamentViewModel.idTournament}/`}
-            fileName="additional files"
+            fileName="calcutta"
           />
         </Grid>
         <Grid item xs={12} sx={{ marginTop: "20px" }}>

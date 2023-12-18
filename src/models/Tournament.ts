@@ -50,7 +50,7 @@ export interface IGroup {
   players: IPlayer[];
 }
 const endDate = new Date();
-endDate.setDate(endDate.getDate() + 15);
+endDate.setDate(endDate.getDate() + 180);
 export default class TournamentModel implements ITournament {
   id? = "";
   author = "";

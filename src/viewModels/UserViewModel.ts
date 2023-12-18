@@ -6,6 +6,7 @@ import {
   getMatchesByID,
   getTournamentsById,
   createDBUser,
+  updateUser,
 } from "../services/firebase";
 import type { IUser } from "../models/User";
 import { Messages } from "../helpers/messages";
@@ -67,6 +68,30 @@ class UserViewModel {
     }
   }
 
+  async updateUser(user: Partial<IUser>): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    try {
+      const createdUser = await updateUser(user);
+      this.setUser(createdUser);
+      const displayMessage = getMessages(Messages.USER_CREATED);
+      toast.update(cuToast, {
+        render: displayMessage,
+        type: toast.TYPE.SUCCESS,
+        isLoading: false,
+        autoClose: 800,
+      });
+    } catch (error) {
+      const codeError = (error as FirebaseError).code;
+      const displayError = getMessages(codeError);
+      toast.update(cuToast, {
+        render: displayError,
+        type: toast.TYPE.ERROR,
+        isLoading: false,
+        autoClose: 800,
+      });
+    }
+  }
   async createDBUser(user: Partial<IUser>): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);

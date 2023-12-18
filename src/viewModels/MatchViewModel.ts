@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 import { Messages } from "../helpers/messages";
-import MatchModel from "../models/Match";
+import MatchModel, { IMatchResults } from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
@@ -8,7 +8,6 @@ import { createMatch, updatePlayer } from "../services/firebase";
 import ScoreViewModel from "./ScoreViewModel";
 import UserViewModel from "./UserViewModel";
 import moment from "moment-timezone";
-import { ITournamentPlayer } from "../models/Player";
 
 class MatchViewModel {
   match: MatchModel = new MatchModel();
@@ -23,6 +22,8 @@ class MatchViewModel {
   differenceHP: Array<number> = [];
   winByHole: Array<string> = [];
   winnerMatch: Array<string> = [];
+  winnerMedalPlay: Array<string> = [];
+  matchResults: Array<IMatchResults> = [];
 
   constructor() {
     makeObservable(this, {
@@ -51,6 +52,8 @@ class MatchViewModel {
     this.match.courseDisplayName = match.courseDisplayName;
     this.match.teeBox = match.teeBox;
     this.match.teeBoxDisplayName = match.teeBoxDisplayName;
+    this.match.scoresId = match.scoresId;
+    this.match.matchResults = match.matchResults;
   }
 
   setHoleScores(scores: Array<number>, hole: number): void {
@@ -68,14 +71,30 @@ class MatchViewModel {
       const playersA = this.players[0];
       const playersB = this.players[1];
 
-      winnerStrokePlay =
-        playersA.score.totalNet < playersB.score.totalNet
-          ? playersA.score.player + " wins Medal Play "
-          : playersB.score.player + " wins Medal Play  ";
-      winnerStrokePlay =
-        playersA.score.totalNet === playersB.score.totalNet
-          ? "Medal Play Draw"
-          : winnerStrokePlay;
+      if (playersA.score.totalNet === playersB.score.totalNet) {
+        this.winnerMedalPlay = [
+          playersA.score.idPlayer,
+          playersB.score.idPlayer,
+        ];
+        winnerStrokePlay = "Medal Play Draw";
+      } else {
+        this.winnerMedalPlay =
+          playersA.score.totalNet < playersB.score.totalNet
+            ? [playersA.score.idPlayer]
+            : [playersB.score.idPlayer];
+        winnerStrokePlay =
+          (playersA.score.totalNet < playersB.score.totalNet
+            ? playersA.score.player
+            : playersB.score.player) + " wins Medal Play ";
+      }
+      // winnerStrokePlay =
+      //   playersA.score.totalNet < playersB.score.totalNet
+      //     ? playersA.score.player + " wins Medal Play "
+      //     : playersB.score.player + " wins Medal Play  ";
+      // winnerStrokePlay =
+      //   playersA.score.totalNet === playersB.score.totalNet
+      //     ? "Medal Play Draw"
+      //     : winnerStrokePlay;
 
       const scoreA =
         playersA.score.scoreHolesHP[index] && playersA.score.scoreHoles[index]
@@ -166,14 +185,21 @@ class MatchViewModel {
       console.log(toJS(this.players), "players ---");
       console.log(this.tournamentId, "tournamentId ---");
       console.log(this.match.scoresId, "matchId ---");
+      const matchResults = this.players.map((p) => ({
+        idPlayer: p.score.idPlayer,
+        playerName: p.score.player,
+        score: p.score.totalNet,
+        gross: p.score.totalGross,
+        hcp: `${p.score.handicap}`,
+        teamPoints: p.score.teamPoints.reduce((a, b) => a + b, 0),
+        isWinnerMatch: this.winnerMatch.includes(p.score.idPlayer),
+        isWinnerMedalPlay: this.winnerMedalPlay.includes(p.score.idPlayer),
+      }));
+      console.log(matchResults, "matchResults --- NEw");
       const playersMail = [
         this.players[0].score.idPlayer,
         this.players[1].score.idPlayer,
       ];
-      const winnerStrokePlay =
-        this.players[0].score.totalNet < this.players[1].score.totalNet
-          ? playersMail[0]
-          : playersMail[1];
       const winnerMatch = this.winnerMatch;
       const strokePlayPoints =
         this.players[0].score.totalNet < this.players[1].score.totalNet
@@ -190,7 +216,6 @@ class MatchViewModel {
           ? [3, 0]
           : [0, 3];
 
-      console.log(playersMail, "playersMail ---");
       for (const playerMail of playersMail) {
         const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
         const playerUpdated = {
@@ -222,6 +247,8 @@ class MatchViewModel {
         ...this.match,
         author: this.author.getUserId(),
         date: saveDate,
+        tournamentId: this.tournamentId,
+        matchResults,
       });
       const displayMessage = getMessages(Messages.MATCH_CREATED);
       toast.update(cuToast, {

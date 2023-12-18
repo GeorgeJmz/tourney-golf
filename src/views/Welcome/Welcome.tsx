@@ -27,9 +27,10 @@ const Welcome: React.FC = () => {
               direction="column"
               justifyContent="center"
               alignItems="center"
-              spacing={5}
+              spacing={3}
               sx={{ height: "100%" }}
             >
+              <img src="teebox.png" width="150" alt="TEE BOX" />
               <Typography
                 variant="h3"
                 sx={{
@@ -43,12 +44,12 @@ const Welcome: React.FC = () => {
                   maxWidth: "250px",
                 }}
               >
-                Tee Box League
+                TEE BOX League
               </Typography>
               <div>
-                <Typography variant="h5" color="primary.main">
-                Compete in your own season long league.
-                </Typography>
+                {/* <Typography variant="h5" color="primary.main">
+                  Compete in your own season long league.
+                </Typography> */}
                 {/* <Typography
                   variant="body1"
                   sx={{

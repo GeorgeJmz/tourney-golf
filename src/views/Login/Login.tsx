@@ -34,20 +34,21 @@ const Login: React.FC = () => {
               spacing={3}
               sx={{ height: "100%" }}
             >
+              <img src="teebox.png" width="90" alt="TEE BOX" />
               <Typography
                 variant="h3"
                 sx={{
                   fontStyle: "italic",
                   fontWeight: 800,
-                  fontSize: "48px",
-                  lineHeight: "39px",
+                  fontSize: "30px",
+                  lineHeight: "24px",
                   textAlign: "center",
-                  letterSpacing: "-4px",
+                  letterSpacing: "-3px",
                   textTransform: "uppercase",
-                  maxWidth: "250px",
+                  maxWidth: "150px",
                 }}
               >
-                Tee Box League
+                TEE BOX League
               </Typography>
               <LoginForm userViewModel={userViewModel} />
               <div>

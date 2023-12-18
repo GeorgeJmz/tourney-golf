@@ -78,6 +78,13 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
     </StyledTableRowSpecial>
   );
 
+  const cellStyle = (size?: string, isBold?: boolean) => ({
+    border: 0.5,
+    color: "rgb(118, 118, 118);",
+    ...(isBold ? { fontWeight: 700 } : {}),
+    ...(size ? { width: size } : {}),
+  });
+
   return (
     <TableContainer
       component={Paper}
@@ -88,34 +95,19 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
       <Table aria-label="score table" style={{ tableLayout: "fixed" }}>
         <TableHead>
           <TableRow>
-            <TableCell
-              align="center"
-              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
-            >
+            <TableCell align="center" sx={cellStyle("60px")}>
               Hole
             </TableCell>
-            <TableCell
-              align="center"
-              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
-            >
+            <TableCell align="center" sx={cellStyle("60px")}>
               {currentTeeBoxDisplayName}
             </TableCell>
-            <TableCell
-              align="center"
-              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
-            >
+            <TableCell align="center" sx={cellStyle("60px")}>
               Hcp
             </TableCell>
-            <TableCell
-              align="center"
-              sx={{ border: 0.5, color: "ActiveBorder", width: "60px" }}
-            >
+            <TableCell align="center" sx={cellStyle("60px")}>
               Par
             </TableCell>
-            <TableCell
-              align="center"
-              sx={{ border: 0.5, color: "ActiveBorder", width: "100px" }}
-            >
+            <TableCell align="center" sx={cellStyle("100px")}>
               Score
             </TableCell>
           </TableRow>
@@ -129,34 +121,19 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
             const score = authorScores[key];
             const returnElement = [
               <StyledTableRow>
-                <TableCell
-                  align="center"
-                  sx={{ border: 0.5, color: "ActiveBorder" }}
-                >
+                <TableCell align="center" sx={cellStyle(undefined, true)}>
                   {hole}
                 </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ border: 0.5, color: "ActiveBorder" }}
-                >
+                <TableCell align="center" sx={cellStyle()}>
                   {distance}
                 </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ border: 0.5, color: "ActiveBorder" }}
-                >
+                <TableCell align="center" sx={cellStyle()}>
                   {hcp}
                 </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ border: 0.5, color: "ActiveBorder" }}
-                >
+                <TableCell align="center" sx={cellStyle()}>
                   {par}
                 </TableCell>
-                <TableCell
-                  align="center"
-                  sx={{ border: 0.5, color: "ActiveBorder" }}
-                >
+                <TableCell align="center" sx={cellStyle()}>
                   <Button
                     type="button"
                     size="large"

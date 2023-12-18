@@ -12,6 +12,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { logout } from "../services/firebase";
 import { useLocation, useNavigate } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
+import { NavbarTitleContext } from "../hooks/useNavContext";
 
 interface INavBarProps {
   children: React.ReactElement;
@@ -32,10 +33,12 @@ function ElevationScroll(props: INavBarProps) {
 }
 
 export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
-  const [title, setTitle] = React.useState("");
+  //const [title, setTitle] = React.useState("");
   const [isBackButton, setIsBackButton] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { title, setTitle } = React.useContext(NavbarTitleContext);
+
   const useStyles = makeStyles({
     abRoot: {
       backgroundColor: "white !important",
@@ -46,11 +49,10 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
 
   React.useEffect(() => {
     if (location.pathname === "/dashboard") {
-      setTitle("Tee Box Dashboard");
+      setTitle("TEE BOX Dashboard");
       setIsBackButton(false);
     }
     if (location.pathname.includes("/tournament/")) {
-      setTitle("League");
       setIsBackButton(true);
     }
     if (location.pathname === "/create-tournament") {
@@ -77,8 +79,8 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
               {" "}
               {/* Use the styles object */}
               <Toolbar sx={{ justifyContent: "space-between" }}>
-                <Box>
-                  {isBackButton && (
+                {isBackButton && (
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
                     <IconButton
                       size="large"
                       edge="start"
@@ -89,8 +91,10 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                     >
                       <ArrowBackIcon />
                     </IconButton>
-                  )}
-                </Box>
+                    <img src="/teebox.png" width="40" alt="TEE BOX" />
+                  </Box>
+                )}
+                {!isBackButton && <Box></Box>}
                 <Box>
                   <Typography
                     color="primary"
@@ -116,7 +120,14 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
           <Toolbar />
         </React.Fragment>
       )}
-      <Container>
+      <Container
+        sx={{
+          padding: 0,
+          "@media (min-width: 600px)": {
+            padding: 0,
+          },
+        }}
+      >
         <Box>{props.children}</Box>
       </Container>
     </React.Fragment>

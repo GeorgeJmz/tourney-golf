@@ -77,6 +77,11 @@ export const Invitations: React.FC<InvitationsProps> = ({
   const isDisabled = playersLeft !== undefined ? playersLeft === 0 : false;
   const playersLeftText =
     playersLeft !== undefined ? `${playersLeft} left` : "";
+
+  const isMobile = () =>
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid item xs={12} md={3} lg={3}>
@@ -127,7 +132,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
               size="large"
               disabled={isDisabled}
             >
-              Send Invitation
+              Add Player
             </Button>
           </FormControl>
         </Grid>
@@ -140,7 +145,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
               <TableHead>
                 <TableRow>
                   <TableCell align="left">Name</TableCell>
-                  <TableCell align="left">Email</TableCell>
+                  {!isMobile() && <TableCell align="left">Email</TableCell>}
                   <TableCell align="left">Handicap</TableCell>
                   <TableCell align="right">Delete</TableCell>
                 </TableRow>
@@ -154,7 +159,7 @@ export const Invitations: React.FC<InvitationsProps> = ({
                     <TableCell component="th" scope="row" align="left">
                       {name}
                     </TableCell>
-                    <TableCell align="left">{email}</TableCell>
+                    {!isMobile() && <TableCell align="left">{email}</TableCell>}
                     <TableCell align="left">
                       <TextField
                         label="Handicap"

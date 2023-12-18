@@ -120,7 +120,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
               size="large"
               disabled={isDisabled}
             >
-              Send Invitation
+              Add Player
             </Button>
           </FormControl>
         </Grid>

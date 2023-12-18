@@ -49,7 +49,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   return (
     <div>
       {user && (
-        <Paper sx={{ my: 2 }}>
+        <Paper sx={{ my: 2, display: "flex", justifyContent: "space-around" }}>
           <ListItem alignItems="flex-start">
             <ListItemAvatar>
               <Avatar
@@ -69,6 +69,13 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
                 </Typography>
               }
             />
+          </ListItem>
+          <ListItem sx={{ width: "auto" }}>
+            <Link to="/edit-profile">
+              <Button variant="outlined" sx={{ width: "120px" }} size="small">
+                Edit Profile
+              </Button>
+            </Link>
           </ListItem>
         </Paper>
       )}
@@ -99,22 +106,31 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> League Action
+            <img src="/teebox.png" width="20" alt="TEE BOX" /> League Action
           </Typography>
         </Grid>
         {user.activeTournaments.map((tournament) => (
-          <Grid item xs={6} md={4} lg={3} key={tournament.name}>
+          <Grid item xs={6} md={4} lg={2} key={tournament.name}>
             <Link to={`/tournament/${tournament.id}`}>
               <Card>
                 <CardActionArea>
-                  <CardContent sx={{ textAlign: "left" }}>
-                    <Typography gutterBottom variant="h6" component="div">
+                  <CardContent
+                    sx={{
+                      textAlign: "center",
+                      lineHeight: "0.5",
+                      minHeight: "80px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      gutterBottom
+                      variant="h6"
+                      component="div"
+                      sx={{ lineHeight: "1" }}
+                    >
                       {tournament.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${convertDate(tournament.startDate)} - ${convertDate(
-                        tournament.cutOffDate
-                      )}`}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -126,21 +142,22 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> Tee Box Challenges
+            <img src="/teebox.png" width="20" alt="TEE BOX" /> TEE BOX
+            Challenges
           </Typography>
         </Grid>
       </Grid>
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> League History
+            <img src="/teebox.png" width="20" alt="TEE BOX" /> League History
           </Typography>
         </Grid>
       </Grid>
       <Grid container spacing={2} sx={{ mt: 1, pb: 4 }}>
         <Grid item xs={6}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <EmojiEventsIcon /> League Admin
+            <img src="/teebox.png" width="20" alt="TEE BOX" /> League Admin
           </Typography>
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "right" }}>
@@ -151,11 +168,11 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </Link>
         </Grid>
         {user.tournaments.map((tournament) => (
-          <Grid item xs={6} md={4} lg={3} key={tournament.name}>
+          <Grid item xs={6} md={4} lg={2} key={tournament.name}>
             <Link to={`/manage-tournament/${tournament.id}`}>
               <Card>
                 <CardActionArea>
-                  <CardContent sx={{ textAlign: "left" }}>
+                  <CardContent sx={{ textAlign: "center", lineHeight: "0.5" }}>
                     <Typography gutterBottom variant="h6" component="div">
                       {tournament.name}
                     </Typography>

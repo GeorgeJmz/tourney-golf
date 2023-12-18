@@ -231,9 +231,11 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
         password: "Pass12345",
         ghinNumber: "",
         handicap: 0,
-      }
+      },
     ];
-    createAllUsers.forEach(async (user) => await userViewModel.createDBUser(user));
+    createAllUsers.forEach(
+      async (user) => await userViewModel.createDBUser(user)
+    );
   };
   const handleAccount = async (
     event: React.FormEvent<HTMLFormElement>

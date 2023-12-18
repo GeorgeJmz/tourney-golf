@@ -22,7 +22,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
         filter: "drop-shadow(7px 7px 11px grey)",
         position: "sticky",
         left: 0,
-        backgroundColor: "ActiveBorder",
+        backgroundColor: "rgb(118, 118, 118);",
         color: "white",
         fontWeight: "bold",
         border: "none",
@@ -33,7 +33,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
       return {
         border: 0,
         width: 80,
-        backgroundColor: "ActiveBorder",
+        backgroundColor: "rgb(118, 118, 118);",
         color: "white",
         fontWeight: "bold",
       };
@@ -47,7 +47,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
         fontWeight: "bold",
       };
     }
-    return { border: 0.5, color: "ActiveBorder", width: 80 };
+    return { border: 1, color: "rgb(118, 118, 118);", width: 80 };
   };
 
   const renderHoleHeaders = () => {
@@ -146,7 +146,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
             background: "#fff",
             zIndex: 2,
             border: "none",
-            color: "ActiveBorder",
+            color: "rgb(118, 118, 118);",
             width: 80,
           }}
         >
@@ -193,7 +193,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
             background: "#fff",
             zIndex: 2,
             border: "none",
-            color: "ActiveBorder",
+            color: "rgb(118, 118, 118);",
             width: 80,
           }}
         >
@@ -220,7 +220,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
               <TableCell
                 colSpan={25}
                 align="right"
-                sx={{ border: 0.5, color: "ActiveBorder", width: 80 }}
+                sx={{ border: 1, color: "rgb(118, 118, 118);", width: 80 }}
               >
                 {match.match.winner}
               </TableCell>
