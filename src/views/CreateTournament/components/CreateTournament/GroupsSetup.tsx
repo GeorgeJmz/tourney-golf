@@ -30,8 +30,6 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
     tournamentViewModel.updateGroupPlayers(group, idPlayer);
   };
 
-  console.log(toJS(tournamentViewModel.tournament.playersList), "playersList");
-
   const isNextDisabled =
     tournamentViewModel.tournament.playersList.filter(
       (player) => player.group === "" || player.group === "0initial"

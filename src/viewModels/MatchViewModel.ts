@@ -4,14 +4,21 @@ import MatchModel, { IMatchResults } from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
-import { createMatch, updatePlayer } from "../services/firebase";
+import {
+  createMatch,
+  sendCustomEmail,
+  updatePlayer,
+} from "../services/firebase";
 import ScoreViewModel from "./ScoreViewModel";
 import UserViewModel from "./UserViewModel";
 import moment from "moment-timezone";
+import TournamentModel from "../models/Tournament";
+import { getBodyMail } from "../helpers/getMatchMail";
 
 class MatchViewModel {
   match: MatchModel = new MatchModel();
   author: UserViewModel = new UserViewModel();
+  currentTournament: TournamentModel = new TournamentModel();
   idMatch = "";
   tournamentId = "";
   currentDistance: Array<number> = [];
@@ -63,6 +70,16 @@ class MatchViewModel {
   }
 
   calculateWinners(): void {
+    const tournamentType = this.currentTournament.tournamentType;
+    const playType = this.currentTournament.playType;
+
+    const isLTMATCH =
+      tournamentType === "leagueteamplay" && playType === "matchPlay";
+    const isLTMEDAL =
+      tournamentType === "leagueteamplay" && playType === "strokePlay";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+
     const winners: Array<string> = [];
     let winner = "";
     let currentMatchResult = 0;
@@ -137,7 +154,18 @@ class MatchViewModel {
           winners.push(String(currentMatchResult));
         }
       }
-      winner = winner != "" ? winner + " / " + winnerStrokePlay : "";
+      winner =
+        winner != ""
+          ? !isLTMATCH && !isLMATCH
+            ? winner + " / " + winnerStrokePlay
+            : winner
+          : "";
+      if (isLTMEDAL || isLMEDAL) {
+        winner = winner != "" ? winnerStrokePlay : "";
+      }
+      if (isLTMATCH || isLTMATCH) {
+        winner = winner != "" ? winner : "";
+      }
     }
     this.winByHole = winners;
     this.match.winner = winner;
@@ -178,13 +206,19 @@ class MatchViewModel {
   async createMatch(): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
+    const tournamentType = this.currentTournament.tournamentType;
+    const playType = this.currentTournament.playType;
 
+    const isLMATCHMEDAL =
+      tournamentType === "league" && playType === "matchstrokePlay";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
     try {
+      const pointsPerWin = this.currentTournament.pointsPerWin;
+      const pointsPerTie = this.currentTournament.pointsPerTie;
+
       const scoresIds = this.players.map(async (p) => await p.createScore());
       this.match.scoresId = await Promise.all(scoresIds);
-      console.log(toJS(this.players), "players ---");
-      console.log(this.tournamentId, "tournamentId ---");
-      console.log(this.match.scoresId, "matchId ---");
       const matchResults = this.players.map((p) => ({
         idPlayer: p.score.idPlayer,
         playerName: p.score.player,
@@ -195,26 +229,27 @@ class MatchViewModel {
         isWinnerMatch: this.winnerMatch.includes(p.score.idPlayer),
         isWinnerMedalPlay: this.winnerMedalPlay.includes(p.score.idPlayer),
       }));
-      console.log(matchResults, "matchResults --- NEw");
       const playersMail = [
         this.players[0].score.idPlayer,
         this.players[1].score.idPlayer,
       ];
       const winnerMatch = this.winnerMatch;
       const strokePlayPoints =
-        this.players[0].score.totalNet < this.players[1].score.totalNet
-          ? [3, 0]
-          : [0, 3];
+        this.players[0].score.totalNet === this.players[1].score.totalNet
+          ? [pointsPerTie, pointsPerTie]
+          : this.players[0].score.totalNet < this.players[1].score.totalNet
+          ? [pointsPerWin, 0]
+          : [0, pointsPerWin];
       const teamPoints = [
         this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
         this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
       ] as Array<number>;
       const matchsPoints =
         winnerMatch.length > 1
-          ? [1, 1]
+          ? [pointsPerTie, pointsPerTie]
           : this.winnerMatch.includes(playersMail[0])
-          ? [3, 0]
-          : [0, 3];
+          ? [pointsPerWin, 0]
+          : [0, pointsPerWin];
 
       for (const playerMail of playersMail) {
         const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
@@ -226,12 +261,14 @@ class MatchViewModel {
           pointsTeam: teamPoints[index],
           tournamentId: this.tournamentId,
           scoreId: this.match.scoresId[index],
+          gross: this.players[index].score.totalGross,
+          net: this.players[index].score.totalNet,
+          handicap: this.players[index].score.handicap,
           // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
           // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
           // ties: winnerMatch.includes(playerMail) ? [] : [],
         };
-        const uP = await updatePlayer({ ...playerUpdated });
-        console.log("Player updated");
+        await updatePlayer({ ...playerUpdated });
       }
 
       const getCurrentMoment = () => {
@@ -250,6 +287,19 @@ class MatchViewModel {
         tournamentId: this.tournamentId,
         matchResults,
       });
+      const result = getBodyMail(
+        this.players,
+        this.winByHole,
+        isLMATCH || isLMEDAL || isLMATCHMEDAL,
+        this.match.winner
+      );
+      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p>${result}`;
+      this.currentTournament.playersList.forEach(async (mail) => {
+        if (mail.email) {
+          await sendCustomEmail(mail.email, this.match.winner, bodyMail);
+        }
+      });
+
       const displayMessage = getMessages(Messages.MATCH_CREATED);
       toast.update(cuToast, {
         render: displayMessage,

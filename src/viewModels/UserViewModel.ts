@@ -48,7 +48,7 @@ class UserViewModel {
     const cuToast = toast.loading(displayLoading);
     try {
       const createdUser = await createUser(user);
-      //this.setUser(createdUser);
+      this.setUser(createdUser);
       const displayMessage = getMessages(Messages.USER_CREATED);
       toast.update(cuToast, {
         render: displayMessage,
@@ -56,6 +56,7 @@ class UserViewModel {
         isLoading: false,
         autoClose: 800,
       });
+      location.reload();
     } catch (error) {
       const codeError = (error as FirebaseError).code;
       const displayError = getMessages(codeError);
@@ -170,7 +171,7 @@ class UserViewModel {
     //const cuToast = toast.loading(displayLoading);
     try {
       const actives = await getTournamentsById(this.user.activeTournaments);
-      console.log(actives);
+
       this.activeTournaments = actives || [];
       // toast.update(cuToast, {
       //   render: displayMessage,

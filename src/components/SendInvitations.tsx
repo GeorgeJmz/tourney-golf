@@ -61,7 +61,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
     initialValues: step2Fields,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      onSubmit(values.email, values.name);
+      onSubmit(values?.email.toLowerCase(), values.name);
       editFormik.setValues(step2Fields); // Reset the form values
     },
   });
@@ -73,7 +73,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
     const name = emailList[index].name;
     const email = emailList[index].email;
     editFormik.setFieldValue(fields[0].name, name);
-    editFormik.setFieldValue(fields[1].name, email);
+    editFormik.setFieldValue(fields[1].name, email?.toLowerCase());
     setIsEditing(true);
     setEditIndex(index);
   };
@@ -185,7 +185,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
                             onClick={() => {
                               // Add logic to save edited data
                               onEdit(
-                                editFormik.values.email,
+                                editFormik.values.email.toLowerCase(),
                                 editFormik.values.name,
                                 index
                               );

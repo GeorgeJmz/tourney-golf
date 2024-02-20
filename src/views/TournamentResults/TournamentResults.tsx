@@ -22,10 +22,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 import Typography from "@mui/material/Typography";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
-import { convertMomentDate } from "../../helpers/convertDate";
+import { convertMomentDate, differenceDate } from "../../helpers/convertDate";
 
 import MenuItems from "../../components/MenuItems";
 import HorizontalScoreCard from "../Play/components/HorizontalScoreCard";
@@ -56,6 +57,18 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
     tournamentViewModel.setTournamentId(id);
     tournamentViewModel.setAuthor(userId);
   }
+
+  const tournamentType = tournamentViewModel.tournament.tournamentType;
+  const playType = tournamentViewModel.tournament.playType;
+
+  const isLTMATCH =
+    tournamentType === "leagueteamplay" && playType === "matchPlay";
+  const isLTMEDAL =
+    tournamentType === "leagueteamplay" && playType === "strokePlay";
+  const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+  const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+  const isLMATCHMEDAL =
+    tournamentType === "league" && playType === "matchstrokePlay";
 
   React.useEffect(() => {
     if (id) {
@@ -101,6 +114,10 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   const styleTable = {
     width: isMobile() ? "100%" : "48%",
   };
+  const hideTeam = !(playType !== "leagueteamplay" && playType !== "teamplay");
+  const hideMatch = !(
+    playType !== "matchPlay" && playType !== "matchstrokePlay"
+  );
 
   return (
     <Box sx={{ background: "white", p: 3, height: "100vh" }}>
@@ -130,10 +147,11 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                 )
               : true;
           })
+          .sort((a, b) => differenceDate(a.date, b.date))
           .map((match) => (
             <div style={styleTable}>
               <TableContainer component={Box}>
-                <Table sx={{tableLayout: "fixed"}}>
+                <Table sx={{ tableLayout: "fixed" }}>
                   <TableHead>
                     <TableRow>
                       <TableCell sx={nameStyles}>
@@ -144,7 +162,9 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                       <TableCell sx={headerStyles}>Gross</TableCell>
                       <TableCell sx={headerStyles}>HDCP</TableCell>
                       <TableCell sx={headerStyles}>Net</TableCell>
-                      <TableCell sx={headerStyles}>Team</TableCell>
+                      {hideTeam && (
+                        <TableCell sx={headerStyles}>Team</TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -157,33 +177,49 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                             {players.playerName}
                           </TableCell>
                           <TableCell sx={cellStyles}>
-                            {match.matchResults[0].isWinnerMatch &&
-                            match.matchResults[1].isWinnerMatch
-                              ? "Tie Match"
-                              : players.isWinnerMatch
-                              ? "Winner Match"
-                              : ""}
+                            {!isLMEDAL &&
+                              !isLTMEDAL &&
+                              (match.matchResults[0].isWinnerMatch &&
+                              match.matchResults[1].isWinnerMatch
+                                ? "Tie Match"
+                                : players.isWinnerMatch
+                                ? "Winner Match"
+                                : "")}
                             <br />
-                            {match.matchResults[0].isWinnerMedalPlay &&
-                            match.matchResults[1].isWinnerMedalPlay
-                              ? "Tie Medal"
-                              : players.isWinnerMedalPlay
-                              ? "Winner Medal"
-                              : ""}
+                            {!isLTMATCH &&
+                              !isLMATCH &&
+                              (match.matchResults[0].isWinnerMedalPlay &&
+                              match.matchResults[1].isWinnerMedalPlay
+                                ? "Tie Medal"
+                                : players.isWinnerMedalPlay
+                                ? "Winner Medal"
+                                : "")}
                           </TableCell>
                           <TableCell sx={cellStyles}>{players.gross}</TableCell>
                           <TableCell sx={cellStyles}>{players.hcp}</TableCell>
                           <TableCell sx={cellStyles}>{players.score}</TableCell>
-                          <TableCell sx={cellStyles}>
-                            {players.teamPoints}
-                          </TableCell>
+                          {!isLMATCH && !isLMEDAL && !isLMATCHMEDAL && (
+                            <TableCell sx={cellStyles}>
+                              {players.teamPoints}
+                            </TableCell>
+                          )}
                         </TableRow>
                       ))}
                       <TableRow>
                         <TableCell sx={{ textAlign: "center" }}></TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{}</TableCell>
                         <TableCell sx={{ textAlign: "center" }} colSpan={3}>
-                          <Button>View Scorecard</Button>
+                          <Link
+                            to={`/match/${match.scoresId[0]}-${
+                              match.scoresId[1]
+                            }-match-${hideMatch ? "true" : "false"}-team-${
+                              hideTeam ? "true" : "false"
+                            }`}
+                          >
+                            <Button variant="text" color="primary">
+                              View Scorecard
+                            </Button>
+                          </Link>
                         </TableCell>
 
                         <TableCell sx={{ textAlign: "center" }}></TableCell>

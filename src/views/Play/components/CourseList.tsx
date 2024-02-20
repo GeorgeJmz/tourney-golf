@@ -45,7 +45,7 @@ const CourseList: React.FC<ICourseList> = ({
                   variant="caption"
                   color="text.primary"
                 >
-                  {`${course.address} - ${course.distance}`}
+                  {`${course.address}`}
                 </Typography>
               }
             />

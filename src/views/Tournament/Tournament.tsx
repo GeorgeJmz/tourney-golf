@@ -48,8 +48,6 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     []
   );
 
-  console.log("tournamentViewModel.author", tournamentViewModel);
-  console.log(currentTournament, id, tournamentViewModel.author);
   if (currentTournament && id && tournamentViewModel.author === "") {
     tournamentViewModel.setTournament(currentTournament);
     tournamentViewModel.setTournamentId(id);
@@ -60,15 +58,44 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     setTitle(currentTournament?.name || "");
   }, [currentTournament?.name]);
 
+  const isActiveTournament = React.useMemo(() => {
+    const endDate = convertDate(
+      currentTournament?.cutOffDate || "",
+      "MM/DD/YYYY"
+    );
+    const today = convertDate(new Date().toISOString(), "MM/DD/YYYY");
+
+    const compareDates = (d1: string, d2: string) => {
+      const date1 = new Date(d1).getTime();
+      const date2 = new Date(d2).getTime();
+      if (date1 < date2) {
+        return false;
+        //console.log(`${d1} is less than ${d2}`);
+      } else if (date1 > date2) {
+        return true;
+        //console.log(`${d1} is greater than ${d2}`);
+      } else {
+        return true;
+      }
+    };
+
+    return compareDates(endDate, today);
+  }, [currentTournament?.cutOffDate]);
   return (
     <Box sx={{ height: "100vh" }}>
       <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
         <Grid item md={2} xs={12}>
-          <Link to={`/play-tournament/${id}`}>
-            <Button variant="text" color="primary">
+          {isActiveTournament ? (
+            <Link to={`/play-tournament/${id}`}>
+              <Button variant="text" color="primary">
+                Play
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="text" disabled color="primary">
               Play
             </Button>
-          </Link>
+          )}
         </Grid>
         <Grid item md={2} xs={12}>
           <Link to={`/results/${id}`}>
@@ -92,7 +119,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
             </Button>
           </Link>
         </Grid>
-        <Grid item md={2} xs={12}>
+        {/* <Grid item md={2} xs={12}>
           <Button
             variant="text"
             color="primary"
@@ -101,7 +128,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           >
             Live Scores
           </Button>
-        </Grid>
+        </Grid> */}
         <Grid item md={2} xs={12}>
           <Button
             variant="text"

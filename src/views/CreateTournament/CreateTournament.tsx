@@ -19,6 +19,7 @@ import { observer } from "mobx-react";
 import UserViewModel from "../../viewModels/UserViewModel";
 import CalendarsSetup from "./components/CreateTournament/CalendarsSetup";
 import { useNavigate } from "react-router-dom";
+import { toJS } from "mobx";
 
 interface ICreateTournamentProps {
   user: UserViewModel;
@@ -123,10 +124,23 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
     },
   ];
 
+  const getFilteredSteps = () => {
+    const type = tournamentViewModel.tournament.tournamentType;
+    if (type === "league") {
+      return steps.filter((s) => s.label !== "Teams Setup");
+    }
+    if (type === "teamplay" || type === "3stage") {
+      return steps.filter(
+        (s) => s.label !== "Groups Setup" && s.label !== "Conference Setup"
+      );
+    }
+    return steps;
+  };
+
   return (
     <Box sx={{ background: "white", p: 3 }}>
       <Stepper activeStep={activeStep} orientation="vertical">
-        {steps.map((step, index) => (
+        {getFilteredSteps().map((step, index) => (
           <Step key={step.label}>
             <StepLabel
               onClick={() => handleStepClick(index)}
@@ -138,7 +152,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
           </Step>
         ))}
       </Stepper>
-      {activeStep === steps.length && (
+      {activeStep === getFilteredSteps().length && (
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps are completed</Typography>
           <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>

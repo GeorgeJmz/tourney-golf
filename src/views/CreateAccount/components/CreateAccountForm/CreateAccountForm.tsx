@@ -1,9 +1,30 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { useForm } from "../../../../hooks/useForm";
-import { accountFields } from "../../../../helpers/getAccountFields";
+import {
+  createAccountElements,
+  accountFieldsValidation,
+  accountFieldsEmpty,
+  IAccountElement,
+} from "../../../../helpers/getAccountFields";
 import type UserViewModel from "../../../../viewModels/UserViewModel";
-import { Button, TextField, Box } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Box,
+  Tooltip,
+  OutlinedInput,
+  InputAdornment,
+  IconButton,
+  Grid,
+  FormHelperText,
+} from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import { TextInput } from "../../../../components/TextInput";
+import { useFormik } from "formik";
 
 interface CreateAccountFormProps {
   userViewModel: UserViewModel;
@@ -12,7 +33,7 @@ interface CreateAccountFormProps {
 const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
   userViewModel,
 }) => {
-  const { values, handleInputChange, isValid } = useForm(accountFields);
+  //const { values, handleInputChange, isValid } = useForm(accountFields);
 
   const createMultipleAccounts = async () => {
     const createAllUsers = [
@@ -237,66 +258,226 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
       async (user) => await userViewModel.createDBUser(user)
     );
   };
-  const handleAccount = async (
-    event: React.FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    event.preventDefault();
-    if (isValid()) {
+  // const handleAccount = async (
+  //   event: React.FormEvent<HTMLFormElement>
+  // ): Promise<void> => {
+  //   event.preventDefault();
+  //   if (isValid()) {
+  //     await userViewModel.createUser({
+  //       id: "",
+  //       name: values.name,
+  //       lastName: values.lastName,
+  //       email: values.email,
+  //       password: values.password,
+  //       ghinNumber: "",
+  //       handicap: 0,
+  //     });
+  //   }
+  // };
+
+  const validationSchema = accountFieldsValidation;
+
+  const formik = useFormik({
+    initialValues: {
+      name: "",
+      lastName: "",
+      email: "",
+      password: "",
+    } as IAccountElement,
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
       await userViewModel.createUser({
         id: "",
         name: values.name,
         lastName: values.lastName,
-        email: values.email,
+        email: values?.email.toLowerCase() || "",
         password: values.password,
         ghinNumber: "",
         handicap: 0,
       });
-    }
+      //user.updateUser(newUser);
+      //setTimeout(() => navigate("/dashboard"), 1000);
+    },
+  });
+
+  const [showPassword, setShowPassword] = React.useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
   };
 
   return (
     <Box
-      component="form"
       sx={{
-        "& > :not(style)": { m: 1, width: "25ch" },
+        "& > :not(style)": { m: 1 },
       }}
-      noValidate
-      autoComplete="off"
-      onSubmit={handleAccount}
     >
-      {accountFields.map((inputElement, key) => (
-        <TextField
-          key={key}
-          type={inputElement.input}
-          name={inputElement.name}
-          label={inputElement.placeholder}
-          value={values[inputElement.name]}
-          onChange={handleInputChange}
-          margin="normal"
-          required
-        />
-      ))}
-      <Button
-        type="submit"
-        variant="contained"
-        disabled={!isValid()}
-        size="large"
-        sx={{ minWidth: "250px" }}
-      >
-        Create Account
-      </Button>
-      {/* <Button
-        type="button"
-        variant="contained"
-        size="large"
-        sx={{ minWidth: "250px" }}
-        onClick={() => {
-          createMultipleAccounts();
-        }}
-      >
-        Create Multiple Accounts
-      </Button> */}
+      <form onSubmit={formik.handleSubmit} autoComplete="off">
+        <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
+          {createAccountElements.map((inputElement, key) => {
+            const isError = Boolean(
+              formik.touched[inputElement.name] &&
+                Boolean(formik.errors[inputElement.name])
+            );
+            if (inputElement.input === "password") {
+              return (
+                <Grid
+                  key={inputElement.name}
+                  item
+                  xs={inputElement.size.xs}
+                  md={inputElement.size.md}
+                >
+                  <Tooltip title="Pasword minimum requirements: 8 Characters, One Capital Letter, One Number">
+                    <FormControl
+                      sx={{ m: 2, width: "25ch" }}
+                      variant="outlined"
+                      error={isError}
+                    >
+                      <InputLabel htmlFor="outlined-adornment-password">
+                        Password
+                      </InputLabel>
+                      <OutlinedInput
+                        id="outlined-adornment-password"
+                        key={key}
+                        type={showPassword ? "text" : "password"}
+                        name={inputElement.name}
+                        label={inputElement.placeholder}
+                        value={formik.values[inputElement.name]}
+                        onChange={formik.handleChange}
+                        required
+                        endAdornment={
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={handleClickShowPassword}
+                              onMouseDown={handleMouseDownPassword}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        }
+                      />
+                      <FormHelperText id="component-helper-text">
+                        {formik.touched[inputElement.name]
+                          ? formik.errors[inputElement.name]
+                          : ""}
+                      </FormHelperText>
+                    </FormControl>
+                  </Tooltip>
+                </Grid>
+              );
+            }
+            return (
+              <TextInput
+                key={inputElement.name}
+                inputElement={inputElement}
+                isError={isError}
+                onChangeHandler={formik.handleChange}
+                error={
+                  formik.touched[inputElement.name]
+                    ? formik.errors[inputElement.name]
+                    : ""
+                }
+                value={formik.values[inputElement.name]}
+              />
+            );
+          })}
+          <Grid item xs={12}>
+            <FormControl>
+              <div style={{ display: "flex" }}>
+                <Button type="submit" variant="contained" size="large">
+                  Create Account
+                </Button>
+              </div>
+            </FormControl>
+          </Grid>
+        </Grid>
+      </form>
     </Box>
+    //<Box
+    //   component="form"
+    //   sx={{
+    //     "& > :not(style)": { m: 1, width: "25ch" },
+    //   }}
+    //   noValidate
+    //   autoComplete="off"
+    //   onSubmit={handleAccount}
+    // >
+    //   {accountFields.map((inputElement, key) => {
+    //     return inputElement.input !== "password" ? (
+    //       <TextField
+    //         key={key}
+    //         type={inputElement.input}
+    //         name={inputElement.name}
+    //         label={inputElement.placeholder}
+    //         value={values[inputElement.name]}
+    //         onChange={handleInputChange}
+    //         margin="normal"
+    //         required
+    //       />
+    //     ) : (
+    //       <React.Fragment>
+    //         <Tooltip title="Pasword minimum requirements: 8 Characters, One Capital Letter, One Number">
+    //           <FormControl sx={{ m: 1, width: "25ch" }} variant="outlined">
+    //             <InputLabel htmlFor="outlined-adornment-password">
+    //               Password
+    //             </InputLabel>
+    //             <OutlinedInput
+    //               id="outlined-adornment-password"
+    //               key={key}
+    //               type={showPassword ? "text" : "password"}
+    //               name={inputElement.name}
+    //               label={inputElement.placeholder}
+    //               value={values[inputElement.name]}
+    //               onChange={handleInputChange}
+    //               required
+    //               endAdornment={
+    //                 <InputAdornment position="end">
+    //                   <IconButton
+    //                     aria-label="toggle password visibility"
+    //                     onClick={handleClickShowPassword}
+    //                     onMouseDown={handleMouseDownPassword}
+    //                     edge="end"
+    //                   >
+    //                     {showPassword ? <VisibilityOff /> : <Visibility />}
+    //                   </IconButton>
+    //                 </InputAdornment>
+    //               }
+    //             />
+    //           </FormControl>
+    //         </Tooltip>
+    //       </React.Fragment>
+    //     );
+    //   })}
+    //   <Button
+    //     type="submit"
+    //     variant="contained"
+    //     disabled={!isValid()}
+    //     size="large"
+    //     sx={{ minWidth: "250px" }}
+    //   >
+    //     Create Account
+    //   </Button>
+    //   {/* <Button
+    //     type="button"
+    //     variant="contained"
+    //     size="large"
+    //     sx={{ minWidth: "250px" }}
+    //     onClick={() => {
+    //       createMultipleAccounts();
+    //     }}
+    //   >
+    //     Create Multiple Accounts
+    //   </Button> */}
+    // </Box>
   );
 };
 

@@ -15,6 +15,7 @@ interface MenuItemsProps {
   placeholder: string;
   onChange: (value: string) => void;
   isActive: boolean;
+  noFirstOption?: boolean;
 }
 
 export const MenuItems: React.FC<MenuItemsProps> = ({
@@ -22,6 +23,7 @@ export const MenuItems: React.FC<MenuItemsProps> = ({
   placeholder,
   onChange,
   isActive,
+  noFirstOption,
 }) => {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -30,7 +32,10 @@ export const MenuItems: React.FC<MenuItemsProps> = ({
     { label: placeholder, value: placeholder },
   ]);
   React.useEffect(() => {
-    setSelectOptions([{ label: placeholder, value: placeholder }, ...options]);
+    const newOptions = noFirstOption
+      ? [...options]
+      : [{ label: placeholder, value: placeholder }, ...options];
+    setSelectOptions([...newOptions]);
   }, [options]);
   const handleClick = () => {
     if (selectedIndex === 0) {
@@ -108,7 +113,7 @@ export const MenuItems: React.FC<MenuItemsProps> = ({
                   {selectOptions.map((option, index) => (
                     <MenuItem
                       key={option.value}
-                      disabled={index === 0}
+                      disabled={!noFirstOption ? index === 0 : false}
                       selected={index === selectedIndex}
                       onClick={(event) => handleMenuItemClick(event, index)}
                     >

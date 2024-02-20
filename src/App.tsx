@@ -7,7 +7,6 @@ import Login from "./views/Login/Login";
 import Welcome from "./views/Welcome/Welcome";
 import Dashboard from "./views/Dashboard/Dashboard";
 import Play from "./views/Play/Play";
-import ManageTournament from "./views/ManageTournament/ManageTournament";
 import { useAuth } from "./hooks/useUserContext";
 import "./App.css";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +17,12 @@ import { NavBar } from "./components/NavBar";
 import TournamentStats from "./views/TournamentStats/TournamentStats";
 import TournamentResults from "./views/TournamentResults/TournamentResults";
 import Profile from "./views/Profile/Profile";
+import MatchDetail from "./views/MatchDetail/MatchDetail";
+import AdminLeague from "./views/AdminLeague/AdminLeague";
+import ForgotPassword from "./views/ForgotPassword/ForgotPassword";
+import PasswordReset from "./views/PasswordReset/PasswordReset";
+import AuthUserActions from "./views/AuthUserActions/AuthUserActions";
+import AuthActions from "./views/AuthActions/AuthActions";
 
 function App(): JSX.Element {
   const { user } = useAuth();
@@ -35,6 +40,8 @@ function App(): JSX.Element {
             <Route path="/" element={<Welcome />} />
             <Route path="/create-account" element={<CreateAccount />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/password-reset" element={<PasswordReset />} />
             <Route
               path="/dashboard"
               element={
@@ -63,7 +70,7 @@ function App(): JSX.Element {
               path="/manage-tournament/:id"
               element={
                 <RequireAuth user={user}>
-                  <ManageTournament user={userViewModel} />
+                  <AdminLeague user={userViewModel} />
                 </RequireAuth>
               }
             />
@@ -100,11 +107,27 @@ function App(): JSX.Element {
               }
             />
             <Route
+              path="/match/:id"
+              element={
+                <RequireAuth user={user}>
+                  <MatchDetail user={userViewModel} />
+                </RequireAuth>
+              }
+            />
+            <Route
               path="/edit-profile"
               element={
                 <RequireAuth user={user}>
                   <Profile user={userViewModel} />
                 </RequireAuth>
+              }
+            />
+            <Route
+              path="auth/actions"
+              element={
+                <AuthActions>
+                  <AuthUserActions />
+                </AuthActions>
               }
             />
           </Routes>

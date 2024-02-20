@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import Box from "@mui/material/Box";
 import Fab from "@mui/material/Fab";
@@ -19,7 +19,9 @@ import HorizontalScoreCard from "./components/HorizontalScoreCard";
 import { useNavigate, useParams } from "react-router-dom";
 import type { IUser } from "../../models/User";
 import { Button } from "@mui/material";
-import { toJS } from "mobx";
+import { getPlayersByTournamentId } from "../../services/firebase";
+import { getBodyMail } from "../../helpers/getMatchMail";
+import { ITournamentPlayer } from "../../models/Player";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -49,6 +51,7 @@ function TabPanel(props: TabPanelProps) {
 
 const Play: React.FC<IPlayProps> = ({ user }) => {
   const playViewModel = React.useMemo(() => new PlayViewModel(), []);
+  const [currentPlayer, setCurrentPlayer] = React.useState<ITournamentPlayer>();
   const navigate = useNavigate();
   const { id } = useParams();
   const currentTournament = React.useMemo(
@@ -56,27 +59,70 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     []
   );
 
-  playViewModel.tournamentId = currentTournament?.id || "";
+  const [numberOfPlayers, setNumberOfPlayers] = React.useState<Array<number>>([
+    2,
+  ]);
+
+  useEffect(() => {
+    const getOpponents = async () => {
+      const opponents = await getPlayersByTournamentId(
+        currentTournament?.id || ""
+      );
+      const player = opponents.find(
+        (player) => player.email === user.user.email
+      );
+      setCurrentPlayer(player);
+    };
+    playViewModel.tournamentId = currentTournament?.id || "";
+    setNumberOfPlayers([2]);
+    currentTournament?.matchesPerRound.forEach((match) => {
+      const newPlayers = match === "double" ? 3 : match === "triple" ? 4 : 5;
+      setNumberOfPlayers((prev) => [...prev, newPlayers]);
+    });
+    getOpponents();
+    if (currentTournament) {
+      playViewModel.currentTournament.name = currentTournament.name;
+      playViewModel.currentTournament.pointsPerWin =
+        currentTournament.pointsPerWin;
+      playViewModel.currentTournament.pointsPerTie =
+        currentTournament.pointsPerTie;
+      playViewModel.currentTournament.playType = currentTournament.playType;
+      playViewModel.currentTournament.tournamentType =
+        currentTournament.tournamentType;
+      playViewModel.currentTournament.playersList =
+        currentTournament.playersList;
+    }
+  }, [currentTournament]);
+
+  const tournamentType = currentTournament?.tournamentType;
+  const playType = currentTournament?.playType;
+
+  const isLTMEDAL =
+    tournamentType === "leagueteamplay" && playType === "strokePlay";
+  const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+  const isLMATCHMEDAL =
+    tournamentType === "league" && playType === "matchstrokePlay";
+  const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
 
   const findConferenceByEmail = (email: string) => {
     const player = currentTournament?.playersList.find(
       (player) => player.email === email
     );
-    console.log(player?.conference, "conference");
     return player?.conference;
   };
 
   const getPlayersByConference = (conferenceId: string) => {
     const players = currentTournament?.playersList.filter(
-      (player) => player.conference === conferenceId
+      (player) =>
+        player.conference === conferenceId &&
+        !currentPlayer?.opponent?.includes(player.email || "")
     );
-    console.log(players, "players");
     return players;
   };
 
   const playersToInvite = React.useMemo(
     () => getPlayersByConference(findConferenceByEmail(user.user.email) || ""),
-    []
+    [currentPlayer]
   );
 
   if (playViewModel.getAuthor() === "") {
@@ -91,6 +137,23 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       playViewModel.setScoreModal(scores, hole);
     });
   };
+
+  const isDisabledButton = React.useMemo(() => {
+    if (playViewModel.currentTeeBox === "" && playViewModel.currentStep === 0) {
+      return true;
+    }
+
+    if (playViewModel.currentStep === 1) {
+      return !numberOfPlayers.includes(playViewModel.emailList.length);
+    }
+
+    return false;
+  }, [
+    numberOfPlayers,
+    playViewModel.emailList.length,
+    playViewModel.currentTeeBox,
+    playViewModel.currentStep,
+  ]);
 
   const onSaveHandler = () => {
     if (playViewModel.currentStep === 2) {
@@ -122,7 +185,6 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     playViewModel.setModal(false);
   };
   const handleOpenModal = (key: number) => {
-    console.log(key);
     playViewModel.setModal(true);
     playViewModel.setModalValues(key);
   };
@@ -187,7 +249,11 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             <TabPanel value={value} index={0}>
               <React.Fragment>
                 {playViewModel.matches.map((match) => (
-                  <HorizontalScoreCard match={match} />
+                  <HorizontalScoreCard
+                    match={match}
+                    hideMatch={isLTMEDAL}
+                    hideTeam={isLMATCH || isLMEDAL || isLMATCHMEDAL}
+                  />
                 ))}
               </React.Fragment>
             </TabPanel>
@@ -228,7 +294,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           variant="contained"
           size="large"
           onClick={onSaveHandler}
-          disabled={playViewModel.currentTeeBox === ""}
+          disabled={isDisabledButton}
         >
           {submitButtonText[playViewModel.currentStep]}
         </Button>
@@ -247,12 +313,12 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         >
           {submitButtonText[playViewModel.currentStep]}
         </Fab> */}
-        {playViewModel.currentStep === 2 && (
+        {/* {playViewModel.currentStep === 2 && (
           <Fab
             color="primary"
             variant="extended"
             disabled={playViewModel.currentTeeBox === ""}
-            onClick={onFillResults}
+            onClick={handleMail}
             sx={{
               position: "fixed",
               bottom: "16px",
@@ -262,7 +328,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           >
             Mock Results
           </Fab>
-        )}
+        )} */}
       </Box>
     </div>
   );

@@ -37,6 +37,29 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "ClubCampestreTijuana",
+      name: "Club Campestre Tijuana",
+      address: "Blvd. Agua Caliente 11311, Aviacion, 22020 Tijuana, B.C.",
+      distance: "3.5 miles",
+      teeBoxes: [
+        {
+          id: "BlackTijuana",
+          color: "Black",
+          length: "6878",
+        },
+        {
+          id: "BlueTijuana",
+          color: "Blue",
+          length: "6523",
+        },
+        {
+          id: "WhiteTijuana",
+          color: "White",
+          length: "6138",
+        },
+      ],
+    },
+    {
       id: "EnagicGolfClubatEastlake",
       name: "Enagic Golf Club at Eastlake",
       address: "2375 Clubhouse Dr, Chula Vista, CA 91915, Estados Unidos",
@@ -65,26 +88,69 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
-      id: "ClubCampestreTijuana",
-      name: "Club Campestre Tijuana",
-      address: "Blvd. Agua Caliente 11311, Aviacion, 22020 Tijuana, B.C.",
-      distance: "3.5 miles",
+      id: "oakGlen",
+      name: "Singing Hills / Oak Glenn",
+      address: "3007 Dehesa Rd, El Cajon, CA 92019",
+      distance: "",
       teeBoxes: [
         {
-          id: "BlackTijuana",
-          color: "Black",
-          length: "6878",
-        },
-        {
-          id: "BlueTijuana",
+          id: "BlueOak",
           color: "Blue",
-          length: "6523",
+          length: "6594",
         },
         {
-          id: "WhiteTijuana",
-          color: "White",
-          length: "6138",
+          id: "RedOak",
+          color: "Red",
+          length: "5618",
         },
+        {
+          id: "WhiteOak",
+          color: "White",
+          length: "6131",
+        },
+      ],
+    },
+    {
+      id: "sanDiegoCountry",
+      name: "San Diego Country Club",
+      address: "88 L Street, Chula Vista, CA 91911",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlackSanDiegoCountry",
+          color: "Black",
+          length: "7033",
+        },
+        {
+          id: "BlueSanDiegoCountry",
+          color: "Blue",
+          length: "6684",
+        },
+        {
+          id: "WhiteSanDiegoCountry",
+          color: "White",
+          length: "6354",
+        },
+        // {
+        //   id: "SilverSanDiegoCountry",
+        //   color: "Silver",
+        //   length: "6021",
+        // },
+        // {
+        //   id: "RedSanDiegoCountry",
+        //   color: "Red",
+        //   length: "5637",
+        // },
+        // {
+        //   id: "GreenSanDiegoCountry",
+        //   color: "Green",
+        //   length: "5385",
+        // },
+        // {
+        //   id: "GoldSanDiegoCountry",
+        //   color: "Gold",
+        //   length: "4957",
+        // },
       ],
     },
   ],
@@ -203,6 +269,105 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [2965, 36],
       out: [3173, 36],
       total: [6138, 72],
+    },
+    BlueOak: {
+      distance: [
+        391, 336, 328, 154, 412, 167, 502, 354, 395, 539, 382, 414, 357, 360,
+        202, 410, 361, 530,
+      ],
+      hcp: [5, 11, 13, 15, 1, 17, 7, 9, 3, 4, 8, 10, 14, 12, 18, 2, 16, 6],
+      par: [4, 4, 4, 3, 4, 3, 5, 4, 4, 5, 4, 4, 4, 4, 3, 4, 4, 5],
+      in: [3555, 37],
+      out: [3039, 35],
+      total: [6594, 72],
+    },
+    WhiteOak: {
+      distance: [
+        372, 317, 311, 121, 395, 130, 483, 337, 372, 506, 361, 369, 312, 333,
+        172, 385, 345, 510,
+      ],
+      hcp: [5, 11, 13, 15, 1, 17, 7, 9, 3, 4, 8, 10, 14, 12, 18, 2, 16, 6],
+      par: [4, 4, 4, 3, 4, 3, 5, 4, 4, 5, 4, 4, 4, 4, 3, 4, 4, 5],
+      in: [3293, 37],
+      out: [3838, 35],
+      total: [6131, 72],
+    },
+    RedOak: {
+      distance: [
+        348, 298, 283, 102, 335, 110, 453, 324, 345, 484, 347, 342, 280, 314,
+        153, 310, 310, 480,
+      ],
+      hcp: [3, 13, 9, 15, 7, 17, 5, 11, 1, 2, 8, 14, 10, 16, 18, 6, 12, 4],
+      par: [4, 4, 4, 3, 4, 3, 5, 4, 4, 5, 4, 4, 4, 4, 3, 4, 4, 5],
+      in: [3020, 37],
+      out: [2598, 35],
+      total: [5618, 72],
+    },
+    BlackSanDiegoCountry: {
+      distance: [
+        368, 513, 236, 461, 401, 187, 377, 563, 427, 438, 158, 390, 202, 485,
+        397, 603, 367, 460,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [3500, 36],
+      out: [3533, 36],
+      total: [7033, 72],
+    },
+    BlueSanDiegoCountry: {
+      distance: [
+        361, 498, 217, 435, 392, 180, 358, 538, 386, 434, 145, 385, 181, 478,
+        391, 526, 361, 418,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [3319, 36],
+      out: [3365, 36],
+      total: [6684, 72],
+    },
+    SilverSanDiegoCountry: {
+      distance: [
+        349, 452, 182, 400, 372, 140, 333, 465, 337, 412, 123, 361, 144, 444,
+        369, 474, 319, 345,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [2991, 36],
+      out: [3030, 36],
+      total: [6021, 72],
+    },
+    RedSanDiegoCountry: {
+      distance: [
+        349, 452, 182, 320, 318, 140, 333, 465, 337, 301, 123, 309, 144, 444,
+        282, 474, 319, 345,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [2741, 36],
+      out: [2896, 36],
+      total: [5637, 72],
+    },
+    GreenSanDiegoCountry: {
+      distance: [
+        349, 452, 92, 320, 318, 140, 250, 465, 337, 301, 123, 309, 144, 444,
+        282, 474, 296, 289,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [2662, 36],
+      out: [2723, 36],
+      total: [5385, 72],
+    },
+    GoldSanDiegoCountry: {
+      distance: [
+        301, 349, 92, 320, 318, 113, 250, 419, 337, 301, 118, 309, 114, 347,
+        282, 402, 296, 289,
+      ],
+      hcp: [11, 9, 15, 1, 7, 17, 13, 5, 3, 2, 18, 8, 16, 10, 12, 6, 14, 4],
+      par: [4, 5, 3, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 5, 4, 4],
+      in: [2458, 36],
+      out: [2499, 36],
+      total: [4957, 72],
     },
   };
   const course = details[id];

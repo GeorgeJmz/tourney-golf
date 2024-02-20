@@ -12,7 +12,6 @@ export interface ITournament {
   startDate: string;
   cutOffDate: string;
   playOffsDate?: Date;
-  calcuta: boolean;
   playOffs: boolean;
   matchesPerRound: string[];
   playersList: Array<Partial<IPlayer>>;
@@ -20,6 +19,8 @@ export interface ITournament {
   teamsList?: Array<ITournamentGroup>;
   conferencesList?: Array<ITournamentGroup>;
   status: TournamentStatus;
+  pointsPerWin: number;
+  pointsPerTie: number;
 }
 export interface ITournamentGroup {
   id: string;
@@ -65,13 +66,14 @@ export default class TournamentModel implements ITournament {
   playersPerGroup = [] as Array<IGroup>;
   teams = [] as Array<IGroup>;
   playType = "";
-  calcuta = false;
   playOffs = false;
   startDate = new Date().toISOString();
   cutOffDate = endDate.toISOString();
   matchesPerRound = [] as string[];
   conference = [] as Array<IGroup>;
   status = TournamentStatus.DRAFT;
+  pointsPerWin = 3;
+  pointsPerTie = 1;
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

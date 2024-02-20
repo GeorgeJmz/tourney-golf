@@ -2,6 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import {
   step1,
+  getStep1,
   step1FieldsValidations,
 } from "../../../../helpers/getTournamentFields";
 import { Button } from "@mui/material";
@@ -42,7 +43,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid container spacing={2}>
-        {step1.map((inputElement, key) => {
+        {getStep1(formik.values.type).map((inputElement, key) => {
           const isError = Boolean(
             formik.touched[inputElement.name] &&
               Boolean(formik.errors[inputElement.name])

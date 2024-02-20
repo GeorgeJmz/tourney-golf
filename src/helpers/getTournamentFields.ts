@@ -3,7 +3,14 @@ import * as yup from "yup";
 export interface ITournamentElement {
   name: string;
   placeholder: string;
-  input: "text" | "select" | "number" | "date" | "switch" | "multiple";
+  input:
+    | "text"
+    | "select"
+    | "number"
+    | "date"
+    | "switch"
+    | "multiple"
+    | "password";
   size: {
     xs: number;
     md: number;
@@ -37,19 +44,12 @@ export const step1: Array<ITournamentElement> = [
     },
     options: [
       // { displayName: "Tourney", value: "tourney" },
-      { displayName: "League + Team Play", value: "teamplay" },
+      { displayName: "League", value: "league" },
+      { displayName: "League + Team Play", value: "leagueteamplay" },
+      { displayName: "Team Play", value: "teamplay" },
+      { displayName: "Team 3 Stage", value: "3stage" },
     ],
   },
-  // {
-  //   name: "players",
-  //   placeholder: "Number of Players",
-  //   input: "number",
-  //   size: {
-  //     xs: 12,
-  //     md: 6,
-  //     lg: 6,
-  //   },
-  // },
   {
     name: "playType",
     placeholder: "Type of Play",
@@ -60,22 +60,33 @@ export const step1: Array<ITournamentElement> = [
       lg: 6,
     },
     options: [
-      //{ displayName: "Match Play", value: "matchPlay" },
-      //{ displayName: "Medal Play", value: "strokePlay" },
+      { displayName: "Match Play", value: "matchPlay" },
+      { displayName: "Medal Play", value: "strokePlay" },
       { displayName: "Match + Medal Play", value: "matchstrokePlay" },
     ],
   },
-  // {
-  //   name: "groups",
-  //   placeholder: "Number of Teams",
-  //   input: "number",
-  //   size: {
-  //     xs: 12,
-  //     md: 4,
-  //     lg: 4,
-  //   },
-  // },
 ];
+
+export const getStep1 = (type: string) => {
+  if (type === "3stage" || type === "teamplay") {
+    return [
+      step1[0],
+      step1[1],
+      {
+        name: "playType",
+        placeholder: "Type of Play",
+        input: "select",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+        options: [{ displayName: "Stableford", value: "stableford" }],
+      },
+    ] as ITournamentElement[];
+  }
+  return step1 as ITournamentElement[];
+};
 
 export interface IStep1InputElement {
   name: string;
@@ -206,8 +217,8 @@ export const rules: Array<ITournamentElement> = [
     input: "multiple",
     size: {
       xs: 12,
-      md: 6,
-      lg: 6,
+      md: 4,
+      lg: 4,
     },
     options: [
       { displayName: "Double", value: "double" },
@@ -216,18 +227,28 @@ export const rules: Array<ITournamentElement> = [
     ],
   },
   {
-    name: "playoffs",
-    placeholder: "Playoffs",
-    input: "switch",
+    name: "pointsPerWin",
+    placeholder: "Points Per Win",
+    input: "number",
     size: {
       xs: 12,
-      md: 3,
-      lg: 3,
+      md: 4,
+      lg: 4,
     },
   },
   {
-    name: "calcuta",
-    placeholder: "Calcutta",
+    name: "pointsPerTie",
+    placeholder: "Points Per Tie",
+    input: "number",
+    size: {
+      xs: 12,
+      md: 4,
+      lg: 4,
+    },
+  },
+  {
+    name: "playoffs",
+    placeholder: "Playoffs",
     input: "switch",
     size: {
       xs: 12,
@@ -240,18 +261,20 @@ export const rules: Array<ITournamentElement> = [
 export interface IRulesInputElement {
   startDate: string | null;
   cutOffDate: string | null;
+  pointsPerTie: number | "";
+  pointsPerWin: number | "";
   matchesPerRound: Array<string>;
   playoffs: boolean;
-  calcuta: boolean;
-  [key: string]: boolean | string | null | Array<string>;
+  [key: string]: boolean | string | number | null | Array<string>;
 }
 
 export const rulesFields: IRulesInputElement = {
   startDate: null,
   cutOffDate: null,
+  pointsPerTie: 1,
+  pointsPerWin: 3,
   matchesPerRound: [],
   playoffs: false,
-  calcuta: false,
 };
 
 export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
@@ -259,9 +282,18 @@ export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
   .shape({
     startDate: yup.string().required("Start Date is required"),
     cutOffDate: yup.string().required("CutOff Date is required"),
+    pointsPerWin: yup
+      .number()
+      .min(2, "Min")
+      .max(100, "Max")
+      .required("Points Per Win is required"),
+    pointsPerTie: yup
+      .number()
+      .min(1, "Min")
+      .max(100, "Max")
+      .required("Points Per Tie is required"),
     playoffs: yup.boolean().required("Playoffs"),
     matchesPerRound: yup.array().required("Matches Required"),
-    calcuta: yup.boolean().required("Calcuta"),
   });
 
 export const step2: Array<ITournamentElement> = [

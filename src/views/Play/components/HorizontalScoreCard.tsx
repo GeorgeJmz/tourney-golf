@@ -13,9 +13,15 @@ import MatchViewModel from "../../../viewModels/MatchViewModel";
 
 interface HorizontalScoreCardProps {
   match: MatchViewModel;
+  hideMatch?: boolean;
+  hideTeam?: boolean;
 }
 
-const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
+const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
+  match,
+  hideMatch,
+  hideTeam,
+}) => {
   const stylesByIndex = (index: number, isHeader = false) => {
     if (index === 0) {
       return {
@@ -62,6 +68,9 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
       "HDCP",
       "TEAM",
     ];
+    if (hideTeam) {
+      holes.pop();
+    }
     return (
       <TableRow>
         {holes.map((hole, index) => (
@@ -118,24 +127,27 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
     const scoreComponent = (
       <div style={{ position: "relative" }}>
         <span>{getScoreWithHP || "-"}</span>{" "}
-        <span
-          style={{
-            position: "absolute",
-            top: -15,
-            right: -10,
-            color: "Green",
-          }}
-        >
-          {`${currentPlayer.score.teamPoints[indexHole] > 0 ? "+" : ""}${
-            currentPlayer.score.teamPoints[indexHole] || "-"
-          }`}
-        </span>
+        {!hideTeam && (
+          <span
+            style={{
+              position: "absolute",
+              top: -15,
+              right: -10,
+              color: "Green",
+            }}
+          >
+            {`${currentPlayer.score.teamPoints[indexHole] > 0 ? "+" : ""}${
+              currentPlayer.score.teamPoints[indexHole] || "-"
+            }`}
+          </span>
+        )}
       </div>
     );
     return scoreComponent;
   };
 
   const renderPlayerRow = (player: string, rowIndex: number) => {
+    const lengthRows = hideTeam ? 23 : 24;
     return (
       <TableRow key={rowIndex}>
         <TableCell
@@ -152,7 +164,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
         >
           {player}
         </TableCell>
-        {Array.from({ length: 24 }, (_, index) => (
+        {Array.from({ length: lengthRows }, (_, index) => (
           <TableCell key={index} align="center" sx={stylesByIndex(index + 1)}>
             {renderScore(index, rowIndex)}
           </TableCell>
@@ -213,7 +225,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({ match }) => {
       <Table style={{ tableLayout: "fixed", marginBottom: "50px" }}>
         <TableHead>{renderHoleHeaders()}</TableHead>
         <TableBody>{renderPlayerRows()}</TableBody>
-        <TableBody>{renderResultsRows()}</TableBody>
+        {!hideMatch && <TableBody>{renderResultsRows()}</TableBody>}
         {match.match.winner !== "" && (
           <TableFooter>
             <TableRow>

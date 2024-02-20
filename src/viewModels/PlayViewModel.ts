@@ -10,6 +10,8 @@ import type { IPlayer } from "../models/Tournament";
 import ScoreViewModel from "./ScoreViewModel";
 import UserViewModel from "./UserViewModel";
 import MatchViewModel from "./MatchViewModel";
+import TournamentViewModel from "./TournamentViewModel";
+import TournamentModel from "../models/Tournament";
 
 export interface IGolfCourse {
   course: GolfCourse;
@@ -18,6 +20,7 @@ export interface IGolfCourse {
 
 class PlayViewModel {
   match: MatchModel = new MatchModel();
+  currentTournament: TournamentModel = new TournamentModel();
   courses: Array<IGolfCourse> = [];
   emailList: Array<Partial<IPlayer>> = [];
   currentTeeBox = "";
@@ -75,7 +78,6 @@ class PlayViewModel {
     if (this.currentStep === 2) {
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
-      console.log("tournamentId", this.tournamentId);
       players.forEach((player) => {
         const newMatch = new MatchViewModel();
         newMatch.setAuthor(this.author);
@@ -89,6 +91,7 @@ class PlayViewModel {
         newMatch.currentHcp = this.currentHcp;
         newMatch.currentPar = this.currentPar;
         newMatch.tournamentId = this.tournamentId;
+        newMatch.currentTournament = this.currentTournament;
 
         newMatch.setDifferenceHP();
         this.matches.push(newMatch);
@@ -222,7 +225,6 @@ class PlayViewModel {
   }
 
   async createMatch(): Promise<void> {
-    console.log("createMatch", toJS(this.matches));
     for (const match of this.matches) {
       await match.createMatch();
     }

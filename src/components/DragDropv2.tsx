@@ -120,7 +120,6 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
   };
 
   const onDragEnd = (result: DropResult) => {
-    console.log(result, "result");
     if (
       !result.destination ||
       result.destination.droppableId === texts.destination

@@ -57,7 +57,6 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
     setTitle("Edit Profile");
   }, []);
 
-  console.log("user", toJS(user.user));
   return (
     <Box sx={{ height: "100vh" }}>
       <form onSubmit={formik.handleSubmit}>

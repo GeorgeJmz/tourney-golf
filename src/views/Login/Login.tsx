@@ -52,7 +52,12 @@ const Login: React.FC = () => {
               </Typography>
               <LoginForm userViewModel={userViewModel} />
               <div>
-                <Typography
+                <Link to="/forgot-password">
+                  <Button variant="outlined" color="secondary" size="large">
+                    Forgot your Password
+                  </Button>
+                </Link>
+                {/* <Typography
                   variant="body1"
                   sx={{
                     maxWidth: "400px",
@@ -67,7 +72,7 @@ const Login: React.FC = () => {
                   <Button variant="outlined" color="secondary" size="large">
                     Create an Account
                   </Button>
-                </Link>
+                </Link> */}
               </div>
             </Stack>
           </Paper>

@@ -93,14 +93,10 @@ class ScoreViewModel {
     hcp: Array<number>,
     par: Array<number>
   ) => {
-    console.log("difference", difference);
-    console.log("teamDifference", this.score.handicap);
     const teamOutHcp =
       Math.floor(this.score.handicap / 2) + (this.score.handicap % 2);
     const teamInHcp =
       Math.ceil(this.score.handicap / 2) - (this.score.handicap % 2);
-    console.log("teamOutHcp", teamOutHcp);
-    console.log("teamInHcp", teamInHcp);
 
     const outHcp = Math.floor(difference / 2) + (difference % 2);
     const inHcp = Math.ceil(difference / 2) - (difference % 2);
@@ -142,8 +138,8 @@ class ScoreViewModel {
 
     this.score.teamScoreHolesHP = [...teamOutPars, ...teamInPars];
 
-    console.log("scoreHolesHP", [...outPars, ...inPars]);
-    console.log("teamScoreHolesHP", [...teamOutPars, ...teamInPars]);
+    // console.log("scoreHolesHP", [...outPars, ...inPars]);
+    // console.log("teamScoreHolesHP", [...teamOutPars, ...teamInPars]);
   };
 
   getArrayPosition = (array: number[], values: number) => {

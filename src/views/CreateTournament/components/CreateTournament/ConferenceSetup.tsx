@@ -28,11 +28,8 @@ const ConferenceSetup: React.FC<ConferenceSetupProps> = ({
     tournamentViewModel.updateConferencesList(conferences);
   };
   const onUpdateGroupPlayers = (conference: string, groupId: string) => {
-    console.log(conference, groupId, "group, idPlayer");
     tournamentViewModel.updateConferenceGroup(conference, groupId);
   };
-
-  console.log(toJS(tournamentViewModel.tournament.groupsList), "groupsList");
 
   const isNextDisabled =
     tournamentViewModel.tournament.groupsList.filter(

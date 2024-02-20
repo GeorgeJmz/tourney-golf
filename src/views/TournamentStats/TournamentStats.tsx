@@ -22,6 +22,7 @@ import Typography from "@mui/material/Typography";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
 import MenuItems from "../../components/MenuItems";
+import { toJS } from "mobx";
 
 interface ITournamentStatsProps {
   user: UserViewModel;
@@ -49,9 +50,20 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
 
   React.useEffect(() => {
     if (id) {
+      tournamentViewModel.setTournamentId(id);
       tournamentViewModel.getStatsPlayersByTournament();
     }
   }, [id]);
+
+  const tournamentType = tournamentViewModel.tournament.tournamentType;
+  const playType = tournamentViewModel.tournament.playType;
+
+  const isLTMATCH =
+    tournamentType === "leagueteamplay" && playType === "matchPlay";
+  const isLTMEDAL =
+    tournamentType === "leagueteamplay" && playType === "strokePlay";
+  const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+  const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
 
   const tableRows = () => {
     const p =
@@ -60,16 +72,34 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         : tournamentViewModel.statsPlayers.filter(
             (p) => p.conference === stats || p.group === stats
           );
+
+    const namesStyles = {
+      textAlign: "center",
+      filter: "drop-shadow(7px 7px 11px grey)",
+      position: "sticky",
+      left: 0,
+      backgroundColor: "rgb(118, 118, 118);",
+      color: "white",
+      fontWeight: "bold",
+      border: "none",
+      width: 80,
+      zIndex: 1,
+    };
+
     const rows = p.map((t, i) => (
       <TableRow key={t.id}>
-        <TableCell sx={{ textAlign: "center" }}>{i + 1}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.tourneyName}</TableCell>
+        <TableCell sx={namesStyles}>{i + 1}</TableCell>
+        <TableCell sx={namesStyles}>{t.tourneyName}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.matchesPlayed}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.wins}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.draws}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.losses}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.matchPoints}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
+        {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+          <TableCell sx={{ textAlign: "center" }}>{t.matchPoints}</TableCell>
+        )}
+        {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+          <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
+        )}
         <TableCell sx={{ textAlign: "center" }}>{t.totalPoints}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>
           {t.grossAverage || "-"}
@@ -80,12 +110,28 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         <TableCell sx={{ textAlign: "center" }}>
           {t.netAverage || "-"}
         </TableCell>
-        <TableCell sx={{ textAlign: "center" }}>
-          {t.teamPoints || "-"}
-        </TableCell>
+        {!isLMATCH && !isLMEDAL && (
+          <TableCell sx={{ textAlign: "center" }}>
+            {t.teamPoints || "-"}
+          </TableCell>
+        )}
       </TableRow>
     ));
+
     return rows;
+  };
+
+  const hStyles = {
+    textAlign: "center",
+    filter: "drop-shadow(7px 7px 11px grey)",
+    position: "sticky",
+    top: 0,
+    backgroundColor: "rgb(118, 118, 118);",
+    color: "white",
+    fontWeight: "bold",
+    border: "none",
+    width: 80,
+    zIndex: 1,
   };
 
   const tableRowsTeams = tournamentViewModel.statsTeams.map((t, i) => (
@@ -133,13 +179,15 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
               (g) => g.value === stats
             )}
           />
-          <Button
-            variant={stats === "teams" ? "contained" : "outlined"}
-            key="teams"
-            onClick={() => setStats("teams")}
-          >
-            Teams
-          </Button>
+          {!isLMATCH && !isLMEDAL && (
+            <Button
+              variant={stats === "teams" ? "contained" : "outlined"}
+              key="teams"
+              onClick={() => setStats("teams")}
+            >
+              Teams
+            </Button>
+          )}
         </Box>
       </div>
       {stats !== "teams" && (
@@ -153,13 +201,17 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
                 <TableCell>Wins</TableCell>
                 <TableCell>Draws</TableCell>
                 <TableCell>Losses</TableCell>
-                <TableCell>Match Points</TableCell>
-                <TableCell>Medal Points</TableCell>
+                {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+                  <TableCell>Match Points</TableCell>
+                )}
+                {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+                  <TableCell>Medal Points</TableCell>
+                )}
                 <TableCell>Total Points</TableCell>
                 <TableCell>Gross Average</TableCell>
                 <TableCell>Handicap Average</TableCell>
                 <TableCell>Net Average</TableCell>
-                <TableCell>Team Points</TableCell>
+                {!isLMATCH && !isLMEDAL && <TableCell>Team Points</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>{tableRows()}</TableBody>

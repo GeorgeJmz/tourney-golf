@@ -32,7 +32,6 @@ const TeamSetup: React.FC<TeamSetupProps> = ({
     tournamentViewModel.updateTeamPlayers(group, idPlayer);
   };
 
-  console.log(toJS(tournamentViewModel.tournament.playersList), "playersList");
   const isNextDisabled =
     tournamentViewModel.tournament.playersList.filter(
       (player) => player.team === "" || player.team === "0initial"

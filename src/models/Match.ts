@@ -7,6 +7,8 @@ export interface IMatchResults {
   teamPoints: number;
   isWinnerMatch: boolean;
   isWinnerMedalPlay: boolean;
+  medalPoints?: number;
+  matchPoints?: number;
 }
 export interface IMatch {
   author: string;

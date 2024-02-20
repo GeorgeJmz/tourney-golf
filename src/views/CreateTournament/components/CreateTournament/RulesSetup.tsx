@@ -13,6 +13,7 @@ import {
   rulesFieldsValidations,
 } from "../../../../helpers/getTournamentFields";
 import dayjs from "dayjs";
+import { TextInput } from "../../../../components/TextInput";
 
 interface RulesSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -31,11 +32,12 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       const newValues = {
-        calcuta: values.calcuta,
         playOffs: values.playoffs,
         startDate: values.startDate?.toString(),
         cutOffDate: values.cutOffDate?.toString(),
         matchesPerRound: values.matchesPerRound,
+        pointsPerWin: values.pointsPerWin || 3,
+        pointsPerTie: values.pointsPerTie || 1,
       };
       await tournamentViewModel.updateTournament(newValues);
       handleNext();
@@ -60,6 +62,23 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
                 }
                 value={formik.values[inputElement.name] as unknown as string}
                 error={formik.errors[inputElement.name]}
+                key={key}
+              />
+            );
+          }
+          if (inputElement.input === "number") {
+            return (
+              <TextInput
+                inputElement={inputElement}
+                isError={isError}
+                inputProps={{ inputMode: "numeric" }}
+                onChangeHandler={formik.handleChange}
+                error={
+                  formik.touched[inputElement.name]
+                    ? formik.errors[inputElement.name]
+                    : ""
+                }
+                value={formik.values[inputElement.name] as number}
                 key={key}
               />
             );
