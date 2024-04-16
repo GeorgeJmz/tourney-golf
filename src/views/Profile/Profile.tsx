@@ -39,6 +39,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
       name: user.user.name,
       email: user.user.email,
       lastName: user.user.lastName,
+      ghinNumber: user.user.ghinNumber,
     } as IProfileElement,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -47,6 +48,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
         lastName: values.lastName,
         id: user.user.id,
         email: user.user.email,
+        ghinNumber: values.ghinNumber,
       };
       user.updateUser(newUser);
       setTimeout(() => navigate("/dashboard"), 1000);

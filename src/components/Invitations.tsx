@@ -27,6 +27,7 @@ import type { IUser } from "../models/User";
 interface InvitationsProps {
   playersToInvite: IUser[];
   fields: ITournamentElement[];
+  showAll: boolean;
   emailList: Array<Partial<IPlayer>>;
   validationSchema: yup.ObjectSchema<IInvitationsInputElement>;
   playersLeft?: number;
@@ -42,6 +43,7 @@ interface InvitationsProps {
 
 export const Invitations: React.FC<InvitationsProps> = ({
   fields,
+  showAll,
   playersToInvite,
   emailList,
   validationSchema,
@@ -56,7 +58,9 @@ export const Invitations: React.FC<InvitationsProps> = ({
     initialValues: invitationsFields,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      onSubmit(values.email, values.name, values.handicap || 0);
+      console.log(values, "values");
+      console.log(selectedUser, "selecedUser");
+      //onSubmit(values.email, values.name, values.handicap || 0);
     },
   });
 
@@ -84,8 +88,8 @@ export const Invitations: React.FC<InvitationsProps> = ({
     );
   return (
     <form onSubmit={formik.handleSubmit}>
+      <Typography variant="h6">Invite Players</Typography>
       <Grid item xs={12} md={3} lg={3}>
-        <Typography variant="h6">Invite Players</Typography>
         <Autocomplete
           options={matchingUsers}
           getOptionLabel={(user) => `${user.name} - ${user.email}`}
@@ -104,26 +108,27 @@ export const Invitations: React.FC<InvitationsProps> = ({
       </Grid>
 
       <Grid container spacing={2}>
-        {fields.map((inputElement, key) => {
-          const isError = Boolean(
-            formik.touched[inputElement.name] &&
-              Boolean(formik.errors[inputElement.name])
-          );
-          return (
-            <TextInput
-              inputElement={inputElement}
-              isError={isError}
-              onChangeHandler={formik.handleChange}
-              error={
-                formik.touched[inputElement.name]
-                  ? formik.errors[inputElement.name]
-                  : ""
-              }
-              value={formik.values[inputElement.name]}
-              key={key}
-            />
-          );
-        })}
+        {showAll &&
+          fields.map((inputElement, key) => {
+            const isError = Boolean(
+              formik.touched[inputElement.name] &&
+                Boolean(formik.errors[inputElement.name])
+            );
+            return (
+              <TextInput
+                inputElement={inputElement}
+                isError={isError}
+                onChangeHandler={formik.handleChange}
+                error={
+                  formik.touched[inputElement.name]
+                    ? formik.errors[inputElement.name]
+                    : ""
+                }
+                value={formik.values[inputElement.name]}
+                key={key}
+              />
+            );
+          })}
         <Grid item xs={12} md={3} lg={3}>
           <FormControl margin="normal" fullWidth>
             <Button
@@ -131,6 +136,12 @@ export const Invitations: React.FC<InvitationsProps> = ({
               variant="contained"
               size="large"
               disabled={isDisabled}
+              onClick={(e) => {
+                if (selectedUser) {
+                  onSubmit(selectedUser.email, selectedUser.name, 0);
+                  setSelectedUser(null);
+                }
+              }}
             >
               Add Player
             </Button>

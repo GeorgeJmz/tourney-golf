@@ -1,4 +1,4 @@
-import { action, makeObservable, observable } from "mobx";
+import { action, makeObservable, observable, toJS } from "mobx";
 import ScoreModel from "../models/Score";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -175,10 +175,10 @@ class ScoreViewModel {
       });
       const displayMessage = getMessages(Messages.SCORE_CREATED);
       toast.update(cuToast, {
-        render: displayMessage,
+        render: `${displayMessage}: ${this.score.player}`,
         type: toast.TYPE.SUCCESS,
         isLoading: false,
-        autoClose: 800,
+        autoClose: 1000,
       });
       return scoreId || "";
     } catch (error) {

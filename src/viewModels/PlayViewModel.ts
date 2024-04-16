@@ -120,7 +120,7 @@ class PlayViewModel {
       match.setHoleScores(allScoresMatches[key], hole);
       match.calculateWinners();
     });
-    this.setModal(false);
+    //this.setModal(false);
   }
 
   getAuthor(): string {
@@ -138,15 +138,17 @@ class PlayViewModel {
   }
 
   addEmailToList(email: string, name: string, handicap: number): void {
-    this.emailList.push({ name, email, handicap });
+    const hp = parseInt(handicap.toString());
+    this.emailList.push({ name, email, handicap: hp });
     const player = new ScoreViewModel();
-    player.setPlayer(name, email, handicap);
+    player.setPlayer(name, email, hp);
     this.allPlayers.push(player);
   }
 
   updateEmailList(email: string, name: string, handicap: number, key: number) {
-    this.emailList[key] = { name, email, handicap };
-    this.allPlayers[key].setPlayer(name, email, handicap);
+    const hp = parseInt(handicap.toString());
+    this.emailList[key] = { name, email, handicap: hp };
+    this.allPlayers[key].setPlayer(name, email, hp);
   }
 
   removeEmailFromList(key: number): void {
@@ -201,7 +203,7 @@ class PlayViewModel {
         isOpen: false,
         course,
       }));
-      const displayMessage = getMessages(Messages.USER_LOGGED);
+      const displayMessage = getMessages(Messages.COURSES_LOADED);
       toast.update(cuToast, {
         render: displayMessage,
         type: toast.TYPE.SUCCESS,

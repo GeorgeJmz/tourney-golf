@@ -9,11 +9,12 @@ import { DateInput } from "../../../../components/DateInput";
 import { SwitchInput } from "../../../../components/SwitchInput";
 import { MultipleInput } from "../../../../components/MultipleInput";
 import {
-  rules,
+  getRules,
   rulesFieldsValidations,
 } from "../../../../helpers/getTournamentFields";
 import dayjs from "dayjs";
 import { TextInput } from "../../../../components/TextInput";
+import { toJS } from "mobx";
 
 interface RulesSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -38,80 +39,94 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
         matchesPerRound: values.matchesPerRound,
         pointsPerWin: values.pointsPerWin || 3,
         pointsPerTie: values.pointsPerTie || 1,
+        pointsPerWinMedal: values.pointsPerWinMedal || 3,
+        pointsPerTieMedal: values.pointsPerTieMedal || 1,
       };
       await tournamentViewModel.updateTournament(newValues);
       handleNext();
     },
   });
 
+  console.log(
+    "tournamentViewModel",
+    toJS(tournamentViewModel.tournament.playType)
+  );
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid container spacing={2}>
-        {rules.map((inputElement, key) => {
-          const isError = Boolean(
-            formik.touched[inputElement.name] &&
-              Boolean(formik.errors[inputElement.name])
-          );
-          if (inputElement.input === "multiple") {
-            return (
-              <MultipleInput
-                inputElement={inputElement}
-                isError={isError}
-                onChangeHandler={(e) =>
-                  formik.setFieldValue(inputElement.name, e.target.value)
-                }
-                value={formik.values[inputElement.name] as unknown as string}
-                error={formik.errors[inputElement.name]}
-                key={key}
-              />
+        {getRules(tournamentViewModel.tournament.playType).map(
+          (inputElement, key) => {
+            const isError = Boolean(
+              formik.touched[inputElement.name] &&
+                Boolean(formik.errors[inputElement.name])
             );
-          }
-          if (inputElement.input === "number") {
+            if (inputElement.input === "multiple") {
+              return (
+                <MultipleInput
+                  inputElement={inputElement}
+                  isError={isError}
+                  onChangeHandler={(e) =>
+                    formik.setFieldValue(inputElement.name, e.target.value)
+                  }
+                  value={formik.values[inputElement.name] as unknown as string}
+                  error={formik.errors[inputElement.name]}
+                  key={key}
+                />
+              );
+            }
+            if (inputElement.input === "number") {
+              return (
+                <TextInput
+                  inputElement={inputElement}
+                  isError={isError}
+                  inputProps={{ inputMode: "numeric" }}
+                  onChangeHandler={formik.handleChange}
+                  error={
+                    formik.touched[inputElement.name]
+                      ? formik.errors[inputElement.name]
+                      : ""
+                  }
+                  value={formik.values[inputElement.name] as number}
+                  key={key}
+                />
+              );
+            }
+            if (inputElement.input === "switch") {
+              return (
+                <SwitchInput
+                  inputElement={inputElement}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    formik.setFieldValue(
+                      inputElement.name,
+                      event.target.checked
+                    )
+                  }
+                  value={formik.values[inputElement.name] as unknown as boolean}
+                  key={key}
+                />
+              );
+            }
             return (
-              <TextInput
+              <DateInput
                 inputElement={inputElement}
                 isError={isError}
-                inputProps={{ inputMode: "numeric" }}
-                onChangeHandler={formik.handleChange}
+                onChange={(value: string | null) => {
+                  formik.setFieldValue(
+                    inputElement.name,
+                    dayjs(value).format()
+                  );
+                }}
                 error={
                   formik.touched[inputElement.name]
                     ? formik.errors[inputElement.name]
                     : ""
                 }
-                value={formik.values[inputElement.name] as number}
+                value={formik.values[inputElement.name] as unknown as string}
                 key={key}
               />
             );
           }
-          if (inputElement.input === "switch") {
-            return (
-              <SwitchInput
-                inputElement={inputElement}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  formik.setFieldValue(inputElement.name, event.target.checked)
-                }
-                value={formik.values[inputElement.name] as unknown as boolean}
-                key={key}
-              />
-            );
-          }
-          return (
-            <DateInput
-              inputElement={inputElement}
-              isError={isError}
-              onChange={(value: string | null) => {
-                formik.setFieldValue(inputElement.name, dayjs(value).format());
-              }}
-              error={
-                formik.touched[inputElement.name]
-                  ? formik.errors[inputElement.name]
-                  : ""
-              }
-              value={formik.values[inputElement.name] as unknown as string}
-              key={key}
-            />
-          );
-        })}
+        )}
         <Grid item xs={12}>
           <FormControl>
             <Button type="submit" variant="contained" size="large">

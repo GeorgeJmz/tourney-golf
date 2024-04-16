@@ -114,10 +114,9 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   const styleTable = {
     width: isMobile() ? "100%" : "48%",
   };
-  const hideTeam = !(playType !== "leagueteamplay" && playType !== "teamplay");
-  const hideMatch = !(
-    playType !== "matchPlay" && playType !== "matchstrokePlay"
-  );
+  const hideTeam = tournamentType === "league";
+  const hideMatch = playType === "strokePlay";
+  const hideMedal = playType === "matchPlay";
 
   return (
     <Box sx={{ background: "white", p: 3, height: "100vh" }}>
@@ -162,7 +161,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                       <TableCell sx={headerStyles}>Gross</TableCell>
                       <TableCell sx={headerStyles}>HDCP</TableCell>
                       <TableCell sx={headerStyles}>Net</TableCell>
-                      {hideTeam && (
+                      {!hideTeam && (
                         <TableCell sx={headerStyles}>Team</TableCell>
                       )}
                     </TableRow>
@@ -212,9 +211,9 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                           <Link
                             to={`/match/${match.scoresId[0]}-${
                               match.scoresId[1]
-                            }-match-${hideMatch ? "true" : "false"}-team-${
-                              hideTeam ? "true" : "false"
-                            }`}
+                            }-match-${!hideMatch ? "true" : "false"}-team-${
+                              !hideTeam ? "true" : "false"
+                            }-medal-${!hideMedal ? "true" : "false"}`}
                           >
                             <Button variant="text" color="primary">
                               View Scorecard

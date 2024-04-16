@@ -19,13 +19,12 @@ import {
   query,
   where,
   deleteDoc,
-  writeBatch,
 } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import type { IUser } from "../models/User";
 import "firebase/database";
 import "firebase/storage";
-import { ITournament } from "../models/Tournament";
+import { IPlayer, ITournament } from "../models/Tournament";
 import { IMatch } from "../models/Match";
 import { IScore } from "../models/Score";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
@@ -80,6 +79,7 @@ export const sendCustomEmail = async (
     const emailContent = {
       to: email.toLowerCase(),
       message: {
+        from: "TEEBOX League <teeboxleague@gmail.com>",
         subject: subject,
         text: body,
         html: `<p>${body}</p>`,
@@ -158,6 +158,7 @@ export const updateUser = async (
       id: user.id,
       name: user.name,
       lastName: user.lastName,
+      ghinNumber: user.ghinNumber || "",
     } as IUser;
 
     const userCollection = collection(db, "users");
@@ -320,6 +321,77 @@ export const assignActiveTourneyByEmail = async (
   }
 };
 
+export const assignNewActiveTourneyByEmail = async (
+  email: string,
+  removeEmail: string,
+  tournamentId: string,
+  tournamentName: string,
+  player: Partial<ITournamentPlayer>
+) => {
+  const subject = "You have a TEE BOX League invitation";
+  const mail = `<h1>Hi ${player.name}</h1>
+      <p>Get ready to practice with purpose, play with an edge and become a league legend.<p>
+      <p><a href="https://teeboxleague.com/" target="_blank">Login</a> to accept the ${tournamentName} invitation.</p>`;
+  const userId = await getUserIdByEmail(email);
+  console.log(userId, "userId");
+  if (userId !== "") {
+    const documentRef = doc(db, "users", userId);
+    const docSnap = await getDoc(documentRef);
+    const activeTournaments = docSnap.data()?.activeTournaments || [];
+    console.log(
+      activeTournaments,
+      "activeTournaments",
+      tournamentId,
+      "tournamentId",
+      email,
+      "email"
+    );
+    if (!activeTournaments.includes(tournamentId)) {
+      const newAdded = {
+        activeTournaments: [...new Set([...activeTournaments, tournamentId])],
+      };
+      console.log(newAdded, "newAdded");
+      await setDoc(documentRef, newAdded, { merge: true });
+      await sendCustomEmail(player.email || "", subject, mail);
+    }
+  } else {
+    const firebaseUser = {
+      email: player?.email?.toLowerCase(),
+      id: player?.email?.toLowerCase(),
+      name: player.name,
+      lastName: "",
+      activeTournaments: [tournamentId],
+    } as IUser;
+    console.log(firebaseUser, "firebaseUser");
+    await addDoc(collection(db, "users"), firebaseUser);
+    await sendCustomEmail(player.email || "", subject, mail);
+  }
+  const removeUserId = await getUserIdByEmail(removeEmail);
+  console.log(removeUserId, "removeUserId");
+  if (removeUserId !== "") {
+    const documentRef = doc(db, "users", removeUserId);
+    const docSnap = await getDoc(documentRef);
+    const activeTournaments = docSnap.data()?.activeTournaments || [];
+    console.log(
+      activeTournaments,
+      "activeTournaments",
+      tournamentId,
+      "tournamentId",
+      removeEmail,
+      "removeEmail"
+    );
+    if (activeTournaments.includes(tournamentId)) {
+      const newAdded = {
+        activeTournaments: activeTournaments.filter(
+          (tournament: string) => tournament !== tournamentId
+        ),
+      };
+      console.log(newAdded, "newAdded-Remove");
+      await setDoc(documentRef, newAdded, { merge: true });
+    }
+  }
+};
+
 export const deleteActiveTourneyById = async (tournamentId: string) => {
   const updateUser = async (email: string) => {
     const userId = await getUserIdByEmail(email.toLowerCase());
@@ -411,6 +483,26 @@ export const updatePlayerAllFields = async (
   const playerRef = doc(db, "player", player.id);
   //const docSnap = await getDoc(playerRef);
   await setDoc(playerRef, player, { merge: true });
+};
+
+export const updatePlayerListByTournamentId = async (
+  tournamentId: string,
+  players: Partial<IPlayer>[]
+): Promise<void> => {
+  getTournamentsById([tournamentId]).then(async (tournament) => {
+    if (tournament) {
+      const currentTournament = tournament[0];
+      console.log(currentTournament, "currentTournament");
+      console.log("new", {
+        ...currentTournament,
+        playersList: players,
+      });
+      await updateTournament(tournamentId, {
+        ...currentTournament,
+        playersList: players,
+      });
+    }
+  });
 };
 
 export const updatePlayer = async (player: {
@@ -596,7 +688,7 @@ export const getMatchesByTournamentId = async (
   const querySnapshot = await getDocs(userQuery);
   const matches = [] as Array<IMatch>;
   querySnapshot.forEach((doc) => {
-    matches.push(doc.data() as unknown as IMatch);
+    matches.push({ ...doc.data(), id: doc.id } as unknown as IMatch);
   });
 
   return matches || ([] as Array<IMatch>);
@@ -619,6 +711,15 @@ export const createMatch = async (match: IMatch): Promise<string> => {
   try {
     const doc = await addDoc(collection(db, "match"), match);
     return doc.id;
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const deleteMatch = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "match", id));
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
@@ -648,6 +749,15 @@ export const createScore = async (score: IScore): Promise<string> => {
   }
 };
 
+export const deleteScore = async (id: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, "score", id));
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
 export const getScoresByID = async (id: string): Promise<IScore | null> => {
   const documentRef = doc(db, "score", id);
   let document = null;
@@ -661,6 +771,19 @@ export const getScoresByID = async (id: string): Promise<IScore | null> => {
     }
   } catch (error) {
     return null;
+  }
+};
+
+export const updateScore = async (
+  documentId: string,
+  updatedData: Partial<IScore>
+): Promise<void> => {
+  try {
+    const documentRef = doc(db, "score", documentId);
+    await setDoc(documentRef, updatedData, { merge: true });
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
   }
 };
 

@@ -217,34 +217,14 @@ export const rules: Array<ITournamentElement> = [
     input: "multiple",
     size: {
       xs: 12,
-      md: 4,
-      lg: 4,
+      md: 3,
+      lg: 3,
     },
     options: [
       { displayName: "Double", value: "double" },
       { displayName: "Triple", value: "triple" },
       { displayName: "Quadruple", value: "cuadruple" },
     ],
-  },
-  {
-    name: "pointsPerWin",
-    placeholder: "Points Per Win",
-    input: "number",
-    size: {
-      xs: 12,
-      md: 4,
-      lg: 4,
-    },
-  },
-  {
-    name: "pointsPerTie",
-    placeholder: "Points Per Tie",
-    input: "number",
-    size: {
-      xs: 12,
-      md: 4,
-      lg: 4,
-    },
   },
   {
     name: "playoffs",
@@ -258,11 +238,89 @@ export const rules: Array<ITournamentElement> = [
   },
 ];
 
+export const getRules = (type: string) => {
+  const matchPoints = [
+    {
+      name: "pointsPerWin",
+      placeholder: "Points Per Win Match",
+      input: "number",
+      size: {
+        xs: 12,
+        md: 3,
+        lg: 3,
+      },
+    },
+    {
+      name: "pointsPerTie",
+      placeholder: "Points Per Tie Match",
+      input: "number",
+      size: {
+        xs: 12,
+        md: 3,
+        lg: 3,
+      },
+    },
+  ];
+  const medalPoints = [
+    {
+      name: "pointsPerWinMedal",
+      placeholder: "Points Per Win Medal",
+      input: "number",
+      size: {
+        xs: 12,
+        md: 3,
+        lg: 3,
+      },
+    },
+    {
+      name: "pointsPerTieMedal",
+      placeholder: "Points Per Tie Medal",
+      input: "number",
+      size: {
+        xs: 12,
+        md: 3,
+        lg: 3,
+      },
+    },
+  ];
+  if (type === "matchPlay") {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...matchPoints,
+      rules[3],
+    ] as ITournamentElement[];
+  }
+  if (type === "strokePlay" || type === "stableford") {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...medalPoints,
+      rules[3],
+    ] as ITournamentElement[];
+  }
+  if (type === "matchstrokePlay") {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...matchPoints,
+      ...medalPoints,
+      rules[3],
+    ] as ITournamentElement[];
+  }
+  return rules as ITournamentElement[];
+};
+
 export interface IRulesInputElement {
   startDate: string | null;
   cutOffDate: string | null;
   pointsPerTie: number | "";
   pointsPerWin: number | "";
+  pointsPerTieMedal: number | "";
+  pointsPerWinMedal: number | "";
   matchesPerRound: Array<string>;
   playoffs: boolean;
   [key: string]: boolean | string | number | null | Array<string>;
@@ -273,6 +331,8 @@ export const rulesFields: IRulesInputElement = {
   cutOffDate: null,
   pointsPerTie: 1,
   pointsPerWin: 3,
+  pointsPerTieMedal: 1,
+  pointsPerWinMedal: 3,
   matchesPerRound: [],
   playoffs: false,
 };
@@ -288,6 +348,16 @@ export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
       .max(100, "Max")
       .required("Points Per Win is required"),
     pointsPerTie: yup
+      .number()
+      .min(1, "Min")
+      .max(100, "Max")
+      .required("Points Per Tie is required"),
+    pointsPerWinMedal: yup
+      .number()
+      .min(2, "Min")
+      .max(100, "Max")
+      .required("Points Per Win is required"),
+    pointsPerTieMedal: yup
       .number()
       .min(1, "Min")
       .max(100, "Max")

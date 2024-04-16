@@ -137,7 +137,7 @@ class UserViewModel {
         render: displayError,
         type: toast.TYPE.ERROR,
         isLoading: false,
-        autoClose: 800,
+        autoClose: 1200,
       });
     }
   }
@@ -147,7 +147,7 @@ class UserViewModel {
     const cuToast = toast.loading(displayLoading);
     try {
       this.tournaments = (await getTournamentsByAuthorID(this.user.id)) || [];
-      const displayMessage = getMessages(Messages.USER_LOGGED);
+      const displayMessage = getMessages(Messages.TOURNAMENTS_LOADED);
       toast.update(cuToast, {
         render: displayMessage,
         type: toast.TYPE.SUCCESS,
@@ -196,7 +196,7 @@ class UserViewModel {
     const cuToast = toast.loading(displayLoading);
     try {
       this.matches = (await getMatchesByID(this.user.id)) || [];
-      const displayMessage = getMessages(Messages.USER_LOGGED);
+      const displayMessage = getMessages(Messages.MATCHES_LOADED);
       toast.update(cuToast, {
         render: displayMessage,
         type: toast.TYPE.SUCCESS,

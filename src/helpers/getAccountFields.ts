@@ -98,12 +98,23 @@ export const profileElementsSettings: Array<ITournamentElement> = [
       lg: 6,
     },
   },
+  {
+    name: "ghinNumber",
+    placeholder: "GHIN Number",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 6,
+    },
+  },
 ];
 
 export interface IProfileElement {
   name: string;
   lastName: string;
   email: string;
+  ghinNumber: string;
   [key: string]: string;
 }
 
@@ -111,6 +122,7 @@ export const profileFields: IProfileElement = {
   name: "",
   lastName: "",
   email: "",
+  ghinNumber: "",
 };
 
 export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
@@ -124,6 +136,7 @@ export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
       .string()
       .required("Last Name is required")
       .min(4, "Last Name should be of minimum 4 characters length"),
+    ghinNumber: yup.string().required("GHIN Number is required"),
     email: yup.string().required("League type is required"),
   });
 

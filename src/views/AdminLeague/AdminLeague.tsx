@@ -10,6 +10,7 @@ import StepLabel from "@mui/material/StepLabel";
 import StepContent from "@mui/material/StepContent";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SwitchAccountIcon from "@mui/icons-material/SwitchAccount";
 import Modal from "@mui/material/Modal";
 
 import List from "@mui/material/List";
@@ -20,6 +21,7 @@ import ListItemText from "@mui/material/ListItemText";
 import {
   Box,
   FormControl,
+  Grid,
   InputLabel,
   MenuItem,
   Select,
@@ -34,7 +36,7 @@ import {
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import TourneySetup from "./../CreateTournament/components/CreateTournament/TourneySetup";
 import RulesSetup from "./../CreateTournament/components/CreateTournament/RulesSetup";
 import PlayerSetup from "./../CreateTournament/components/CreateTournament/PlayerSetup";
@@ -48,7 +50,21 @@ import { set } from "firebase/database";
 import { convertMomentDate, differenceDate } from "../../helpers/convertDate";
 import { IMatchResults } from "../../models/Match";
 import MenuItems from "../../components/MenuItems";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Slide from "@mui/material/Slide";
+import { TransitionProps } from "@mui/material/transitions";
 import { toJS } from "mobx";
+import { IPlayer } from "../../models/Tournament";
+import { TextInput } from "../../components/TextInput";
+import { useFormik } from "formik";
+import { step2Fields } from "../../helpers/getTournamentFields";
+import { getMessages } from "../../helpers/getMessages";
+import { toast } from "react-toastify";
+import { Messages } from "../../helpers/messages";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -95,6 +111,14 @@ const styleModal = {
   boxShadow: 24,
   p: 4,
 };
+const Transition = React.forwardRef(function Transition(
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   const userId = React.useMemo(() => user.getUserId(), []);
 
@@ -177,6 +201,44 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     playType !== "matchstrokePlay" &&
     playType !== "stableford";
 
+  const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
+  const [openSwitchModal, setOpenSwitchModal] = React.useState(false);
+  const [matchToDelete, setMatchToDelete] = React.useState<string>("");
+  const [playerToSwitch, setPlayerToSwitch] =
+    React.useState<null | Partial<IPlayer>>(null);
+
+  const onDeleteMatch = (id: string) => {
+    setMatchToDelete(id);
+    setOpenDeleteModal(true);
+  };
+
+  const onDeleteMatchConfirm = () => {
+    tournamentViewModel.deleteMatch(matchToDelete);
+    setTimeout(() => navigate("/dashboard"), 1200);
+    setOpenDeleteModal(false);
+  };
+
+  const onSwitchPlayer = async () => {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    await tournamentViewModel.switchPlayer(
+      playerToSwitch?.prevEmail || "",
+      playerToSwitch?.email || "",
+      playerToSwitch?.name || ""
+    );
+    toast.dismiss(cuToast);
+    setTimeout(() => {
+      navigate("/dashboard");
+    }, 1200);
+  };
+
+  const hasDuplicate = () => {
+    const emails = tournamentViewModel.tournament.playersList.map(
+      (p) => p.email
+    );
+    return emails.includes(playerToSwitch?.email || "");
+  };
+
   return (
     <div>
       <Box
@@ -195,9 +257,9 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
           <Tabs value={value} onChange={handleChange} centered>
             <Tab label="League Setup" />
             <Tab label="Results Review " />
+            <Tab label="Switch Players " />
             <Tab label="Playoff Picture " />
             <Tab label="Finish League" />
-            <Tab label="Delete League" />
           </Tabs>
           <TabPanel value={value} index={0}>
             <React.Fragment>
@@ -235,6 +297,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                       <TableCell sx={headerStyles}>Gross</TableCell>
                       <TableCell sx={headerStyles}>HDCP</TableCell>
                       <TableCell sx={headerStyles}>Net</TableCell>
+                      <TableCell sx={headerStyles}></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -246,13 +309,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                       )
                       .sort((a, b) => differenceDate(a.date, b.date))
                       .map((match) => (
-                        <TableRow
-                          key={
-                            match.matchResults[0].idPlayer +
-                            "-" +
-                            match.matchResults[1].idPlayer
-                          }
-                        >
+                        <TableRow key={match.id}>
                           <TableCell
                             sx={{ textAlign: "center", minWidth: "80px" }}
                           >
@@ -407,6 +464,16 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                               {match.matchResults[1].score}
                             </p>
                           </TableCell>
+                          <TableCell
+                            sx={{ textAlign: "center", minWidth: "80px" }}
+                          >
+                            <IconButton
+                              aria-label="delete"
+                              onClick={() => onDeleteMatch(match.id || "")}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
                         </TableRow>
                       ))}
                     <TableRow>
@@ -557,12 +624,61 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             </TableContainer> */}
           </TabPanel>
           <TabPanel value={value} index={2}>
-            <p>Playoff Picture </p>
+            <Grid container spacing={2}>
+              <Grid item xs={12} justifyContent="center" alignItems="center">
+                <TableContainer component={Paper}>
+                  <Table aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="left">Name</TableCell>
+                        <TableCell align="left">Email</TableCell>
+                        <TableCell align="right"></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {tournamentViewModel.tournament.playersList.map(
+                        ({ email, name }, index) => (
+                          <TableRow key={`${email}-${name}-${index}`}>
+                            <TableCell component="th" scope="row" align="left">
+                              {name}
+                            </TableCell>
+                            <TableCell align="left">{email}</TableCell>
+                            <TableCell align="right">
+                              <Button
+                                variant="outlined"
+                                endIcon={<SwitchAccountIcon />}
+                                type="button"
+                                onClick={() => {
+                                  setPlayerToSwitch({
+                                    email,
+                                    name,
+                                    prevEmail: email,
+                                  });
+                                  setOpenSwitchModal(true);
+                                }}
+                              >
+                                Switch Player
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
+            </Grid>
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <p>Click below if {currentTournament?.name} has concluded </p>
+            <p>Playoff Picture </p>
+          </TabPanel>
+          <TabPanel value={value} index={4}>
             <p>
-              All scores and stats will be saved and set as view-only in
+              Click here if <strong>{currentTournament?.name}</strong> has
+              concluded{" "}
+            </p>
+            <p>
+              Scores and stats will be saved and set as view-only in
               participant’s League History
             </p>
             <Button
@@ -572,20 +688,113 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             >
               Finish League
             </Button>
+            <Box sx={{ marginTop: "100px" }}>
+              <p>
+                Click here to delete <strong>{currentTournament?.name}</strong>
+              </p>
+              <p>Setup, Scores and Stats will be permanently lost</p>
+              <Button
+                variant="contained"
+                type="button"
+                color="error"
+                onClick={() => tournamentViewModel.deleteLeague()}
+              >
+                Delete League
+              </Button>
+            </Box>
           </TabPanel>
-          <TabPanel value={value} index={4}>
-            <p>
-              Click below to delete {currentTournament?.name} along with setup,
-              scores and stats generated in this league
-            </p>
-            <Button
-              variant="contained"
-              type="button"
-              onClick={() => tournamentViewModel.deleteLeague()}
-            >
-              Delete League
-            </Button>
-          </TabPanel>
+          <Dialog
+            open={openDeleteModal}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => setOpenDeleteModal(false)}
+            aria-describedby="alert-dialog-slide-description"
+          >
+            <DialogTitle>Delete match?</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-slide-description">
+                <Typography variant="h6" textAlign="center">
+                  {tournamentViewModel.leagueResults
+                    .find((m) => m.id === matchToDelete)
+                    ?.matchResults.map((p) => p.playerName)
+                    .join(" vs ") || ""}
+                </Typography>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Box display="flex" gap="8px" alignContent="space-between">
+                <Button onClick={() => onDeleteMatchConfirm()}>Yes</Button>
+                <Button onClick={() => setOpenDeleteModal(false)}>No</Button>
+              </Box>
+            </DialogActions>
+          </Dialog>
+          <Dialog
+            open={openSwitchModal}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => {
+              setOpenSwitchModal(false);
+              setPlayerToSwitch(null);
+            }}
+            aria-describedby="alert-dialog-slide-description"
+          >
+            <DialogTitle>New Player Information</DialogTitle>
+            <DialogContent>
+              <Box
+                sx={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
+                <FormControl margin="normal" fullWidth>
+                  <Box display="flex" gap="8px">
+                    <TextField
+                      size="small"
+                      type="text"
+                      variant="outlined"
+                      placeholder="Name"
+                      name="nameSwitch"
+                      value={playerToSwitch?.name}
+                      defaultValue={playerToSwitch?.name}
+                      onChange={(e) =>
+                        setPlayerToSwitch({
+                          ...playerToSwitch,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                    <TextField
+                      size="small"
+                      type="text"
+                      variant="outlined"
+                      placeholder="Email"
+                      defaultValue={playerToSwitch?.email}
+                      name="emailSwitch"
+                      value={playerToSwitch?.email}
+                      onChange={(e) =>
+                        setPlayerToSwitch({
+                          ...playerToSwitch,
+                          email: e.target.value,
+                        })
+                      }
+                    />
+                  </Box>
+                </FormControl>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Box display="flex" gap="8px" alignContent="space-between">
+                <Button disabled={hasDuplicate()} onClick={onSwitchPlayer}>
+                  Update
+                </Button>
+                <Button
+                  onClick={() => {
+                    setPlayerToSwitch(null);
+                    setOpenSwitchModal(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Box>
+            </DialogActions>
+          </Dialog>
         </React.Fragment>
       </Box>
     </div>

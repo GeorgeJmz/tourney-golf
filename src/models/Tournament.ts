@@ -21,6 +21,8 @@ export interface ITournament {
   status: TournamentStatus;
   pointsPerWin: number;
   pointsPerTie: number;
+  pointsPerWinMedal: number;
+  pointsPerTieMedal: number;
 }
 export interface ITournamentGroup {
   id: string;
@@ -42,6 +44,7 @@ export interface IPlayer {
   team?: string;
   strokes?: number;
   handicap?: number;
+  prevEmail?: string;
 }
 
 export interface IGroup {
@@ -74,6 +77,8 @@ export default class TournamentModel implements ITournament {
   status = TournamentStatus.DRAFT;
   pointsPerWin = 3;
   pointsPerTie = 1;
+  pointsPerWinMedal = 3;
+  pointsPerTieMedal = 1;
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

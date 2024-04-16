@@ -217,6 +217,9 @@ class MatchViewModel {
       const pointsPerWin = this.currentTournament.pointsPerWin;
       const pointsPerTie = this.currentTournament.pointsPerTie;
 
+      const pointsPerWinMedal = this.currentTournament.pointsPerWinMedal;
+      const pointsPerTieMedal = this.currentTournament.pointsPerTieMedal;
+
       const scoresIds = this.players.map(async (p) => await p.createScore());
       this.match.scoresId = await Promise.all(scoresIds);
       const matchResults = this.players.map((p) => ({
@@ -236,10 +239,10 @@ class MatchViewModel {
       const winnerMatch = this.winnerMatch;
       const strokePlayPoints =
         this.players[0].score.totalNet === this.players[1].score.totalNet
-          ? [pointsPerTie, pointsPerTie]
+          ? [pointsPerTieMedal, pointsPerTieMedal]
           : this.players[0].score.totalNet < this.players[1].score.totalNet
-          ? [pointsPerWin, 0]
-          : [0, pointsPerWin];
+          ? [pointsPerWinMedal, 0]
+          : [0, pointsPerWinMedal];
       const teamPoints = [
         this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
         this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
@@ -287,16 +290,29 @@ class MatchViewModel {
         tournamentId: this.tournamentId,
         matchResults,
       });
+      const hideTeam =
+        tournamentType !== "leagueteamplay" && tournamentType !== "teamplay";
+      const hideMatch =
+        playType !== "matchPlay" && playType !== "matchstrokePlay";
+      const hideMedal =
+        playType !== "strokePlay" &&
+        playType !== "matchstrokePlay" &&
+        playType !== "stableford";
       const result = getBodyMail(
         this.players,
         this.winByHole,
-        isLMATCH || isLMEDAL || isLMATCHMEDAL,
-        this.match.winner
+        hideTeam,
+        this.match.winner,
+        hideMatch,
+        hideMedal
       );
+      const player1 = this.players[0].score.player;
+      const player2 = this.players[1].score.player;
+      const title = `${player1} vs ${player2}`;
       const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p>${result}`;
       this.currentTournament.playersList.forEach(async (mail) => {
         if (mail.email) {
-          await sendCustomEmail(mail.email, this.match.winner, bodyMail);
+          await sendCustomEmail(mail.email, title, bodyMail);
         }
       });
 

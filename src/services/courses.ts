@@ -19,6 +19,42 @@ export interface GolfCoursesResponse {
 export const getCourses = (): GolfCoursesResponse => ({
   courses: [
     {
+      id: "BalboaParkGolfCourse",
+      name: "Balboa Park Golf Course",
+      address: "2600 Golf Course Dr. San Diego, CA 92102",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueBalboaParkGolfCourse",
+          color: "Blue",
+          length: "6339",
+        },
+        {
+          id: "WhiteBalboaParkGolfCourse",
+          color: "White",
+          length: "5835",
+        },
+      ],
+    },
+    {
+      id: "BajamarGolfResort",
+      name: "Bajamar Golf Resort",
+      address: "Km. 77.5 Toll Road Tijuana Ensenada, BC Mexico",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueBajamarGolfResort",
+          color: "Blue",
+          length: "6569",
+        },
+        {
+          id: "WhiteBajamarGolfResort",
+          color: "White",
+          length: "6036",
+        },
+      ],
+    },
+    {
       id: "BonitaGolfCourse",
       name: "Bonita Golf Course",
       address: "5540 Clubhouse Dr, Chula Vista, CA, USA",
@@ -33,6 +69,24 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "BonitaGolfCourseWhite",
           color: "White",
           length: "67.3 / 114, 5758",
+        },
+      ],
+    },
+    {
+      id: "CarltonOaksCountryClub",
+      name: "Carlton Oaks Country Club",
+      address: "9200 Inwood Dr, Santee, CA 92071",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueCarltonOaksCountryClub",
+          color: "Blue",
+          length: "6700",
+        },
+        {
+          id: "GreenCarltonOaksCountryClub",
+          color: "Green",
+          length: "6320",
         },
       ],
     },
@@ -56,6 +110,24 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "WhiteTijuana",
           color: "White",
           length: "6138",
+        },
+      ],
+    },
+    {
+      id: "CottonwoodGolfClub",
+      name: "Cottonwood Golf Club",
+      address: "3121 Willow Glen Drive, El Cajon, CA 92019",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlackCottonwoodGolfClub",
+          color: "Black",
+          length: "6736",
+        },
+        {
+          id: "WhiteCottonwoodGolfClub",
+          color: "White",
+          length: "6413",
         },
       ],
     },
@@ -88,25 +160,20 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
-      id: "oakGlen",
-      name: "Singing Hills / Oak Glenn",
-      address: "3007 Dehesa Rd, El Cajon, CA 92019",
+      id: "RiverwalkGolfClub",
+      name: "Riverwalk Golf Club",
+      address: "1150 Fashion Valley Rd, San Diego, CA 92108",
       distance: "",
       teeBoxes: [
         {
-          id: "BlueOak",
-          color: "Blue",
-          length: "6594",
+          id: "BackRiverwalkGolfClub",
+          color: "Back",
+          length: "6550",
         },
         {
-          id: "RedOak",
-          color: "Red",
-          length: "5618",
-        },
-        {
-          id: "WhiteOak",
-          color: "White",
-          length: "6131",
+          id: "MiddleRiverwalkGolfClub",
+          color: "Middle",
+          length: "6156",
         },
       ],
     },
@@ -151,6 +218,137 @@ export const getCourses = (): GolfCoursesResponse => ({
         //   color: "Gold",
         //   length: "4957",
         // },
+      ],
+    },
+    {
+      id: "oakGlen",
+      name: "Singing Hills / Oak Glen",
+      address: "3007 Dehesa Rd, El Cajon, CA 92019",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueOak",
+          color: "Blue",
+          length: "6594",
+        },
+        {
+          id: "RedOak",
+          color: "Red",
+          length: "5618",
+        },
+        {
+          id: "WhiteOak",
+          color: "White",
+          length: "6131",
+        },
+      ],
+    },
+    {
+      id: "SingingHillsWillowGlen",
+      name: "Singing Hills / Willow Glen",
+      address: "3199 Stonefield Dr, Jamul, CA 91935",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueSingingHillsWillowGlen",
+          color: "Blue",
+          length: "6651",
+        },
+        {
+          id: "WhiteSingingHillsWillowGlen",
+          color: "White",
+          length: "6200",
+        },
+      ],
+    },
+    {
+      id: "SteelCanyonGolfClubCanyonRanch",
+      name: "Steel Canyon Golf Club / Canyon - Ranch",
+      address: "3199 Stonefield Dr, Jamul, CA 91935",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueSteelCanyonGolfClubCanyonRanch",
+          color: "Blue",
+          length: "6432",
+        },
+        {
+          id: "WhiteSteelCanyonGolfClubCanyonRanch",
+          color: "White",
+          length: "6196",
+        },
+      ],
+    },
+    {
+      id: "SteelCanyonGolfClubRanchVineyard",
+      name: "Steel Canyon Golf Club / Ranch - Vineyard",
+      address: "3199 Stonefield Dr, Jamul, CA 91935",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueSteelCanyonGolfClubRanchVineyard",
+          color: "Blue",
+          length: "6456",
+        },
+        {
+          id: "WhiteSteelCanyonGolfClubRanchVineyard",
+          color: "White",
+          length: "5618",
+        },
+      ],
+    },
+    {
+      id: "SteelCanyonGolfClubVineyardCanyon",
+      name: "Steel Canyon Golf Club / Vineyard - Canyon",
+      address: "3199 Stonefield Dr, Jamul, CA 91935",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueSteelCanyonGolfClubVineyardCanyon",
+          color: "Blue",
+          length: "6144",
+        },
+        {
+          id: "WhiteSteelCanyonGolfClubVineyardCanyon",
+          color: "White",
+          length: "5903",
+        },
+      ],
+    },
+    {
+      id: "TorreyPinesGolfCourseSouth",
+      name: "Torrey Pines Golf Course - South",
+      address: "11480 N Torrey Pines Rd, La Jolla, CA 92037",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "GreenTorreyPinesGolfCourseSouth",
+          color: "Green",
+          length: "6635",
+        },
+        {
+          id: "WhiteTorreyPinesGolfCourseSouth",
+          color: "White",
+          length: "6145",
+        },
+      ],
+    },
+    {
+      id: "TorreyPinesGolfCourseNorth",
+      name: "Torrey Pines Golf Course - North",
+      address: "11480 N Torrey Pines Rd, La Jolla, CA 92037",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "GreenTorreyPinesGolfCourseNorth",
+          color: "Green",
+          length: "6346",
+        },
+        {
+          id: "GoldTorreyPinesGolfCourseNorth",
+          color: "Gold",
+          length: "5851",
+        },
       ],
     },
   ],
@@ -368,6 +566,248 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [2458, 36],
       out: [2499, 36],
       total: [4957, 72],
+    },
+    BackRiverwalkGolfClub: {
+      distance: [
+        388, 293, 304, 526, 178, 354, 190, 378, 542, 398, 178, 511, 440, 393,
+        538, 374, 148, 417,
+      ],
+      hcp: [5, 17, 7, 11, 9, 15, 3, 13, 1, 6, 12, 14, 4, 2, 16, 8, 18, 10],
+      par: [4, 4, 4, 5, 3, 4, 3, 4, 5, 4, 3, 5, 4, 4, 5, 4, 3, 4],
+      in: [3397, 36],
+      out: [3153, 36],
+      total: [6550, 72],
+    },
+    MiddleRiverwalkGolfClub: {
+      distance: [
+        376, 274, 285, 510, 143, 329, 161, 357, 521, 379, 156, 488, 416, 373,
+        515, 350, 132, 391,
+      ],
+      hcp: [5, 17, 7, 11, 9, 15, 3, 13, 1, 6, 12, 14, 4, 2, 16, 8, 18, 10],
+      par: [4, 4, 4, 5, 3, 4, 3, 4, 5, 4, 3, 5, 4, 4, 5, 4, 3, 4],
+      in: [3200, 36],
+      out: [2956, 36],
+      total: [6156, 72],
+    },
+    BlueBalboaParkGolfCourse: {
+      distance: [
+        344, 502, 379, 371, 296, 215, 463, 327, 177, 439, 384, 392, 134, 532,
+        315, 555, 198, 316,
+      ],
+      hcp: [15, 11, 5, 9, 1, 13, 3, 9, 17, 4, 12, 6, 16, 8, 18, 2, 14, 10],
+      par: [4, 5, 4, 4, 4, 3, 5, 4, 3, 4, 4, 4, 3, 5, 4, 5, 3, 4],
+      in: [3265, 36],
+      out: [3074, 36],
+      total: [6339, 72],
+    },
+    WhiteBalboaParkGolfCourse: {
+      distance: [
+        311, 468, 318, 338, 277, 193, 448, 302, 164, 379, 356, 379, 105, 494,
+        299, 534, 167, 303,
+      ],
+      hcp: [15, 5, 9, 1, 13, 3, 7, 17, 11, 6, 10, 4, 18, 12, 14, 2, 16, 8],
+      par: [4, 5, 4, 4, 4, 3, 5, 4, 3, 4, 4, 4, 3, 5, 4, 5, 3, 4],
+      in: [3016, 36],
+      out: [2819, 36],
+      total: [5835, 72],
+    },
+    BlueCarltonOaksCountryClub: {
+      distance: [
+        394, 163, 518, 438, 303, 391, 198, 376, 528, 433, 355, 169, 574, 427,
+        546, 347, 140, 400,
+      ],
+      hcp: [7, 11, 15, 1, 17, 5, 9, 3, 13, 6, 12, 8, 10, 2, 14, 18, 16, 4],
+      par: [4, 3, 5, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 5, 4, 3, 4],
+      in: [3391, 36],
+      out: [3309, 36],
+      total: [6700, 72],
+    },
+    GreenCarltonOaksCountryClub: {
+      distance: [
+        394, 163, 502, 394, 303, 362, 139, 342, 505, 387, 338, 130, 527, 381,
+        492, 311, 127, 364,
+      ],
+      hcp: [7, 11, 15, 1, 17, 5, 9, 3, 13, 6, 12, 8, 10, 2, 14, 18, 16, 4],
+      par: [4, 3, 5, 4, 4, 4, 3, 4, 5, 4, 4, 3, 5, 4, 5, 4, 3, 4],
+      in: [3216, 36],
+      out: [3104, 36],
+      total: [6320, 72],
+    },
+    BlueBajamarGolfResort: {
+      distance: [
+        399, 527, 400, 150, 388, 407, 370, 398, 149, 433, 366, 391, 378, 339,
+        173, 368, 405, 528,
+      ],
+      hcp: [11, 1, 3, 15, 9, 5, 13, 7, 17, 14, 18, 2, 8, 10, 16, 4, 6, 12],
+      par: [4, 5, 4, 3, 4, 4, 4, 4, 3, 5, 4, 4, 4, 4, 3, 4, 4, 5],
+      in: [3381, 37],
+      out: [3188, 35],
+      total: [6569, 72],
+    },
+    WhiteBajamarGolfResort: {
+      distance: [
+        345, 489, 349, 134, 347, 381, 330, 366, 115, 416, 351, 355, 352, 307,
+        170, 344, 373, 512,
+      ],
+      hcp: [11, 1, 3, 15, 9, 5, 13, 7, 17, 14, 18, 2, 8, 10, 16, 4, 6, 12],
+      par: [4, 5, 4, 3, 4, 4, 4, 4, 3, 5, 4, 4, 4, 4, 3, 4, 4, 5],
+      in: [3180, 37],
+      out: [2856, 35],
+      total: [6036, 72],
+    },
+    GreenTorreyPinesGolfCourseSouth: {
+      distance: [
+        419, 344, 146, 420, 393, 505, 424, 149, 514, 352, 190, 444, 514, 394,
+        355, 183, 398, 491,
+      ],
+      hcp: [5, 15, 13, 3, 11, 9, 1, 17, 7, 16, 14, 2, 6, 8, 12, 18, 4, 10],
+      par: [4, 4, 3, 4, 4, 5, 4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 4, 5],
+      in: [3321, 36],
+      out: [3314, 36],
+      total: [6635, 72],
+    },
+    WhiteTorreyPinesGolfCourseSouth: {
+      distance: [
+        409, 323, 142, 384, 382, 449, 387, 139, 457, 308, 171, 411, 486, 359,
+        339, 151, 375, 473,
+      ],
+      hcp: [5, 15, 13, 3, 11, 9, 1, 17, 7, 16, 14, 2, 6, 8, 12, 18, 4, 10],
+      par: [4, 4, 3, 4, 4, 5, 4, 3, 5, 4, 3, 4, 5, 4, 4, 3, 4, 5],
+      in: [3073, 36],
+      out: [3072, 36],
+      total: [6145, 72],
+    },
+    GreenTorreyPinesGolfCourseNorth: {
+      distance: [
+        395, 412, 183, 416, 483, 389, 274, 167, 476, 506, 321, 155, 399, 352,
+        165, 345, 486, 422,
+      ],
+      hcp: [5, 1, 13, 3, 11, 7, 17, 15, 9, 12, 18, 14, 4, 6, 16, 8, 10, 2],
+      par: [4, 4, 3, 4, 5, 4, 4, 3, 5, 5, 4, 3, 4, 4, 3, 4, 5, 4],
+      in: [3151, 36],
+      out: [3195, 36],
+      total: [6346, 72],
+    },
+    GoldTorreyPinesGolfCourseNorth: {
+      distance: [
+        351, 355, 164, 357, 437, 380, 259, 161, 460, 460, 310, 108, 383, 340,
+        145, 336, 472, 373,
+      ],
+      hcp: [5, 1, 13, 3, 11, 7, 17, 15, 9, 12, 18, 14, 4, 6, 16, 8, 10, 2],
+      par: [4, 4, 3, 4, 5, 4, 4, 3, 5, 5, 4, 3, 4, 4, 3, 4, 5, 4],
+      in: [2927, 36],
+      out: [2924, 36],
+      total: [5851, 72],
+    },
+    BlueSingingHillsWillowGlen: {
+      distance: [
+        375, 330, 399, 325, 502, 185, 416, 544, 184, 506, 403, 174, 395, 358,
+        409, 431, 547, 168,
+      ],
+      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 2, 6, 4, 18],
+      par: [4, 4, 4, 4, 5, 3, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3],
+      in: [3391, 36],
+      out: [3260, 36],
+      total: [6651, 72],
+    },
+    WhiteSingingHillsWillowGlen: {
+      distance: [
+        341, 311, 374, 310, 484, 165, 388, 517, 161, 490, 370, 149, 371, 340,
+        367, 387, 525, 150,
+      ],
+      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 2, 6, 4, 18],
+      par: [4, 4, 4, 4, 5, 3, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3],
+      in: [3149, 36],
+      out: [3051, 36],
+      total: [6200, 72],
+    },
+    BlueSteelCanyonGolfClubCanyonRanch: {
+      distance: [
+        409, 517, 163, 489, 209, 360, 150, 390, 373, 364, 385, 401, 174, 533,
+        388, 414, 204, 509,
+      ],
+      hcp: [4, 2, 6, 1, 9, 7, 8, 3, 5, 9, 5, 4, 8, 1, 3, 6, 7, 2],
+      par: [4, 5, 3, 5, 3, 4, 3, 4, 4, 4, 4, 4, 3, 5, 4, 4, 3, 5],
+      in: [3372, 36],
+      out: [3060, 35],
+      total: [6432, 72],
+    },
+    WhiteSteelCanyonGolfClubCanyonRanch: {
+      distance: [
+        381, 517, 163, 489, 200, 330, 127, 358, 373, 329, 323, 401, 174, 533,
+        371, 414, 204, 509,
+      ],
+      hcp: [4, 2, 6, 1, 9, 7, 8, 3, 5, 9, 5, 4, 8, 1, 3, 6, 7, 2],
+      par: [4, 5, 3, 5, 3, 4, 3, 4, 4, 4, 4, 4, 3, 5, 4, 4, 3, 5],
+      in: [3258, 36],
+      out: [2938, 35],
+      total: [6196, 72],
+    },
+    BlueSteelCanyonGolfClubRanchVineyard: {
+      distance: [
+        364, 385, 401, 174, 533, 388, 414, 204, 509, 418, 328, 173, 347, 393,
+        519, 168, 351, 387,
+      ],
+      hcp: [9, 5, 4, 8, 1, 3, 6, 7, 2, 7, 5, 8, 4, 2, 1, 9, 3, 6],
+      par: [4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 3, 4, 4],
+      in: [3084, 35],
+      out: [3372, 36],
+      total: [6456, 72],
+    },
+    WhiteSteelCanyonGolfClubRanchVineyard: {
+      distance: [
+        329, 323, 401, 174, 533, 371, 414, 204, 509, 396, 276, 173, 347, 393,
+        519, 150, 351, 360,
+      ],
+      hcp: [9, 5, 4, 8, 1, 3, 6, 7, 2, 7, 5, 8, 4, 2, 1, 9, 3, 6],
+      par: [4, 4, 4, 3, 5, 4, 4, 3, 5, 4, 4, 3, 4, 4, 5, 3, 4, 4],
+      in: [2965, 35],
+      out: [3258, 36],
+      total: [6223, 72],
+    },
+    BlueSteelCanyonGolfClubVineyardCanyon: {
+      distance: [
+        418, 328, 173, 347, 393, 519, 168, 351, 387, 409, 517, 163, 489, 209,
+        360, 150, 390, 373,
+      ],
+      hcp: [7, 5, 8, 4, 2, 1, 9, 3, 6, 4, 2, 6, 1, 9, 7, 8, 3, 5],
+      par: [4, 4, 3, 4, 4, 5, 3, 4, 4, 4, 5, 3, 5, 3, 4, 3, 4, 4],
+      in: [3060, 35],
+      out: [3084, 35],
+      total: [6144, 72],
+    },
+    WhiteSteelCanyonGolfClubVineyardCanyon: {
+      distance: [
+        396, 276, 173, 347, 393, 519, 150, 351, 360, 381, 517, 163, 489, 200,
+        330, 127, 358, 373,
+      ],
+      hcp: [7, 5, 8, 4, 2, 1, 9, 3, 6, 4, 2, 6, 1, 9, 7, 8, 3, 5],
+      par: [4, 4, 3, 4, 4, 5, 3, 4, 4, 4, 5, 3, 5, 3, 4, 3, 4, 4],
+      in: [2938, 35],
+      out: [2965, 35],
+      total: [5903, 72],
+    },
+    BlackCottonwoodGolfClub: {
+      distance: [
+        404, 539, 426, 159, 363, 411, 389, 567, 183, 429, 370, 170, 364, 341,
+        486, 439, 490, 206,
+      ],
+      hcp: [13, 15, 3, 11, 7, 5, 9, 1, 17, 6, 8, 14, 12, 16, 10, 2, 18, 4],
+      par: [4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 4, 5, 4, 5, 3],
+      in: [3295, 36],
+      out: [3441, 36],
+      total: [6735, 72],
+    },
+    WhiteCottonwoodGolfClub: {
+      distance: [
+        354, 513, 399, 143, 357, 401, 379, 552, 169, 392, 364, 150, 351, 335,
+        476, 425, 456, 197,
+      ],
+      hcp: [13, 15, 3, 11, 7, 5, 9, 1, 17, 6, 8, 14, 12, 16, 10, 2, 18, 4],
+      par: [4, 5, 4, 3, 4, 4, 4, 5, 3, 4, 4, 3, 4, 4, 5, 4, 5, 3],
+      in: [3146, 36],
+      out: [3267, 36],
+      total: [6413, 72],
     },
   };
   const course = details[id];

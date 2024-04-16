@@ -10,6 +10,12 @@ import {
   updatePlayerAllFields,
   deleteActiveTourneyById,
   sendCustomEmail,
+  deleteMatch,
+  deleteScore,
+  updatePlayerListByTournamentId,
+  updateScore,
+  updateMatch,
+  assignNewActiveTourneyByEmail,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -98,6 +104,8 @@ class TournamentViewModel {
       playersResultsOptions: observable,
       updatePlayersAndMatches: action,
       deleteLeague: action,
+      deleteMatch: action,
+      switchPlayer: action,
     });
     this.statsPlayers = [];
   }
@@ -139,6 +147,8 @@ class TournamentViewModel {
       matchesPerRound: this.tournament.matchesPerRound,
       pointsPerTie: this.tournament.pointsPerTie || 1,
       pointsPerWin: this.tournament.pointsPerWin || 3,
+      pointsPerTieMedal: this.tournament.pointsPerTieMedal || 1,
+      pointsPerWinMedal: this.tournament.pointsPerWinMedal || 3,
     };
   }
 
@@ -321,6 +331,144 @@ class TournamentViewModel {
     }));
   }
 
+  async deleteMatch(matchId: string): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    const match = this.leagueResults.find((m) => m.id === matchId);
+    const tournamentId = match?.tournamentId || "";
+    const scoreId1 = match?.scoresId[0] || "";
+    const scoreId2 = match?.scoresId[1] || "";
+    const players = (await getPlayersByTournamentId(tournamentId)) || [];
+    const p1 = match?.matchResults[0].idPlayer || "";
+    const p2 = match?.matchResults[1].idPlayer || "";
+    const player1 = players.find((p) => p.email === p1);
+    const player2 = players.find((p) => p.email === p2);
+    const index1 = player1?.scoreId.findIndex((o) => o === scoreId1) || 0;
+    const index2 = player2?.scoreId.findIndex((o) => o === scoreId2) || 0;
+    if (!player1 || !player2) {
+      return;
+    }
+    const newPlayer1 = { ...player1 };
+    const newPlayer2 = { ...player2 };
+    newPlayer1.opponent = player1?.opponent.filter((o, i) => i !== index1);
+    newPlayer2.opponent = player2?.opponent.filter((o, i) => i !== index2);
+    newPlayer1.pointsMatch = player1?.pointsMatch?.filter(
+      (o, i) => i !== index1
+    );
+    newPlayer2.pointsMatch = player2?.pointsMatch?.filter(
+      (o, i) => i !== index2
+    );
+    newPlayer1.pointsStroke = player1?.pointsStroke?.filter(
+      (o, i) => i !== index1
+    );
+    newPlayer2.pointsStroke = player2?.pointsStroke?.filter(
+      (o, i) => i !== index2
+    );
+    newPlayer1.pointsTeam = player1?.pointsTeam?.filter((o, i) => i !== index1);
+    newPlayer2.pointsTeam = player2?.pointsTeam?.filter((o, i) => i !== index2);
+    newPlayer1.gross = player1?.gross?.filter((o, i) => i !== index1);
+    newPlayer2.gross = player2?.gross?.filter((o, i) => i !== index2);
+    newPlayer1.handicap = player1?.handicap?.filter((o, i) => i !== index1);
+    newPlayer2.handicap = player2?.handicap?.filter((o, i) => i !== index2);
+    newPlayer1.net = player1?.net?.filter((o, i) => i !== index1);
+    newPlayer2.net = player2?.net?.filter((o, i) => i !== index2);
+    newPlayer1.scoreId = player1?.scoreId?.filter((o, i) => i !== index1);
+    newPlayer2.scoreId = player2?.scoreId?.filter((o, i) => i !== index2);
+    newPlayer1.id = player1?.id || "";
+    newPlayer2.id = player2?.id || "";
+
+    await updatePlayerAllFields(newPlayer1);
+    await updatePlayerAllFields(newPlayer2);
+    await deleteScore(scoreId1);
+    await deleteScore(scoreId2);
+    await deleteMatch(matchId);
+
+    const displayMessage = getMessages(Messages.MATCH_DELETED);
+    toast.update(cuToast, {
+      render: displayMessage,
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+  }
+
+  async switchPlayer(prevId: string, newId: string, newName: string) {
+    const players = (await getPlayersByTournamentId(this.idTournament)) || [];
+    const player = players.find((p) => p.email === prevId);
+    if (!player) {
+      return;
+    }
+    const tournamentId = this.tournament.id || "";
+    const newPlayer = {
+      ...player,
+      email: newId,
+      name: newName,
+      prevEmail: prevId,
+    };
+
+    console.log(toJS(player), toJS(newPlayer), "player");
+    await updatePlayerAllFields(newPlayer);
+    if (prevId !== newId) {
+      await assignNewActiveTourneyByEmail(
+        newPlayer.email || "",
+        player.email || "",
+        tournamentId,
+        this.tournament.name,
+        toJS(newPlayer)
+      );
+    }
+
+    const newPlayers = this.tournament.playersList.map((p) => {
+      if (p.email === prevId) {
+        return { ...p, email: newId, name: newName, id: newId };
+      }
+      return toJS(p);
+    });
+
+    await updatePlayerListByTournamentId(tournamentId || "", newPlayers);
+
+    for (const opponent of newPlayer.opponent) {
+      const player = players.find((p) => p.email === opponent);
+      if (player) {
+        const newPlayer = {
+          ...player,
+          opponent: player?.opponent.map((o) => (o === prevId ? newId : o)),
+        };
+        await updatePlayerAllFields(newPlayer);
+        await getMatchesByTournamentId(tournamentId).then(async (matches) => {
+          for (const match of matches) {
+            let updated = false;
+            const newMatch = {
+              ...match,
+              matchResults: match.matchResults.map((m) => {
+                if (m.idPlayer === prevId) {
+                  updated = true;
+                  return { ...m, idPlayer: newId, playerName: newName };
+                }
+                return m;
+              }),
+            };
+            if (updated) {
+              await updateMatch(match.id || "", newMatch);
+            }
+          }
+        });
+      }
+    }
+
+    for (const scoreId of newPlayer.scoreId) {
+      const score = await getScoresByID(scoreId);
+      if (score) {
+        const newScore = {
+          ...score,
+          idPlayer: score.idPlayer === prevId ? newId : score.idPlayer,
+          player: score.idPlayer === prevId ? newName : score.player,
+        };
+        await updateScore(scoreId, newScore);
+      }
+    }
+  }
+
   async updatePlayersAndMatches(changes: {
     [key: string]: { [key: string]: string };
   }): Promise<void> {
@@ -356,15 +504,21 @@ class TournamentViewModel {
 
   async getStatsPlayersByTournament(): Promise<void> {
     const t1 = performance.now();
-    const pointsPerWin = this.tournament.pointsPerWin;
 
-    // Pre-calculate frequently used values for efficiency
-    const isMatchPlay =
-      this.tournament.tournamentType === "leagueteamplay" ||
-      this.tournament.tournamentType === "league";
-    const isStrokePlay =
-      this.tournament.tournamentType === "leagueteamplay" ||
-      this.tournament.tournamentType === "league";
+    const tournamentType = this.tournament.tournamentType;
+
+    const playType = this.tournament.playType;
+    const pointsPerTie = this.tournament.pointsPerTie;
+    const pointsPerWin = this.tournament.pointsPerWin;
+    const pointsPerTieMedal = this.tournament.pointsPerTieMedal;
+    const pointsPerWinMedal = this.tournament.pointsPerWinMedal;
+
+    const isLTMATCH =
+      tournamentType === "leagueteamplay" && playType === "matchPlay";
+    const isLTMEDAL =
+      tournamentType === "leagueteamplay" && playType === "strokePlay";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
 
     // Fetch players and optimize data fetching
     const fullPlayers = await getPlayersByTournamentId(this.idTournament);
@@ -381,36 +535,100 @@ class TournamentViewModel {
       name: nameMap.get(player.email) || player.name,
     }));
 
-    // Consolidate score calculations into a single reusable function
-    const calculateStats = (
-      player: ITournamentPlayer,
-      propertyName: string,
-      pointsArray: Array<number>
-    ) => {
-      if (isMatchPlay && propertyName === "pointsMatch") {
-        return pointsArray.reduce(
-          (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
-          0
-        );
-      } else if (isStrokePlay && propertyName === "pointsStroke") {
-        return pointsArray.reduce(
-          (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
-          0
-        );
-      } else {
-        return pointsArray.reduce(
-          (acc, curr) => (curr === 0 ? acc + 1 : acc),
-          0
-        );
-      }
-    };
-
     // Fetch scores in batches for improved performance
     const newPlayers = await Promise.all(
       players.map(async (player) => {
         const getAverage = (values: Array<number>) => {
           const average = values.reduce((acc, curr) => acc + curr, 0);
-          return average > 0 ? (average / values.length).toFixed(1) : "0";
+          return average > 0 ? (average / values.length).toFixed(0) : "0";
+        };
+
+        const getWins = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerWinMedal ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerWinMedal ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getDraws = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerTie ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerTieMedal ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerTie ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerTieMedal ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getLoss = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getTotalPoints = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce((acc, curr) => acc + curr, 0);
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce((acc, curr) => acc + curr, 0);
+          }
+          return (
+            player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
+            player.pointsStroke.reduce((acc, curr) => acc + curr, 0)
+          );
         };
 
         return {
@@ -418,24 +636,24 @@ class TournamentViewModel {
           position: 0, // Add position property
           tourneyName: player.name, // Add tourneyName property
           matchesPlayed:
-            isMatchPlay || isStrokePlay
+            playType !== "matchstrokePlay"
               ? player.opponent.length
               : player.opponent.length * 2,
-          wins: calculateStats(player, "pointsMatch", player.pointsMatch),
-          draws:
-            calculateStats(player, "pointsMatch", player.pointsMatch) +
-            calculateStats(player, "pointsStroke", player.pointsStroke),
-          losses:
-            calculateStats(player, "pointsMatch", player.pointsMatch) +
-            calculateStats(player, "pointsStroke", player.pointsStroke),
+          wins: getWins(),
+          draws: getDraws(),
+          losses: getLoss(),
           matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
           medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
-          totalPoints:
-            player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
-            player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
-          grossAverage: getAverage(player.gross),
-          handicapAverage: getAverage(player.handicap),
-          netAverage: getAverage(player.net),
+          totalPoints: getTotalPoints(),
+          grossAverage: getAverage(
+            player.gross.map((value) => parseInt(value.toString()))
+          ),
+          handicapAverage: getAverage(
+            player.handicap.map((value) => parseInt(value.toString()))
+          ),
+          netAverage: getAverage(
+            player.net.map((value) => parseInt(value.toString()))
+          ),
           teamPoints: player.pointsTeam.reduce((acc, curr) => acc + curr, 0),
           conference: player.conference,
           group: player.group,

@@ -26,7 +26,6 @@ import { Button, CardActionArea } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import moment from "moment-timezone";
 import { convertDate } from "../../helpers/convertDate";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 interface IDashboardProps {
   user: UserViewModel;
@@ -142,8 +141,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
-            <img src="/teebox.png" width="20" alt="TEE BOX" /> TEE BOX
-            Challenges
+            <img src="/teebox.png" width="20" alt="TEE BOX" /> TEE BOX Stakes
           </Typography>
         </Grid>
       </Grid>

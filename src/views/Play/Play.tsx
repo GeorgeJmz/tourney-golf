@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import Box from "@mui/material/Box";
-import Fab from "@mui/material/Fab";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import UserViewModel from "../../viewModels/UserViewModel";
@@ -20,8 +19,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import type { IUser } from "../../models/User";
 import { Button } from "@mui/material";
 import { getPlayersByTournamentId } from "../../services/firebase";
-import { getBodyMail } from "../../helpers/getMatchMail";
 import { ITournamentPlayer } from "../../models/Player";
+import { ScoreBeforeLeave } from "./components/ScoreBeforeLeave";
+import { LeaveModal } from "./components/LeaveModal";
+import { useBlocker } from "react-router-dom";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -44,7 +45,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && <Box>{children}</Box>}
     </div>
   );
 }
@@ -57,6 +58,13 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   const currentTournament = React.useMemo(
     () => user.activeTournaments.find((t) => t.id === id),
     []
+  );
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      playViewModel.currentStep === 2 &&
+      !openFinishModal &&
+      currentLocation.pathname !== nextLocation.pathname
   );
 
   const [numberOfPlayers, setNumberOfPlayers] = React.useState<Array<number>>([
@@ -86,6 +94,10 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         currentTournament.pointsPerWin;
       playViewModel.currentTournament.pointsPerTie =
         currentTournament.pointsPerTie;
+      playViewModel.currentTournament.pointsPerWinMedal =
+        currentTournament.pointsPerWinMedal;
+      playViewModel.currentTournament.pointsPerTieMedal =
+        currentTournament.pointsPerTieMedal;
       playViewModel.currentTournament.playType = currentTournament.playType;
       playViewModel.currentTournament.tournamentType =
         currentTournament.tournamentType;
@@ -96,14 +108,9 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
 
   const tournamentType = currentTournament?.tournamentType;
   const playType = currentTournament?.playType;
-
-  const isLTMEDAL =
-    tournamentType === "leagueteamplay" && playType === "strokePlay";
-  const isLMATCH = tournamentType === "league" && playType === "matchPlay";
-  const isLMATCHMEDAL =
-    tournamentType === "league" && playType === "matchstrokePlay";
-  const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
-
+  const hideTeam = tournamentType === "league";
+  const hideMatch = playType === "strokePlay";
+  const hideMedal = playType === "matchPlay";
   const findConferenceByEmail = (email: string) => {
     const player = currentTournament?.playersList.find(
       (player) => player.email === email
@@ -155,10 +162,11 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     playViewModel.currentStep,
   ]);
 
+  const [openFinishModal, setOpenFinishModal] = React.useState(false);
+
   const onSaveHandler = () => {
     if (playViewModel.currentStep === 2) {
-      playViewModel.createMatch();
-      setTimeout(() => navigate("/dashboard"), 5000);
+      setOpenFinishModal(true);
     } else {
       playViewModel.setCurrentStep(playViewModel.currentStep + 1);
     }
@@ -188,6 +196,12 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     playViewModel.setModal(true);
     playViewModel.setModalValues(key);
   };
+  const handleNextHole = () => {
+    playViewModel.setModalValues(playViewModel.modalKey + 1);
+  };
+  const handlePreviousHole = () => {
+    playViewModel.setModalValues(playViewModel.modalKey - 1);
+  };
   const onSetScore = (temporalScores: Array<number>, hole: number) =>
     playViewModel.setScoreModal(temporalScores, hole);
 
@@ -203,6 +217,26 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
+  const handleSubmit = () => {
+    playViewModel.createMatch();
+    setTimeout(() => navigate("/dashboard"), 5000);
+  };
+
+  const handleOnExit = () => {
+    setTimeout(() => navigate("/dashboard"), 1);
+  };
+
+  const handleCancel = () => {
+    setOpenFinishModal(false);
+  };
+  const showButton = !(playViewModel.currentStep === 2 && value !== 1);
+
+  const isMobile = () =>
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+  const isFull = playViewModel.matches.length > 2 || isMobile();
   return (
     <div>
       <Box
@@ -227,6 +261,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         )}
         {playViewModel.currentStep === 1 && (
           <Invitations
+            showAll={false}
             playersToInvite={
               (playersToInvite?.filter(
                 (player) => player?.email !== user.user.email
@@ -243,16 +278,19 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
         {playViewModel.currentStep === 2 && (
           <React.Fragment>
             <Tabs value={value} onChange={handleChange} centered>
-              <Tab label="Round" />
+              <Tab label="Match" />
               <Tab label="Score" />
+              <Tab label="Stakes" />
             </Tabs>
             <TabPanel value={value} index={0}>
               <React.Fragment>
                 {playViewModel.matches.map((match) => (
                   <HorizontalScoreCard
                     match={match}
-                    hideMatch={isLTMEDAL}
-                    hideTeam={isLMATCH || isLMEDAL || isLMATCHMEDAL}
+                    hideMatch={hideMatch}
+                    hideTeam={hideTeam}
+                    hideMedal={hideMedal}
+                    isSmall={false}
                   />
                 ))}
               </React.Fragment>
@@ -273,10 +311,22 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 authorScores={
                   playViewModel.matches[0].players[0].score.scoreHoles
                 }
+                authorDisplayName={
+                  playViewModel.matches[0].players[0].score.player
+                }
                 onOpenModal={handleOpenModal}
+                opponents={playViewModel.matches.map((match) => ({
+                  displayName: match.players[1].score.player,
+                  currentTotal: match.players[1].score.totalGross,
+                  currentIn: match.players[1].score.in,
+                  currentOut: match.players[1].score.out,
+                  scores: match.players[1].score.scoreHoles,
+                }))}
               />
 
               <MatchModal
+                onNextHole={handleNextHole}
+                onPrevHole={handlePreviousHole}
                 hole={parseInt(playViewModel.holeModal)}
                 par={parseInt(playViewModel.parModal)}
                 onSetScore={onSetScore}
@@ -284,20 +334,79 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 isOpen={playViewModel.openModal}
                 onCloseModal={handleCloseModal}
               />
+              <ScoreBeforeLeave
+                isOpen={openFinishModal}
+                onCloseModal={handleCancel}
+                isFull={isFull}
+                onSubmit={
+                  playViewModel.matches[0].match.winner !== ""
+                    ? handleSubmit
+                    : () => {
+                        handleOnExit();
+                        if (blocker.state === "blocked") {
+                          blocker.reset();
+                        }
+                      }
+                }
+                title={
+                  playViewModel.matches[0].match.winner !== ""
+                    ? "POST SCORE"
+                    : "EXIT ROUND"
+                }
+              >
+                <React.Fragment>
+                  {playViewModel.matches.map((match) => (
+                    <HorizontalScoreCard
+                      match={match}
+                      hideMatch={hideMatch}
+                      hideTeam={hideTeam}
+                      hideMedal={hideMedal}
+                      isSmall={true}
+                    />
+                  ))}
+                </React.Fragment>
+              </ScoreBeforeLeave>
+              {blocker.state === "blocked" &&
+              playViewModel.currentStep === 2 ? (
+                <LeaveModal
+                  isOpen={blocker.state === "blocked"}
+                  onCloseModal={() => blocker.reset()}
+                  onSubmit={() => blocker.proceed()}
+                  title={
+                    playViewModel.matches[0].match.winner !== ""
+                      ? "POST SCORE"
+                      : "EXIT ROUND"
+                  }
+                >
+                  <React.Fragment>
+                    {playViewModel.matches.map((match) => (
+                      <HorizontalScoreCard
+                        match={match}
+                        hideMatch={hideMatch}
+                        hideTeam={hideTeam}
+                        hideMedal={hideMedal}
+                        isSmall={true}
+                      />
+                    ))}
+                  </React.Fragment>
+                </LeaveModal>
+              ) : null}
             </TabPanel>
           </React.Fragment>
         )}
 
-        <Button
-          sx={{ marginTop: "20px", minWidth: "250px" }}
-          color="primary"
-          variant="contained"
-          size="large"
-          onClick={onSaveHandler}
-          disabled={isDisabledButton}
-        >
-          {submitButtonText[playViewModel.currentStep]}
-        </Button>
+        {showButton && (
+          <Button
+            sx={{ marginTop: "20px", minWidth: "250px" }}
+            color="primary"
+            variant="contained"
+            size="large"
+            onClick={onSaveHandler}
+            disabled={isDisabledButton}
+          >
+            {submitButtonText[playViewModel.currentStep]}
+          </Button>
+        )}
 
         {/* <Fab
           color="primary"

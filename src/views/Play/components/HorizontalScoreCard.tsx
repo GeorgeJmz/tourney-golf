@@ -15,12 +15,16 @@ interface HorizontalScoreCardProps {
   match: MatchViewModel;
   hideMatch?: boolean;
   hideTeam?: boolean;
+  hideMedal?: boolean;
+  isSmall?: boolean;
 }
 
 const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   match,
   hideMatch,
   hideTeam,
+  hideMedal,
+  isSmall,
 }) => {
   const stylesByIndex = (index: number, isHeader = false) => {
     if (index === 0) {
@@ -57,23 +61,21 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   };
 
   const renderHoleHeaders = () => {
-    const holes = [
+    const all = [
       "HOLES",
       ...Array.from({ length: 9 }, (_, index) => index + 1),
       "OUT",
       ...Array.from({ length: 9 }, (_, index) => index + 10),
       "IN",
-      "GROSS",
-      "NET",
-      "HDCP",
-      "TEAM",
     ];
+    const holes = ["GROSS", "HDCP", "NET", "TEAM"];
     if (hideTeam) {
       holes.pop();
     }
+    const allTable = isSmall ? ["Players", ...holes] : [...all, ...holes];
     return (
       <TableRow>
-        {holes.map((hole, index) => (
+        {allTable.map((hole, index) => (
           <TableCell key={index} align="center" sx={stylesByIndex(index, true)}>
             {hole}
           </TableCell>
@@ -98,11 +100,11 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
       return currentPlayer.score.totalGross;
     }
     //Net
-    if (index === 21) {
+    if (index === 22) {
       return currentPlayer.score.totalNet;
     }
     //HDCP
-    if (index === 22) {
+    if (index === 21) {
       return currentPlayer.score.handicap;
     }
     //TEAM
@@ -124,8 +126,23 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
           currentPlayer.score.scoreHolesHP[indexHole]
         }`
       : currentPlayer.score.scoreHoles[indexHole];
+
     const scoreComponent = (
       <div style={{ position: "relative" }}>
+        {currentPlayer.score.scoreHolesHP[indexHole] === 1 && (
+          <span
+            style={{
+              position: "absolute",
+              top: -28,
+              left: -10,
+              fontSize: "20px",
+              color: "Green",
+            }}
+          >
+            {" "}
+            •{" "}
+          </span>
+        )}
         <span>{getScoreWithHP || "-"}</span>{" "}
         {!hideTeam && (
           <span
@@ -164,11 +181,30 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
         >
           {player}
         </TableCell>
-        {Array.from({ length: lengthRows }, (_, index) => (
-          <TableCell key={index} align="center" sx={stylesByIndex(index + 1)}>
-            {renderScore(index, rowIndex)}
-          </TableCell>
-        ))}
+        {isSmall && (
+          <React.Fragment>
+            <TableCell key={0} align="center" sx={stylesByIndex(21)}>
+              {renderScore(20, rowIndex)}
+            </TableCell>
+            <TableCell key={0} align="center" sx={stylesByIndex(22)}>
+              {renderScore(21, rowIndex)}
+            </TableCell>
+            <TableCell key={0} align="center" sx={stylesByIndex(23)}>
+              {renderScore(22, rowIndex)}
+            </TableCell>
+            {!hideTeam && (
+              <TableCell key={0} align="center" sx={stylesByIndex(24)}>
+                {renderScore(23, rowIndex)}
+              </TableCell>
+            )}
+          </React.Fragment>
+        )}
+        {!isSmall &&
+          Array.from({ length: lengthRows }, (_, index) => (
+            <TableCell key={index} align="center" sx={stylesByIndex(index + 1)}>
+              {renderScore(index, rowIndex)}
+            </TableCell>
+          ))}
       </TableRow>
     );
   };
@@ -220,21 +256,25 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
     );
   };
 
+  const realWinner = match.match.winner.split("/");
+
   return (
     <TableContainer component={Paper}>
       <Table style={{ tableLayout: "fixed", marginBottom: "50px" }}>
         <TableHead>{renderHoleHeaders()}</TableHead>
         <TableBody>{renderPlayerRows()}</TableBody>
-        {!hideMatch && <TableBody>{renderResultsRows()}</TableBody>}
+        {!hideMatch && !isSmall && <TableBody>{renderResultsRows()}</TableBody>}
         {match.match.winner !== "" && (
           <TableFooter>
             <TableRow>
               <TableCell
-                colSpan={25}
+                colSpan={isSmall ? 4 : 25}
                 align="right"
                 sx={{ border: 1, color: "rgb(118, 118, 118);", width: 80 }}
               >
-                {match.match.winner}
+                {!hideMatch && !hideMedal && match.match.winner}
+                {hideMatch && !hideMedal && (realWinner[1] || realWinner[0])}
+                {!hideMatch && hideMedal && realWinner[0]}
               </TableCell>
             </TableRow>
           </TableFooter>

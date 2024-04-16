@@ -58,12 +58,10 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
   const tournamentType = tournamentViewModel.tournament.tournamentType;
   const playType = tournamentViewModel.tournament.playType;
 
-  const isLTMATCH =
-    tournamentType === "leagueteamplay" && playType === "matchPlay";
-  const isLTMEDAL =
-    tournamentType === "leagueteamplay" && playType === "strokePlay";
-  const isLMATCH = tournamentType === "league" && playType === "matchPlay";
-  const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+  const showTeams =
+    tournamentType === "leagueteamplay" || tournamentType === "teamplay";
+  const showMatch = playType !== "strokePlay";
+  const showMedal = playType !== "matchPlay";
 
   const tableRows = () => {
     const p =
@@ -94,10 +92,10 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         <TableCell sx={{ textAlign: "center" }}>{t.wins}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.draws}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.losses}</TableCell>
-        {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+        {showMatch && (
           <TableCell sx={{ textAlign: "center" }}>{t.matchPoints}</TableCell>
         )}
-        {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
+        {showMedal && (
           <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
         )}
         <TableCell sx={{ textAlign: "center" }}>{t.totalPoints}</TableCell>
@@ -110,7 +108,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         <TableCell sx={{ textAlign: "center" }}>
           {t.netAverage || "-"}
         </TableCell>
-        {!isLMATCH && !isLMEDAL && (
+        {showTeams && (
           <TableCell sx={{ textAlign: "center" }}>
             {t.teamPoints || "-"}
           </TableCell>
@@ -179,7 +177,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
               (g) => g.value === stats
             )}
           />
-          {!isLMATCH && !isLMEDAL && (
+          {showTeams && (
             <Button
               variant={stats === "teams" ? "contained" : "outlined"}
               key="teams"
@@ -201,17 +199,13 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
                 <TableCell>Wins</TableCell>
                 <TableCell>Draws</TableCell>
                 <TableCell>Losses</TableCell>
-                {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
-                  <TableCell>Match Points</TableCell>
-                )}
-                {!isLTMATCH && !isLTMEDAL && !isLMATCH && !isLMEDAL && (
-                  <TableCell>Medal Points</TableCell>
-                )}
+                {showMatch && <TableCell>Match Points</TableCell>}
+                {showMedal && <TableCell>Medal Points</TableCell>}
                 <TableCell>Total Points</TableCell>
                 <TableCell>Gross Average</TableCell>
                 <TableCell>Handicap Average</TableCell>
                 <TableCell>Net Average</TableCell>
-                {!isLMATCH && !isLMEDAL && <TableCell>Team Points</TableCell>}
+                {showTeams && <TableCell>Team Points</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>{tableRows()}</TableBody>

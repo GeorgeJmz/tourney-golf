@@ -21,9 +21,11 @@ export interface IMatch {
   date: Array<string>;
   tournamentId: string;
   matchResults: Array<IMatchResults>;
+  id?: string;
 }
 
 export default class MatchModel implements IMatch {
+  id = "";
   author = "";
   course = "";
   tournamentId = "";

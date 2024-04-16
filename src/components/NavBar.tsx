@@ -10,12 +10,12 @@ import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { logout } from "../services/firebase";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { makeStyles } from "@mui/styles";
 import { NavbarTitleContext } from "../hooks/useNavContext";
 
 interface INavBarProps {
-  children: React.ReactElement;
+  children?: React.ReactElement;
   isVisible: boolean;
 }
 
@@ -27,7 +27,7 @@ function ElevationScroll(props: INavBarProps) {
     target: window,
   });
 
-  return React.cloneElement(children, {
+  return React.cloneElement(children || <></>, {
     elevation: trigger ? 4 : 0,
   });
 }
@@ -59,15 +59,17 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setTitle("Create League");
       setIsBackButton(true);
     }
-    if (location.pathname === "/play") {
+    if (location.pathname.includes("/play-tournament/")) {
       setTitle("Play");
-      setIsBackButton(true);
+      setIsBackButton(false);
     }
     if (location.pathname.includes("/manage-tournament/")) {
       setTitle("Manage League");
       setIsBackButton(true);
     }
   }, [location]);
+
+  const isDevelopment = !window.location.href.includes("teeboxleague.com");
 
   return (
     <React.Fragment>
@@ -104,6 +106,16 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                   >
                     {title}
                   </Typography>
+                  {isDevelopment && (
+                    <Typography
+                      color="primary"
+                      variant="caption"
+                      component="div"
+                    >
+                      {location.pathname} - version 1.2.0 - Password and Mobile
+                      Post Score Modal Scores and Notifications
+                    </Typography>
+                  )}
                 </Box>
                 <Box>
                   <IconButton
@@ -128,7 +140,9 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
           },
         }}
       >
-        <Box>{props.children}</Box>
+        <Box>
+          <Outlet />
+        </Box>
       </Container>
     </React.Fragment>
   );

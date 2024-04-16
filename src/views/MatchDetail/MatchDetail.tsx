@@ -36,11 +36,13 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
   const [matchId, setMatchId] = React.useState<string>("");
   const [hideMatch, setHideMatch] = React.useState<boolean>(false);
   const [hideTeam, setHideTeam] = React.useState<boolean>(false);
+  const [hideMedal, setHideMedal] = React.useState<boolean>(false);
 
   const getScores = async () => {
     const players = [id?.split("-")[0], id?.split("-")[1]];
-    const m = id?.split("-")[3] === "true" ? true : false;
-    const team = id?.split("-")[5] === "true" ? true : false;
+    const m = id?.split("-")[3] === "true" ? false : true;
+    const team = id?.split("-")[5] === "true" ? false : true;
+    const medal = id?.split("-")[7] === "true" ? false : true;
     const score = [];
     for (const player of players) {
       const scores = await getScoresByID(player || "");
@@ -56,8 +58,11 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
 
     match.calculateWinners();
     setHideMatch(m);
+    setHideMedal(medal);
     setHideTeam(team);
-    setMatchId("sadasdasdsa");
+    setTimeout(() => {
+      setMatchId("sadasdasdsa");
+    }, 500);
   };
 
   useEffect(() => {
@@ -83,6 +88,7 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
             match={match}
             hideMatch={hideMatch}
             hideTeam={hideTeam}
+            hideMedal={hideMedal}
           />
         )}
       </Box>

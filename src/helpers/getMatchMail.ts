@@ -4,7 +4,9 @@ export const getBodyMail = (
   players: Array<ScoreViewModel>,
   winByHole: Array<string>,
   hideTeam: boolean,
-  winner: string
+  winner: string,
+  hideMatch: boolean,
+  hideMedal: boolean
 ) => {
   const renderResultsMatch = (index: number) => {
     //Out
@@ -33,14 +35,14 @@ export const getBodyMail = (
 
   const headers = () => {
     const holes = [
-      "HOLES",
+      "HOLE",
       ...Array.from({ length: 9 }, (_, index) => index + 1),
       "OUT",
       ...Array.from({ length: 9 }, (_, index) => index + 10),
-      "IN",
-      "GROSS",
+      "IN_",
+      "TOT",
+      "HCP",
       "NET",
-      "HDCP",
       "TEAM",
     ];
     if (hideTeam) {
@@ -60,17 +62,17 @@ export const getBodyMail = (
     if (index === 19) {
       return currentPlayer.score.in;
     }
-    //Gross
+    //Tot - Gross
     if (index === 20) {
       return currentPlayer.score.totalGross;
     }
-    //Net
-    if (index === 21) {
-      return currentPlayer.score.totalNet;
-    }
     //HDCP
-    if (index === 22) {
+    if (index === 21) {
       return currentPlayer.score.handicap;
+    }
+    //Net
+    if (index === 22) {
+      return currentPlayer.score.totalNet;
     }
     //TEAM
     if (index === 23) {
@@ -104,7 +106,9 @@ export const getBodyMail = (
 
   const renderPlayerRow = (player: string, rowIndex: number) => {
     const lengthRows = hideTeam ? 23 : 24;
-    return `<tr style="border: 1px solid;"><td style="writing-mode: vertical-lr; transform: rotate(180deg);">${player}</td>${Array.from(
+    return `<tr style="border: 1px solid;"><td style="writing-mode: vertical-lr; text-orientation: mixed; ">${
+      player.split(" ")[0]
+    }</td>${Array.from(
       { length: lengthRows },
       (_, index) =>
         `<td align="center" style="border: 1px solid;">${renderScore(
@@ -126,7 +130,15 @@ export const getBodyMail = (
   const header = `<thead ><tr> ${headers()}</tr></thead>`;
   const body = ` <tbody >${renderPlayerRows()}</tbody>`;
   const results = ` <tbody >${renderResultsRows()}</tbody>`;
-  const winnerResult = ` <tfoot><tr><td  colspan='25'>${winner}</td></tr></tfoot>`;
-  const table = `<table  style='table-layout: fixed; margin-bottom: 50px; border: 1px solid'>${header}${body}${results}${winnerResult}</table>`;
+  const realWinner = winner.split("/");
+  const finalWinner =
+    !hideMatch && !hideMedal
+      ? winner
+      : hideMatch && !hideMedal
+      ? realWinner[1]
+      : realWinner[0];
+
+  const winnerResult = ` <tfoot><tr><td  colspan='25'>${finalWinner}</td></tr></tfoot>`;
+  const table = `<table  style='margin-bottom: 50px; border: 1px solid'>${header}${body}${results}${winnerResult}</table>`;
   return table;
 };

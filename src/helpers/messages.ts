@@ -23,7 +23,7 @@ export const messages: MessagesType = {
   "match-created": "Congratulations! Your match has been successfully created.",
   "match-updated": "Match Updated",
   "score-created": "Congratulations! Your score has been successfully created.",
-  "user-logged": "Welcome.",
+  "user-logged": "Welcome",
   "loading-message": "Please wait...",
   ok: "Operation successful.",
   cancelled: "The operation was cancelled.",
@@ -47,15 +47,26 @@ export const messages: MessagesType = {
   unavailable: "The service is currently unavailable. Please try again later.",
   "data-loss": "An unrecoverable data loss or corruption occurred.",
   unauthenticated: "You are not authenticated to perform this operation.",
+  "match-deleted": "Match Deleted Successfully",
+  "auth/invalid-login-credentials":
+    "Invalid login credentials. Please try again.",
+  "tournaments-loaded": "Leagues Loaded Successfully",
+  "courses-loaded": "Courses Loaded Successfully",
+  "matches-loaded": "Matches Loaded Successfully",
 };
 
 export enum Messages {
   "USER_CREATED" = "user-created",
   "USER_LOGGED" = "user-logged",
   "LOADING" = "loading-message",
+  "MATCHES_LOADED" = "matches-loaded",
+  "COURSES_LOADED" = "courses-loaded",
+  "TOURNAMENTS_LOADED" = "tournaments-loaded",
   "TOURNAMENT_CREATED" = "tournament-created",
   "TOURNAMENT_UPDATED" = "tournament-updated",
   "MATCH_CREATED" = "match-created",
   "MATCH_UPDATED" = "match-updated",
   "SCORE_CREATED" = "score-created",
+  "MATCH_DELETED" = "match-deleted",
+  "INVALID_LOGIN_CREDENTIALS" = "auth/invalid-login-credentials",
 }
