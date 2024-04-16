@@ -218,8 +218,8 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     setValue(newValue);
   };
 
-  const handleSubmit = () => {
-    playViewModel.createMatch();
+  const handleSubmit = (message: string) => {
+    playViewModel.createMatch(message);
     setTimeout(() => navigate("/dashboard"), 5000);
   };
 
@@ -341,7 +341,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 onSubmit={
                   playViewModel.matches[0].match.winner !== ""
                     ? handleSubmit
-                    : () => {
+                    : (message: string) => {
                         handleOnExit();
                         if (blocker.state === "blocked") {
                           blocker.reset();

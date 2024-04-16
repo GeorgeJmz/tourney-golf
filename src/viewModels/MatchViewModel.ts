@@ -203,7 +203,7 @@ class MatchViewModel {
     });
   }
 
-  async createMatch(): Promise<void> {
+  async createMatch(messageModal: string): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
     const tournamentType = this.currentTournament.tournamentType;
@@ -309,7 +309,7 @@ class MatchViewModel {
       const player1 = this.players[0].score.player;
       const player2 = this.players[1].score.player;
       const title = `${player1} vs ${player2}`;
-      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p>${result}`;
+      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p>${result}<p>${messageModal}</p>`;
       this.currentTournament.playersList.forEach(async (mail) => {
         if (mail.email) {
           await sendCustomEmail(mail.email, title, bodyMail);

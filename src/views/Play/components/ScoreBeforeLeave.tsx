@@ -3,13 +3,14 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
+import { TextField } from "@mui/material";
 
 interface IScoreBeforeLeaveProps {
   isOpen: boolean;
   title: string;
   isFull?: boolean;
   onCloseModal: () => void;
-  onSubmit: () => void;
+  onSubmit: (message: string) => void;
   children?: React.ReactNode;
   fullWidth?: boolean;
 }
@@ -37,6 +38,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
   };
 
   const [isDisabledButton, setIsDisabledButton] = React.useState(false);
+  const [message, setMessage] = React.useState("");
 
   return (
     <Modal
@@ -58,6 +60,26 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
           sx={{
             display: "flex",
             justifyContent: "center",
+            marginTop: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          <TextField
+            id="outlined-basic"
+            label="Leave a message"
+            variant="outlined"
+            placeholder="(Optional)"
+            fullWidth
+            value={message}
+            onChange={(event) => {
+              setMessage(event.target.value);
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
             gap: "12px",
             marginTop: "10px",
           }}
@@ -67,7 +89,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
             disabled={isDisabledButton}
             onClick={() => {
               setIsDisabledButton(true);
-              onSubmit();
+              onSubmit(message);
             }}
           >
             Yes

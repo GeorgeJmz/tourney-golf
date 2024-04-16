@@ -226,9 +226,9 @@ class PlayViewModel {
     this.idMatch = id;
   }
 
-  async createMatch(): Promise<void> {
+  async createMatch(message: string): Promise<void> {
     for (const match of this.matches) {
-      await match.createMatch();
+      await match.createMatch(message);
     }
   }
 }
