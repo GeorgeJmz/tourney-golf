@@ -2,25 +2,13 @@ import React from "react";
 import { observer } from "mobx-react";
 import {
   step2,
-  step2Fields,
   step2FieldsValidations,
 } from "../../../../helpers/getTournamentFields";
 import { Button } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
-import { useFormik } from "formik";
-import Typography from "@mui/material/Typography";
 import TournamentViewModel from "../../../../viewModels/TournamentViewModel";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { TextInput } from "../../../../components/TextInput";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import { SendInvitations } from "../../../../components/SendInvitations";
 
 interface PlayerSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -31,100 +19,54 @@ interface PlayerSetupFormProps {
 const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
   tournamentViewModel,
   handleNext,
-  handlePrev,
 }) => {
   const validationSchema = step2FieldsValidations;
-  const formik = useFormik({
-    initialValues: step2Fields,
-    validationSchema: validationSchema,
-    onSubmit: async (values) => {
-      tournamentViewModel.addEmailToList(values.email, values.name);
-    },
-  });
+  const emailList = tournamentViewModel.tournament.playersList;
+  const onSubmitHandler = (email: string, name: string) => {
+    tournamentViewModel.addEmailToList(email, name);
+  };
 
-  const emailList = tournamentViewModel.getEmailList();
-  const players = tournamentViewModel.getPlayers();
-  const playersLeft = players - emailList.length;
+  const onEditHandler = (email: string, name: string, index: number) => {
+    tournamentViewModel.editEmailList(email, name, index);
+  };
+
+  const onRemoveHandler = (key: number) => {
+    tournamentViewModel.removeEmailFromList(key);
+  };
 
   const onNextHandler = () => {
-    const i = tournamentViewModel.getPlayersPerGroup();
-    if (i.length === 0) {
-      tournamentViewModel.setupGroups();
+    if (tournamentViewModel.tournament.playersList.length > 0) {
+      tournamentViewModel.updateTournament({
+        playersList: tournamentViewModel.tournament.playersList,
+      });
     }
     handleNext();
   };
 
   return (
-    <form onSubmit={formik.handleSubmit}>
+    <React.Fragment>
+      <SendInvitations
+        fields={step2}
+        emailList={emailList}
+        validationSchema={validationSchema}
+        onSubmit={onSubmitHandler}
+        onEdit={onEditHandler}
+        onDelete={onRemoveHandler}
+      />
       <Grid container spacing={2}>
-        {step2.map((inputElement, key) => {
-          const isError = Boolean(
-            formik.touched[inputElement.name] &&
-              Boolean(formik.errors[inputElement.name])
-          );
-          return (
-            <TextInput
-              inputElement={inputElement}
-              isError={isError}
-              onChangeHandler={formik.handleChange}
-              error={
-                formik.touched[inputElement.name]
-                  ? formik.errors[inputElement.name]
-                  : ""
-              }
-              value={formik.values[inputElement.name]}
-              key={key}
-            />
-          );
-        })}
-        <Grid item xs={4}>
-          <FormControl margin="normal" fullWidth>
+        <Grid item xs={12}>
+          <FormControl>
             <Button
-              type="submit"
+              type="button"
               variant="contained"
               size="large"
-              disabled={playersLeft === 0}
+              onClick={onNextHandler}
             >
-              Send Invitation
+              {"Save and next step"}
             </Button>
           </FormControl>
         </Grid>
-        <Grid item xs={12}>
-          <Typography>{`${emailList.length} players invited ${playersLeft} left`}</Typography>
-        </Grid>
-        <Grid item xs={12} justifyContent="center" alignItems="center">
-          <TableContainer component={Paper}>
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Name</TableCell>
-                  <TableCell align="left">Email</TableCell>
-                  <TableCell align="right">Delete</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {emailList.map(({ email, name }, index) => (
-                  <TableRow
-                    key={`${email}-${name}-${index}`}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row" align="left">
-                      {name}
-                    </TableCell>
-                    <TableCell align="left">{email}</TableCell>
-                    <TableCell align="right">
-                      <IconButton edge="end" aria-label="comments">
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
-
-        <Grid item xs={6}>
+        {/* <Grid item xs={6}>
           <FormControl fullWidth>
             <Button
               type="button"
@@ -136,7 +78,6 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
             </Button>
           </FormControl>
         </Grid>
-
         <Grid item xs={6}>
           <FormControl fullWidth>
             <Button
@@ -149,9 +90,9 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid>*/}
       </Grid>
-    </form>
+    </React.Fragment>
   );
 };
 

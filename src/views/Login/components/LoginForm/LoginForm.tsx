@@ -10,20 +10,20 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ userViewModel }) => {
-  const { values, handleInputChange, isValid } = useForm(loginFields);
+  const { values, handleInputChange } = useForm(loginFields);
 
   const handleAccount = async (
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> => {
     const { email, password } = values;
     event.preventDefault();
-    if (isValid()) {
+    if (email && password) {
       await userViewModel.loginUser(email, password);
     }
   };
 
   return (
-    <form onSubmit={handleAccount}>
+    <form onSubmit={handleAccount} autoComplete="true">
       <Grid container spacing={2}>
         {loginFields.map((inputElement, key) => (
           <Grid item xs={12} key={key}>

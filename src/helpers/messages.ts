@@ -20,11 +20,14 @@ export const messages: MessagesType = {
   "tournament-created":
     "Congratulations! Your tournament has been successfully created.",
   "tournament-updated": "Tournament Updated",
-  "user-logged": "Welcome.",
+  "match-created": "Congratulations! Your match has been successfully created.",
+  "match-updated": "Match Updated",
+  "score-created": "Congratulations! Your score has been successfully created.",
+  "user-logged": "Welcome",
   "loading-message": "Please wait...",
-  "ok": "Operation successful.",
-  "cancelled": "The operation was cancelled.",
-  "unknown": "An unknown error occurred. Please try again later.",
+  ok: "Operation successful.",
+  cancelled: "The operation was cancelled.",
+  unknown: "An unknown error occurred. Please try again later.",
   "invalid-argument":
     "An invalid argument was provided. Please check your input and try again.",
   "deadline-exceeded":
@@ -36,20 +39,34 @@ export const messages: MessagesType = {
     "The resource has been exhausted. Please try again later.",
   "failed-precondition":
     "The operation failed due to a precondition. Please try again later.",
-  "aborted": "The operation was aborted. Please try again.",
+  aborted: "The operation was aborted. Please try again.",
   "out-of-range":
     "The operation is out of range. Please check your input and try again.",
-  "unimplemented": "The operation is not implemented or not supported.",
-  "internal": "An internal error occurred. Please try again later.",
-  "unavailable": "The service is currently unavailable. Please try again later.",
+  unimplemented: "The operation is not implemented or not supported.",
+  internal: "An internal error occurred. Please try again later.",
+  unavailable: "The service is currently unavailable. Please try again later.",
   "data-loss": "An unrecoverable data loss or corruption occurred.",
-  "unauthenticated": "You are not authenticated to perform this operation.",
+  unauthenticated: "You are not authenticated to perform this operation.",
+  "match-deleted": "Match Deleted Successfully",
+  "auth/invalid-login-credentials":
+    "Invalid login credentials. Please try again.",
+  "tournaments-loaded": "Leagues Loaded Successfully",
+  "courses-loaded": "Courses Loaded Successfully",
+  "matches-loaded": "Matches Loaded Successfully",
 };
 
 export enum Messages {
   "USER_CREATED" = "user-created",
   "USER_LOGGED" = "user-logged",
   "LOADING" = "loading-message",
+  "MATCHES_LOADED" = "matches-loaded",
+  "COURSES_LOADED" = "courses-loaded",
+  "TOURNAMENTS_LOADED" = "tournaments-loaded",
   "TOURNAMENT_CREATED" = "tournament-created",
   "TOURNAMENT_UPDATED" = "tournament-updated",
+  "MATCH_CREATED" = "match-created",
+  "MATCH_UPDATED" = "match-updated",
+  "SCORE_CREATED" = "score-created",
+  "MATCH_DELETED" = "match-deleted",
+  "INVALID_LOGIN_CREDENTIALS" = "auth/invalid-login-credentials",
 }

@@ -1,9 +1,9 @@
 import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
+import MenuItem from "@mui/material/MenuItem";
 import Grid from "@mui/material/Grid";
 import type { ITournamentElement } from "../helpers/getTournamentFields";
 

@@ -2,6 +2,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import {
   step1,
+  getStep1,
   step1FieldsValidations,
 } from "../../../../helpers/getTournamentFields";
 import { Button } from "@mui/material";
@@ -30,12 +31,8 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
         ? "createTournament"
         : "updateTournament";
       const newValues = {
-        author: "",
         name: values.name,
         tournamentType: values.type,
-        players: values.players || 0,
-        groups: values.groups || 0,
-        playersPerGroup: [],
         playType: values.playType,
       };
       await tournamentViewModel[tournamentAction](newValues);
@@ -46,7 +43,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid container spacing={2}>
-        {step1.map((inputElement, key) => {
+        {getStep1(formik.values.type).map((inputElement, key) => {
           const isError = Boolean(
             formik.touched[inputElement.name] &&
               Boolean(formik.errors[inputElement.name])
@@ -64,6 +61,10 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
                 key={key}
               />
             );
+          }
+          // Remove This validation when we have the backend
+          if (inputElement.name === "players") {
+            return <p></p>;
           }
           if (inputElement.input === "number") {
             return (
@@ -97,14 +98,14 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
             />
           );
         })}
-        <Grid item xs={8}>
-          <FormControl fullWidth>
+        <Grid item xs={12}>
+          <FormControl>
             <Button type="submit" variant="contained" size="large">
-              {isNewTournament ? "Save" : "Update"}
+              {isNewTournament ? "Save and next step" : "Update League"}
             </Button>
           </FormControl>
         </Grid>
-        <Grid item xs={4}>
+        {/* <Grid item xs={4}>
           <FormControl fullWidth>
             <Button
               type="button"
@@ -116,7 +117,7 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
               Next Step
             </Button>
           </FormControl>
-        </Grid>
+        </Grid> */}
       </Grid>
     </form>
   );
