@@ -26,13 +26,30 @@ import { ToastContainer } from "react-toastify";
 const theme = createTheme({
   typography: {
     fontFamily: "'Raleway', sans-serif",
+    subtitle1: {
+      fontFamily: "'Daniel', sans-serif"
+    },
+    subtitle2: {
+      fontFamily: "'DanielBD', sans-serif"
+    },
+    button: {
+      fontFamily: "'RalewayBold', sans-serif"
+    },
+    h3: {
+      fontFamily: "'BigBlackBear', sans-serif"
+    }
   },
   palette: {
+    mode: "dark",
+    background: {
+      default: "#121212", // Dark grey background
+      paper: "#1e1e1e", // Slightly lighter grey for paper elements
+    },
     primary: {
-      main: "#0F934C",
+      main: "#bdff69",
     },
     secondary: {
-      main: "#7FC36A",
+      main: "#ff006b",
     },
   },
 });

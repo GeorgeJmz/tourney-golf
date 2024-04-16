@@ -1,3 +1,40 @@
+@font-face {
+  font-family: 'Blockman-Solid';
+  src: url('./../fonts/blockman-solid.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Blockman-Outlined';
+  src: url('./../fonts/blockman-outlined.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Daniel';
+  src: url('./../fonts/daniel.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'DanielBD';
+  src: url('./../fonts/danielbd.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'RalewayBold';
+  src: url('./../fonts/Raleway-VariableFont_wght.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'BigBlackBear';
+  src: url('./../fonts/Big\ Black\ Bear.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -14,4 +51,11 @@ code {
 
 a {
   text-decoration: none;
+}
+
+button {
+  border-radius: 0px!important;
+  font-size: 1.7em!important;
+  padding: .01em!important;
+  font-weight: 800;
 }

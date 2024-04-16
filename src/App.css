@@ -1,6 +1,36 @@
 .App {
   text-align: center;
-  background-color: #e7ebf0;
   height: auto;
   min-height: 100vh;
+}
+
+img {
+  margin-bottom: -65px;
+}
+
+a {
+  width: 100%;
+}
+
+hr {
+  position: relative;
+  margin: 2em !important;
+  width: 100%;
+  align-self: center;
+}
+
+.fade-enter {
+  opacity: 0;
+  z-index: 1;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
 }
