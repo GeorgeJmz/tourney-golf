@@ -316,7 +316,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
       }}
     >
       <form onSubmit={formik.handleSubmit} autoComplete="off">
-        <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
+        <Grid container spacing={2} sx={{ p: 3 }}>
           {createAccountElements.map((inputElement, key) => {
             const isError = Boolean(
               formik.touched[inputElement.name] &&

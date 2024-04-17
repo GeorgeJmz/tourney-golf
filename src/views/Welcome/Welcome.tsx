@@ -17,18 +17,17 @@ const Welcome: React.FC = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            height: "100%",
+            height: "100vh",
             width: "100%"
           }}
         >
           <Container
-            maxWidth="sm"
+            maxWidth="xs"
             sx={{
               display: { xs: "flex", lg: "flex" },
               alignItems: "center",
               justifyContent: "center",
-              maxWidth: { xs: "25vw", lg: "25vw"},
-              maxHeight: "100%",
+              height: "100%",
               backdropFilter: "blur(50px)",
               margin: { xs: "0", lg: "0 0 -50 0"},
             }}
@@ -41,7 +40,7 @@ const Welcome: React.FC = () => {
               sx={{ height: "100%" }}
             >
               <Container
-                maxWidth="sm"
+                maxWidth="md"
                 sx={{
                   width: "100%"
                 }}
@@ -53,7 +52,7 @@ const Welcome: React.FC = () => {
                 sx={{
                   // fontStyle: "italic",
                   fontWeight: 800,
-                  fontSize: { xs: "85px", lg: "95px" },
+                  fontSize: { xs: "85px", lg: "85px" },
                   lineHeight: "90px",
                   textAlign: "center",
                   letterSpacing: "-6px",

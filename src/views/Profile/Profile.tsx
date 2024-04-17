@@ -60,7 +60,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
   return (
     <Box sx={{ height: "100vh" }}>
       <form onSubmit={formik.handleSubmit}>
-        <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
+        <Grid container spacing={2} sx={{ p: 3 }}>
           {profileElementsSettings.map((inputElement, key) => {
             const isError = Boolean(
               formik.touched[inputElement.name] &&

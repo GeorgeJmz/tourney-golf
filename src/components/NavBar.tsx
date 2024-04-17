@@ -41,15 +41,15 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
 
   const useStyles = makeStyles({
     abRoot: {
-      backgroundColor: "white !important",
-      border: "1px solid #e0e0e0",
+      backgroundColor: "#121212!important",
+      borderWidth: "0"
     },
   });
   const classes = useStyles(); // Invoke the makeStyles hook to get the styles object
 
   React.useEffect(() => {
     if (location.pathname === "/dashboard") {
-      setTitle("TEE BOX Dashboard");
+      setTitle("Dashboard");
       setIsBackButton(false);
     }
     if (location.pathname.includes("/tournament/")) {
@@ -60,7 +60,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setIsBackButton(true);
     }
     if (location.pathname === "/play") {
-      setTitle("Play");
+      setTitle("Choose oponent");
       setIsBackButton(true);
     }
     if (location.pathname.includes("/manage-tournament/")) {
@@ -91,14 +91,13 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                     >
                       <ArrowBackIcon />
                     </IconButton>
-                    <img src="/teebox.png" width="40" alt="TEE BOX" />
                   </Box>
                 )}
                 {!isBackButton && <Box></Box>}
                 <Box>
                   <Typography
                     color="primary"
-                    variant="h6"
+                    variant="h3"
                     fontWeight="700"
                     component="div"
                   >

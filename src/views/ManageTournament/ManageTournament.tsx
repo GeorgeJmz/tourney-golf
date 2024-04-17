@@ -143,7 +143,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   };
 
   return (
-    <Box sx={{ background: "white", p: 3 }}>
+    <Box sx={{ p: 3 }}>
       <Stepper activeStep={activeStep} orientation="vertical">
         {getFilteredSteps().map((step, index) => (
           <Step key={step.label}>

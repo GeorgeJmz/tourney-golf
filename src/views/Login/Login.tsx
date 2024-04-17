@@ -20,16 +20,17 @@ const Login: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            minHeight: "100vh",
+            height: "100vh",
           }}
         >
           <Container
-            maxWidth="sm"
+            maxWidth="xs"
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              maxWidth: "25vw",
+              // maxWidth: "25vw",
+              // height: "100vh",
               backdropFilter: "blur(50px)",
               marginBottom: "-50px",
             }}
@@ -41,13 +42,20 @@ const Login: React.FC = () => {
               spacing={3}
               sx={{ height: "100%" }}
             >
-              <img src="logo2.png" width="400" alt="TEE BOX" />
+              <Container
+                maxWidth="sm"
+                sx={{
+                  width: "90%"
+                }}
+              >
+                <img src="logo2.png" style={{width: "100%"}} alt="TEE BOX" />
+              </Container>
               <Typography
                 variant="h3"
                 sx={{
                   // fontStyle: "italic",
                   fontWeight: 800,
-                  fontSize: "107px",
+                  fontSize: "85px",
                   lineHeight: "90px",
                   textAlign: "center",
                   letterSpacing: "-6px",
