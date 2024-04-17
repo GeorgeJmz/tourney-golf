@@ -34,6 +34,12 @@
   font-weight: 900;
   font-style: normal;
 }
+@font-face {
+  font-family: 'Sequel-Sans';
+  src: url('./../fonts/Sequel\ Sans\ Medium\ Body.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 body {
   margin: 0;
@@ -49,13 +55,16 @@ code {
     monospace;
 }
 
+* {
+  border-radius: 0!important;
+}
+
 a {
   text-decoration: none;
 }
 
 button {
-  border-radius: 0px!important;
-  font-size: 1.7em!important;
-  padding: .01em!important;
-  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  width: auto;
 }

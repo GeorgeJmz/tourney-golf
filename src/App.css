@@ -1,11 +1,7 @@
 .App {
   text-align: center;
-  height: auto;
-  min-height: 100vh;
-}
-
-img {
-  margin-bottom: -65px;
+  /*height: auto;*/
+  height: 100vh!important;
 }
 
 a {
@@ -13,10 +9,8 @@ a {
 }
 
 hr {
-  position: relative;
-  margin: 2em !important;
-  width: 100%;
-  align-self: center;
+  height: 3px;
+  background-color: white;
 }
 
 .fade-enter {

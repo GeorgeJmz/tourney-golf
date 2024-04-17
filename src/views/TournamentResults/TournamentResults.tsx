@@ -119,7 +119,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   const hideMedal = playType === "matchPlay";
 
   return (
-    <Box sx={{ background: "white", p: 3, height: "100vh" }}>
+    <Box sx={{ p: 3, height: "100vh" }}>
       <MenuItems
         options={tournamentViewModel.playersResultsOptions}
         placeholder="All Results"

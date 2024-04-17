@@ -265,7 +265,6 @@ export const DragDrop: React.FC<DragDropProps> = ({
                                   <Card
                                     style={{
                                       marginTop: 4,
-                                      backgroundColor: "white",
                                       maxWidth: 300,
                                     }}
                                   >
