@@ -166,10 +166,12 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
         >
           <TextField
             id="outlined-basic"
-            label="Leave a message"
+            label="Postgame message"
             variant="outlined"
             placeholder="(Optional)"
             fullWidth
+            multiline
+            maxRows={4}
             value={message}
             onChange={(event) => {
               setMessage(event.target.value);
