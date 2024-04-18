@@ -22,6 +22,7 @@ import "./App.css";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import Router from "./Router";
 import { ToastContainer } from "react-toastify";
+import {CssBaseline} from "@mui/material";
 
 const theme = createTheme({
   typography: {
@@ -101,6 +102,7 @@ root.render(
   <AuthProvider>
     <NavbarTitleProvider>
       <ThemeProvider theme={theme}>
+        <CssBaseline />
         <div className="App">
           <Router />
           <ToastContainer
