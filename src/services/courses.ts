@@ -244,6 +244,24 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "nativeOaks",
+      name: "Native Oaks",
+      address: "14616 Woods Valley Road Valley Center, CA 92082",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "nativeOaksBlack",
+          color: "Black",
+          length: "6707",
+        },
+        {
+          id: "nativeOaksBlue",
+          color: "Blue",
+          length: "6315",
+        },
+      ],
+    },
+    {
       id: "SingingHillsWillowGlen",
       name: "Singing Hills / Willow Glen",
       address: "3199 Stonefield Dr, Jamul, CA 91935",
@@ -808,6 +826,28 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3146, 36],
       out: [3267, 36],
       total: [6413, 72],
+    },
+    nativeOaksBlack: {
+      distance: [
+        399, 531, 154, 411, 435, 377, 329, 175, 552, 384, 484, 375, 154, 435,
+        350, 205, 410, 547,
+      ],
+      hcp: [9, 5, 17, 7, 1, 11, 13, 15, 3, 8, 4, 12, 18, 2, 16, 14, 10, 6],
+      par: [4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 5, 4, 3, 4, 4, 3, 4, 5],
+      in: [3344, 36],
+      out: [3363, 36],
+      total: [6707, 72],
+    },
+    nativeOaksBlue: {
+      distance: [
+        380, 524, 129, 383, 419, 369, 315, 152, 528, 370, 465, 350, 140, 378,
+        318, 181, 375, 539,
+      ],
+      hcp: [9, 5, 17, 7, 1, 11, 13, 15, 3, 8, 4, 12, 18, 2, 16, 14, 10, 6],
+      par: [4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 5, 4, 3, 4, 4, 3, 4, 5],
+      in: [3116, 36],
+      out: [3199, 36],
+      total: [6315, 72],
     },
   };
   const course = details[id];

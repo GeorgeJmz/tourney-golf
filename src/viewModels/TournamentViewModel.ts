@@ -301,10 +301,12 @@ class TournamentViewModel {
       acc[curr.email] = curr.name + " " + curr.lastName;
       return acc;
     }, {} as { [key: string]: string });
-    this.playersResultsOptions = players.map((player) => ({
-      label: listEmails ? listEmails[player.email] : player.name,
-      value: player.email,
-    }));
+    this.playersResultsOptions = players
+      .map((player) => ({
+        label: listEmails ? listEmails[player.email] : player.name,
+        value: player.email,
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
     const matches = await getMatchesByTournamentId(this.idTournament);
     const getPointsPerMatch = (idPlayer: string, idOpponent: string) => {
       const player = players.find((p) => p.email === idPlayer);
@@ -540,7 +542,7 @@ class TournamentViewModel {
       players.map(async (player) => {
         const getAverage = (values: Array<number>) => {
           const average = values.reduce((acc, curr) => acc + curr, 0);
-          return average > 0 ? (average / values.length).toFixed(0) : "0";
+          return average > 0 ? (average / values.length).toFixed(1) : "0";
         };
 
         const getWins = () => {

@@ -89,15 +89,6 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         <TableCell sx={namesStyles}>{i + 1}</TableCell>
         <TableCell sx={namesStyles}>{t.tourneyName}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.matchesPlayed}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.wins}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.draws}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.losses}</TableCell>
-        {showMatch && (
-          <TableCell sx={{ textAlign: "center" }}>{t.matchPoints}</TableCell>
-        )}
-        {showMedal && (
-          <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
-        )}
         <TableCell sx={{ textAlign: "center" }}>{t.totalPoints}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>
           {t.grossAverage || "-"}
@@ -108,6 +99,15 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         <TableCell sx={{ textAlign: "center" }}>
           {t.netAverage || "-"}
         </TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{t.wins}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{t.draws}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{t.losses}</TableCell>
+        {showMatch && (
+          <TableCell sx={{ textAlign: "center" }}>{t.matchPoints}</TableCell>
+        )}
+        {showMedal && (
+          <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
+        )}
         {showTeams && (
           <TableCell sx={{ textAlign: "center" }}>
             {t.teamPoints || "-"}
@@ -196,15 +196,15 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
                 <TableCell> </TableCell>
                 <TableCell> </TableCell>
                 <TableCell>Games Played</TableCell>
+                <TableCell>Total Points</TableCell>
+                <TableCell>Gross Average</TableCell>
+                <TableCell>Handicap Average</TableCell>
+                <TableCell>Net Average</TableCell>
                 <TableCell>Wins</TableCell>
                 <TableCell>Draws</TableCell>
                 <TableCell>Losses</TableCell>
                 {showMatch && <TableCell>Match Points</TableCell>}
                 {showMedal && <TableCell>Medal Points</TableCell>}
-                <TableCell>Total Points</TableCell>
-                <TableCell>Gross Average</TableCell>
-                <TableCell>Handicap Average</TableCell>
-                <TableCell>Net Average</TableCell>
                 {showTeams && <TableCell>Team Points</TableCell>}
               </TableRow>
             </TableHead>

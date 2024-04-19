@@ -112,8 +112,8 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                       variant="caption"
                       component="div"
                     >
-                      {location.pathname} - version 1.0.0 - PostScore Modal -
-                      Add Message
+                      {location.pathname} - version 1.0.0 - Averages and column
+                      positions
                     </Typography>
                   )}
                 </Box>
