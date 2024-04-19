@@ -166,7 +166,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
         >
           <TextField
             id="outlined-basic"
-            label="Postgame message"
+            label="Postgame comments"
             variant="outlined"
             placeholder="(Optional)"
             fullWidth
@@ -177,6 +177,13 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
               setMessage(event.target.value);
             }}
           />
+        </Box>
+        <Box
+          sx={{ display: "flex", justifyContent: "center", marginTop: "10px" }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {title}
+          </Typography>
         </Box>
         <Box
           sx={{
