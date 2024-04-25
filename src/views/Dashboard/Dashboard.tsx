@@ -22,13 +22,14 @@ import { Link } from "react-router-dom";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import { Button, CardActionArea, Container } from "@mui/material";
+import { Button, CardActionArea, Container, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import moment from "moment-timezone";
 import { convertDate } from "../../helpers/convertDate";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import AnimatedTypography from "../../components/AnimatedTypography";
-import {hr} from "@faker-js/faker";
+import PersonIcon from "@mui/icons-material/Person";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 interface IDashboardProps {
   user: UserViewModel;
@@ -41,6 +42,10 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       .format("MMMM Do YYYY, h:mm a");
     return formattedDate;
   };
+  const isDevelopment = !window.location.href.includes("teeboxleague.com");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     if (user) {
       user.getTournaments();
@@ -49,7 +54,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
     }
   }, []);
   return (
-    <div>
+    <div style={{padding: "1em"}}>
       {user && (
         <Paper variant="outlined" sx={{ my: 2, display: "flex", justifyContent: "space-between" }}>
           <ListItem sx={{p: "0"}} alignItems="flex-start">
@@ -57,7 +62,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
               {/* <Avatar
                 {...stringAvatar(`${user.user.name} ${user.user.lastName}`)}
               /> */}
-              <AnimatedTypography animation="still" sx={{letterSpacing: "-6px"}} gutterBottom align="left" variant="h3">
+              <AnimatedTypography animation="still" sx={{margin: "0", letterSpacing: "-6px"}} gutterBottom align="left" variant="block">
                 {`${user.user.name[0]} ${user.user.lastName[0]}`}
               </AnimatedTypography>
             </ListItemAvatar>
@@ -77,9 +82,15 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </ListItem>
           <ListItem sx={{ p: "0", width: "auto" }}>
             <Link to="/edit-profile">
-              <Button variant="outlined" size="large">
-                Edit Profile
-              </Button>
+              {
+                isMobile ?
+                  <IconButton color="secondary" aria-label="Edit profile">
+                    <PersonIcon />
+                  </IconButton> :
+                  <Button variant="outlined" color="secondary" size="large">
+                    Edit Profile
+                  </Button>
+              }
             </Link>
           </ListItem>
         </Paper>
@@ -153,26 +164,32 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </AnimatedTypography>
         </Grid>
       </Grid>
-      <hr />
+      {/*<hr />
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <AnimatedTypography gutterBottom align="left" variant="h3">
             League History
           </AnimatedTypography>
         </Grid>
-      </Grid>
+      </Grid>*/}
       <hr />
       <Grid container spacing={2} sx={{ mt: 1, pb: 4 }}>
-        <Grid item xs={6}>
+        <Grid item xs={10} md={6}>
           <AnimatedTypography gutterBottom align="left" variant="h3">
             League Admin
           </AnimatedTypography>
         </Grid>
-        <Grid item xs={6} sx={{ textAlign: "right" }}>
+        <Grid item xs={2} md={6} sx={{ textAlign: "right" }}>
           <Link to="/create-tournament">
-            <Button variant="outlined" size="large">
-              New League
-            </Button>
+            {
+              isMobile ?
+                <IconButton color="secondary" aria-label="New league">
+                  <AddCircleIcon />
+                </IconButton> :
+                <Button variant="outlined" color="secondary" size="large">
+                  New League
+                </Button>
+              }
           </Link>
         </Grid>
         {user.tournaments.map((tournament) => (
@@ -186,11 +203,6 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
                     </Typography>
                     <Typography variant="body2" sx={{lineHeight: "2.5"}}>
                       {tournament?.playersList?.length || 0} Players
-                    </Typography>
-                    <Typography variant="caption">
-                      {`${convertDate(tournament.startDate)}—${convertDate(
-                        tournament.cutOffDate
-                      )}`}
                     </Typography>
                   </CardContent>
                 </CardActionArea>
@@ -232,6 +244,17 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           <BottomNavigationAction label="Stats" icon={<AssessmentIcon />} />
         </BottomNavigation>
       </Paper> */}
+      
+      {isDevelopment && (
+        <Typography
+          color="primary"
+          variant="caption"
+          component="div"
+        >
+          {location.pathname} - version 1.2.0 - Password and Mobile
+          Post Score Modal Scores and Notifications
+        </Typography>
+      )}
     </div>
   );
 };

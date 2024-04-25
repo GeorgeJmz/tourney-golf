@@ -5,6 +5,7 @@ import LoginForm from "./components/LoginForm/LoginForm";
 import { Navigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useUserContext";
 import { Button, Stack, Typography, Paper, Container } from "@mui/material";
+import CompositeLogo from "../../components/CompositeLogo";
 
 const Login: React.FC = () => {
   const userViewModel = new UserViewModel();
@@ -21,16 +22,16 @@ const Login: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             height: "100vh",
+            width: "100%"
           }}
         >
           <Container
             maxWidth="xs"
             sx={{
               display: "flex",
+              padding: "0",
               alignItems: "center",
               justifyContent: "center",
-              // maxWidth: "25vw",
-              // height: "100vh",
               backdropFilter: "blur(50px)",
               marginBottom: "-50px",
             }}
@@ -40,31 +41,9 @@ const Login: React.FC = () => {
               justifyContent="center"
               alignItems="center"
               spacing={3}
-              sx={{ height: "100%" }}
+              sx={{ height: "100%", width: "100%" }}
             >
-              <Container
-                maxWidth="sm"
-                sx={{
-                  width: "90%"
-                }}
-              >
-                <img src="logo2.png" style={{width: "100%"}} alt="TEE BOX" />
-              </Container>
-              <Typography
-                variant="h3"
-                sx={{
-                  // fontStyle: "italic",
-                  fontWeight: 800,
-                  fontSize: "85px",
-                  lineHeight: "90px",
-                  textAlign: "center",
-                  letterSpacing: "-6px",
-                  textTransform: "uppercase",
-                  // maxWidth: "500px",
-                }}
-              >
-                TEE BOX League
-              </Typography>
+              <CompositeLogo mode="vertical"></CompositeLogo>
               <LoginForm userViewModel={userViewModel} />
               <Stack
                 direction="column"
@@ -74,7 +53,7 @@ const Login: React.FC = () => {
                 sx={{ width: "100%", paddingBottom: "4em" }}
               >
                 <Link to="/forgot-password">
-                  <Button variant="text" color="secondary" size="large">
+                  <Button variant="text" color="secondary" size="big">
                     Forgot your Password
                   </Button>
                 </Link>

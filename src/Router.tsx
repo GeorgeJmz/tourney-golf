@@ -20,6 +20,7 @@ import AuthActions from "./views/AuthActions/AuthActions";
 import CreateAccount from "./views/CreateAccount/CreateAccount";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import CreateTournament from "./views/CreateTournament/CreateTournament";
+import CompositeLogo from "./components/CompositeLogo";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -42,7 +43,10 @@ function Router(): JSX.Element {
           path: "/dashboard",
           element: (
             <RequireAuth user={user}>
-              <Dashboard user={userViewModel} />
+              <React.Fragment>
+                <Dashboard user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -50,7 +54,10 @@ function Router(): JSX.Element {
           path: "/create-tournament",
           element: (
             <RequireAuth user={user}>
-              <CreateTournament user={userViewModel} />
+              <React.Fragment>
+                <CreateTournament user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -58,7 +65,10 @@ function Router(): JSX.Element {
           path: "/play",
           element: (
             <RequireAuth user={user}>
-              <Play user={userViewModel} />
+              <React.Fragment>
+                <Play user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -66,7 +76,10 @@ function Router(): JSX.Element {
           path: "/manage-tournament/:id",
           element: (
             <RequireAuth user={user}>
-              <AdminLeague user={userViewModel} />
+              <React.Fragment>
+                <AdminLeague user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -75,7 +88,10 @@ function Router(): JSX.Element {
           path: "/tournament/:id",
           element: (
             <RequireAuth user={user}>
-              <Tournament user={userViewModel} />
+              <React.Fragment>
+                <Tournament user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -83,7 +99,10 @@ function Router(): JSX.Element {
           path: "/stats-tournament/:id",
           element: (
             <RequireAuth user={user}>
-              <TournamentStats user={userViewModel} />
+              <React.Fragment>
+                <TournamentStats user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -91,7 +110,10 @@ function Router(): JSX.Element {
           path: "/play-tournament/:id",
           element: (
             <RequireAuth user={user}>
-              <Play user={userViewModel} />
+              <React.Fragment>
+                <Play user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -99,7 +121,10 @@ function Router(): JSX.Element {
           path: "/results/:id",
           element: (
             <RequireAuth user={user}>
-              <TournamentResults user={userViewModel} />
+              <React.Fragment>
+                <TournamentResults user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -107,7 +132,10 @@ function Router(): JSX.Element {
           path: "/match/:id",
           element: (
             <RequireAuth user={user}>
-              <MatchDetail user={userViewModel} />
+              <React.Fragment>
+                <MatchDetail user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },
@@ -115,7 +143,10 @@ function Router(): JSX.Element {
           path: "/edit-profile",
           element: (
             <RequireAuth user={user}>
-              <Profile user={userViewModel} />
+              <React.Fragment>
+                <Profile user={userViewModel} />
+                <CompositeLogo></CompositeLogo>
+              </React.Fragment>
             </RequireAuth>
           ),
         },

@@ -5,6 +5,7 @@ import UserViewModel from "../../viewModels/UserViewModel";
 import { Navigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useUserContext";
 import { Button, Stack, Typography, Paper, Container } from "@mui/material";
+import CompositeLogo from "../../components/CompositeLogo";
 
 const CreateAccount: React.FC = () => {
   const userViewModel = new UserViewModel();
@@ -24,7 +25,7 @@ const CreateAccount: React.FC = () => {
         >
           <Paper
             elevation={3}
-            sx={{ width: "95%", height: "95vh", padding: "0 20px" }}
+            sx={{ padding: "2em" }}
           >
             <Stack
               direction="column"
@@ -33,21 +34,9 @@ const CreateAccount: React.FC = () => {
               spacing={3}
               sx={{ height: "100%" }}
             >
-              <Typography
-                variant="h3"
-                sx={{
-                  fontStyle: "italic",
-                  fontWeight: 800,
-                  fontSize: "48px",
-                  lineHeight: "39px",
-                  textAlign: "center",
-                  letterSpacing: "-4px",
-                  textTransform: "uppercase",
-                  maxWidth: "250px",
-                }}
-              >
-                TEE BOX League
-              </Typography>
+              {/* <div style={{width: "70%"}}>
+                <CompositeLogo mode="vertical"></CompositeLogo>
+              </div> */}
               <CreateAccountForm userViewModel={userViewModel} />
               <div>
                 <Typography
@@ -64,6 +53,7 @@ const CreateAccount: React.FC = () => {
                 <Link to="/login">
                   <Button
                     variant="outlined"
+                    color="secondary"
                     size="large"
                     sx={{ minWidth: "250px" }}
                   >

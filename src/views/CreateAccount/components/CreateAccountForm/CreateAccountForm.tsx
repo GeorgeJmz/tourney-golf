@@ -316,7 +316,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
       }}
     >
       <form onSubmit={formik.handleSubmit} autoComplete="off">
-        <Grid container spacing={2} sx={{ p: 3 }}>
+        <Grid direction="column" container spacing={2} sx={{ p: 3 }}>
           {createAccountElements.map((inputElement, key) => {
             const isError = Boolean(
               formik.touched[inputElement.name] &&
@@ -332,7 +332,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
                 >
                   <Tooltip title="Pasword minimum requirements: 8 Characters, One Capital Letter, One Number">
                     <FormControl
-                      sx={{ m: 2, width: "25ch" }}
+                      sx={{ my: 2, width: "100%" }}
                       variant="outlined"
                       error={isError}
                     >

@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import { Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useUserContext";
 import { Button, Stack, Typography, Container } from "@mui/material";
+import CompositeLogo from "../../components/CompositeLogo";
 
 const Welcome: React.FC = () => {
   const location = useLocation();
@@ -39,29 +40,7 @@ const Welcome: React.FC = () => {
               spacing={3}
               sx={{ height: "100%" }}
             >
-              <Container
-                maxWidth="md"
-                sx={{
-                  width: "100%"
-                }}
-              >
-                <img src="logo2.png" style={{width: "100%"}} alt="TEE BOX" />
-              </Container>
-              <Typography
-                variant="h3"
-                sx={{
-                  // fontStyle: "italic",
-                  fontWeight: 800,
-                  fontSize: { xs: "85px", lg: "85px" },
-                  lineHeight: "90px",
-                  textAlign: "center",
-                  letterSpacing: "-6px",
-                  textTransform: "uppercase",
-                  // maxWidth: "500px",
-                }}
-              >
-                TEE BOX League
-              </Typography>
+              <CompositeLogo mode="vertical"></CompositeLogo>
               <br />
               <Typography
                 variant="subtitle1"
