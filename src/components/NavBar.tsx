@@ -60,7 +60,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setIsBackButton(true);
     }
     if (location.pathname.includes("/play-tournament/")) {
-      setTitle("Choose oponent");
+      setTitle("Choose player");
       setIsBackButton(false);
     }
     if (location.pathname.includes("/manage-tournament/")) {
@@ -68,8 +68,6 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setIsBackButton(true);
     }
   }, [location]);
-
-  const isDevelopment = !window.location.href.includes("teeboxleague.com");
 
   return (
     <React.Fragment>
@@ -80,7 +78,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
             <AppBar className={classes.abRoot}>
               {" "}
               {/* Use the styles object */}
-              <Toolbar sx={{ justifyContent: "space-between" }}>
+              <Toolbar sx={{ maxWidth: "100vw", left: "0", justifyContent: "space-between" }}>
                 {isBackButton && (
                   <Box sx={{ display: "flex", alignItems: "center" }}>
                     <IconButton
@@ -95,7 +93,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                     </IconButton>
                   </Box>
                 )}
-                {!isBackButton && <Box></Box>}
+                {/*!isBackButton && <Box></Box>*/}
                 <Box>
                   <Typography
                     color="primary"
@@ -105,20 +103,10 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                   >
                     {title}
                   </Typography>
-                  {isDevelopment && (
-                    <Typography
-                      color="primary"
-                      variant="caption"
-                      component="div"
-                    >
-                      {location.pathname} - version 1.2.0 - Password and Mobile
-                      Post Score Modal Scores and Notifications
-                    </Typography>
-                  )}
                 </Box>
                 <Box>
                   <IconButton
-                    color="primary"
+                    color="secondary"
                     aria-label="logout"
                     onClick={logout}
                   >

@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./hooks/useUserContext";
 import { NavbarTitleProvider } from "./hooks/useNavContext";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, responsiveFontSizes, ThemeProvider } from "@mui/material/styles";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import App from "./App";
@@ -22,9 +22,9 @@ import "./App.css";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import Router from "./Router";
 import { ToastContainer } from "react-toastify";
-import {CssBaseline} from "@mui/material";
+import {Container, CssBaseline, Typography} from "@mui/material";
 
-const theme = createTheme({
+const theme =  responsiveFontSizes(createTheme({
   typography: {
     fontFamily: "'Sequel-Sans', sans-serif",
     subtitle1: {
@@ -42,6 +42,11 @@ const theme = createTheme({
     h6: {
       fontFamily: "'BigBlackBear', sans-serif"
     },
+    block: {
+      fontFamily: "'BigBlackBear', sans-serif",
+      fontSize: "3.4em",
+      lineHeight: "1em"
+    }
   },
   components: {
     MuiButton: {
@@ -55,6 +60,12 @@ const theme = createTheme({
               color: theme.palette.primary.main,
               boxShadow: `-6px 6px ${theme.palette.secondary.main}`
             }*/
+          }),
+        },
+        {
+          props: { size: "big" },
+          style: ({ theme }) => ({
+            fontSize: 20, padding: "0.1em 0.8em",
           }),
         }
       ],
@@ -93,6 +104,14 @@ const theme = createTheme({
       main: "#ff006b",
     },
   },
+}), {
+  variants: [
+    "subtitle1",
+    "subtitle2",
+    "button",
+    "h3",
+    "h6"
+  ]
 });
 
 const root = ReactDOM.createRoot(
