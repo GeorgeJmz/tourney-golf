@@ -12,6 +12,8 @@ import UserViewModel from "./UserViewModel";
 import MatchViewModel from "./MatchViewModel";
 import TournamentViewModel from "./TournamentViewModel";
 import TournamentModel from "../models/Tournament";
+import { checkIfMatchExist } from "../services/firebase";
+import { fa } from "@faker-js/faker";
 
 export interface IGolfCourse {
   course: GolfCourse;
@@ -228,7 +230,26 @@ class PlayViewModel {
 
   async createMatch(message: string): Promise<void> {
     for (const match of this.matches) {
-      await match.createMatch(message);
+      const player1 = match.players[0].score.idPlayer;
+      const player2 = match.players[1].score.idPlayer;
+      const name1 = match.players[0].score.player;
+      const name2 = match.players[1].score.player;
+      const idTournament = match.tournamentId;
+      const exist = await checkIfMatchExist(player1, player2, idTournament);
+      const displayLoading = getMessages(Messages.LOADING);
+      const cuToast = toast.loading(displayLoading);
+      const alreadyMessage = `Match ${name1} vs ${name2} was previously posted.`;
+      if (!exist) {
+        await match.createMatch(message);
+        toast.dismiss(cuToast);
+      } else {
+        toast.update(cuToast, {
+          render: alreadyMessage,
+          type: toast.TYPE.ERROR,
+          isLoading: false,
+          autoClose: 7000,
+        });
+      }
     }
   }
 }

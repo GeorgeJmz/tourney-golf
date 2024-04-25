@@ -12,8 +12,15 @@ import {
   MenuItem,
   Grid,
 } from "@mui/material";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import Filter1Icon from "@mui/icons-material/Filter1";
+import Filter2Icon from "@mui/icons-material/Filter2";
+import Filter3Icon from "@mui/icons-material/Filter3";
+import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
@@ -52,6 +59,8 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     tournamentViewModel.setTournament(currentTournament);
     tournamentViewModel.setTournamentId(id);
     tournamentViewModel.setAuthor(userId);
+    tournamentViewModel.getStatsPlayersByTournament();
+    console.log("TournamentPage currentTournament", currentTournament);
   }
 
   React.useEffect(() => {
@@ -81,9 +90,38 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
 
     return compareDates(endDate, today);
   }, [currentTournament?.cutOffDate]);
+
+  const standings = [
+    tournamentViewModel.statsPlayers[0] ?? [],
+    tournamentViewModel.statsPlayers[1] ?? [],
+    tournamentViewModel.statsPlayers[2] ?? [],
+  ];
+  const icons = [<Filter1Icon />, <Filter2Icon />, <Filter3Icon />];
   return (
-    <Box sx={{ height: "100vh" }}>
-      <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
+    <Box sx={{ height: "100vh", background: "white" }}>
+      <Box>
+        <Typography variant="h6">STANDINGS</Typography>
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          {standings.map((player, index) => (
+            <List
+              sx={{ width: "100%", bgcolor: "background.paper" }}
+            >
+              <ListItem key={player.tourneyName}>
+                <ListItemAvatar>
+                  <Avatar sx={(theme)=>({
+                    backgroundColor: theme.palette.primary.main,
+                  })}>{icons[index]}</Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={player.tourneyName}
+                  secondary={`Total Points: ${player.totalPoints}`}
+                />
+              </ListItem>
+            </List>
+          ))}
+        </Box>
+      </Box>
+      <Grid container sx={{ background: "white", p: 3 }}>
         <Grid item md={2} xs={12}>
           {isActiveTournament ? (
             <Link to={`/play-tournament/${id}`}>

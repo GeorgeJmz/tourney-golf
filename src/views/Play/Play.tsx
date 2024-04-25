@@ -236,6 +236,10 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [playViewModel.currentStep]);
   const isFull = playViewModel.matches.length > 2 || isMobile();
   return (
     <div>

@@ -809,3 +809,26 @@ export const getPdfUrl = async (name: string): Promise<string> => {
     return "";
   }
 };
+
+export const checkIfMatchExist = async (
+  player1: string,
+  player2: string,
+  tournamentId: string
+): Promise<boolean> => {
+  const matches = await getMatchesByTournamentId(tournamentId);
+  const exist = matches.some((match) => {
+    if (
+      match.matchResults[0].idPlayer === player1 &&
+      match.matchResults[1].idPlayer === player2
+    ) {
+      return true;
+    }
+    if (
+      match.matchResults[1].idPlayer === player1 &&
+      match.matchResults[0].idPlayer === player2
+    ) {
+      return true;
+    }
+  });
+  return exist;
+};

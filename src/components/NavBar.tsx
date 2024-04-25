@@ -67,6 +67,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setTitle("Manage League");
       setIsBackButton(true);
     }
+    window.scrollTo(0, 0);
   }, [location]);
 
   const isDevelopment = !window.location.href.includes("teeboxleague.com");

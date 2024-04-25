@@ -177,11 +177,6 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
                     <Typography variant="body2" color="text.secondary">
                       {tournament?.playersList?.length || 0} Players
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${convertDate(tournament.startDate)} - ${convertDate(
-                        tournament.cutOffDate
-                      )}`}
-                    </Typography>
                   </CardContent>
                 </CardActionArea>
               </Card>
