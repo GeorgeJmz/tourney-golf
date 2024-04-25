@@ -1,6 +1,30 @@
 .App {
   text-align: center;
-  background-color: #e7ebf0;
-  height: auto;
-  min-height: 100vh;
+  /*height: auto;*/
+  height: 100vh!important;
+}
+
+a {
+  width: 100%;
+}
+
+hr {
+  height: 3px;
+  background-color: white;
+}
+
+.fade-enter {
+  opacity: 0;
+  z-index: 1;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
+.fade-exit {
+  opacity: 1;
+}
+.fade-exit-active {
+  opacity: 0;
+  transition: opacity 300ms ease-in;
 }

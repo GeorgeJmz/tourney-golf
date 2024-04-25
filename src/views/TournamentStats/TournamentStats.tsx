@@ -143,11 +143,10 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
   ));
 
   return (
-    <Box sx={{ background: "white", p: 3, height: "100vh" }}>
+    <Box sx={{ p: 3, height: "100vh" }}>
       <div>
         <Box
           sx={{
-            background: "white",
             p: 3,
             gap: 2,
             display: "flex",

@@ -22,10 +22,13 @@ import { Link } from "react-router-dom";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import { Button, CardActionArea } from "@mui/material";
+import { Button, CardActionArea, Container } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import moment from "moment-timezone";
 import { convertDate } from "../../helpers/convertDate";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import AnimatedTypography from "../../components/AnimatedTypography";
+import {hr} from "@faker-js/faker";
 
 interface IDashboardProps {
   user: UserViewModel;
@@ -48,12 +51,15 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   return (
     <div>
       {user && (
-        <Paper sx={{ my: 2, display: "flex", justifyContent: "space-around" }}>
-          <ListItem alignItems="flex-start">
-            <ListItemAvatar>
-              <Avatar
+        <Paper variant="outlined" sx={{ my: 2, display: "flex", justifyContent: "space-between" }}>
+          <ListItem sx={{p: "0"}} alignItems="flex-start">
+            <ListItemAvatar sx={{m: 0, pr: 2}}>
+              {/* <Avatar
                 {...stringAvatar(`${user.user.name} ${user.user.lastName}`)}
-              />
+              /> */}
+              <AnimatedTypography animation="still" sx={{letterSpacing: "-6px"}} gutterBottom align="left" variant="h3">
+                {`${user.user.name[0]} ${user.user.lastName[0]}`}
+              </AnimatedTypography>
             </ListItemAvatar>
             <ListItemText
               primary={`${user.user.name} ${user.user.lastName}`}
@@ -69,15 +75,16 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
               }
             />
           </ListItem>
-          <ListItem sx={{ width: "auto" }}>
+          <ListItem sx={{ p: "0", width: "auto" }}>
             <Link to="/edit-profile">
-              <Button variant="outlined" sx={{ width: "120px" }} size="small">
+              <Button variant="outlined" size="large">
                 Edit Profile
               </Button>
             </Link>
           </ListItem>
         </Paper>
       )}
+      {user && <hr />}
       {/* <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
@@ -104,9 +111,9 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       </Grid> */}
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
-          <Typography gutterBottom align="left" variant="h6" component="div">
-            <img src="/teebox.png" width="20" alt="TEE BOX" /> League Action
-          </Typography>
+          <AnimatedTypography gutterBottom align="left" variant="h3">
+            League Action
+          </AnimatedTypography>
         </Grid>
         {user.activeTournaments.map((tournament) => (
           <Grid item xs={6} md={4} lg={2} key={tournament.name}>
@@ -138,29 +145,32 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </Grid>
         ))}
       </Grid>
+      <hr />
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
-          <Typography gutterBottom align="left" variant="h6" component="div">
-            <img src="/teebox.png" width="20" alt="TEE BOX" /> TEE BOX Stakes
-          </Typography>
+          <AnimatedTypography gutterBottom align="left" variant="h3">
+            TEE BOX Stakes
+          </AnimatedTypography>
         </Grid>
       </Grid>
+      <hr />
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
-          <Typography gutterBottom align="left" variant="h6" component="div">
-            <img src="/teebox.png" width="20" alt="TEE BOX" /> League History
-          </Typography>
+          <AnimatedTypography gutterBottom align="left" variant="h3">
+            League History
+          </AnimatedTypography>
         </Grid>
       </Grid>
+      <hr />
       <Grid container spacing={2} sx={{ mt: 1, pb: 4 }}>
         <Grid item xs={6}>
-          <Typography gutterBottom align="left" variant="h6" component="div">
-            <img src="/teebox.png" width="20" alt="TEE BOX" /> League Admin
-          </Typography>
+          <AnimatedTypography gutterBottom align="left" variant="h3">
+            League Admin
+          </AnimatedTypography>
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "right" }}>
           <Link to="/create-tournament">
-            <Button variant="outlined" size="small">
+            <Button variant="outlined" size="large">
               New League
             </Button>
           </Link>
@@ -170,15 +180,15 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             <Link to={`/manage-tournament/${tournament.id}`}>
               <Card>
                 <CardActionArea>
-                  <CardContent sx={{ textAlign: "center", lineHeight: "0.5" }}>
-                    <Typography gutterBottom variant="h6" component="div">
+                  <CardContent sx={{ textAlign: "center", lineHeight: "1" }}>
+                    <Typography gutterBottom variant="h6" sx={{my: 0}} component="div">
                       {tournament.name}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{lineHeight: "2.5"}}>
                       {tournament?.playersList?.length || 0} Players
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {`${convertDate(tournament.startDate)} - ${convertDate(
+                    <Typography variant="caption">
+                      {`${convertDate(tournament.startDate)}—${convertDate(
                         tournament.cutOffDate
                       )}`}
                     </Typography>
