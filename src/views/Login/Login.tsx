@@ -20,20 +20,12 @@ const Login: React.FC = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            height: "100vh",
+            minHeight: "100vh",
           }}
         >
-          <Container
-            maxWidth="xs"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              // maxWidth: "25vw",
-              // height: "100vh",
-              backdropFilter: "blur(50px)",
-              marginBottom: "-50px",
-            }}
+          <Paper
+            elevation={3}
+            sx={{ width: "95%", height: "85vh", padding: "0 20px" }}
           >
             <Stack
               direction="column"
@@ -42,39 +34,26 @@ const Login: React.FC = () => {
               spacing={3}
               sx={{ height: "100%" }}
             >
-              <Container
-                maxWidth="sm"
-                sx={{
-                  width: "90%"
-                }}
-              >
-                <img src="logo2.png" style={{width: "100%"}} alt="TEE BOX" />
-              </Container>
+              <img src="teebox.png" width="90" alt="TEE BOX" />
               <Typography
                 variant="h3"
                 sx={{
-                  // fontStyle: "italic",
+                  fontStyle: "italic",
                   fontWeight: 800,
-                  fontSize: "85px",
-                  lineHeight: "90px",
+                  fontSize: "30px",
+                  lineHeight: "24px",
                   textAlign: "center",
-                  letterSpacing: "-6px",
+                  letterSpacing: "-3px",
                   textTransform: "uppercase",
-                  // maxWidth: "500px",
+                  maxWidth: "150px",
                 }}
               >
                 TEE BOX League
               </Typography>
               <LoginForm userViewModel={userViewModel} />
-              <Stack
-                direction="column"
-                justifyContent="center"
-                alignItems="stretch"
-                spacing={2}
-                sx={{ width: "100%", paddingBottom: "4em" }}
-              >
+              <div>
                 <Link to="/forgot-password">
-                  <Button variant="text" color="secondary" size="large">
+                  <Button variant="outlined" color="secondary" size="large">
                     Forgot your Password
                   </Button>
                 </Link>
@@ -94,9 +73,9 @@ const Login: React.FC = () => {
                     Create an Account
                   </Button>
                 </Link> */}
-              </Stack>
+              </div>
             </Stack>
-          </Container>
+          </Paper>
         </Container>
       )}
     </React.Fragment>

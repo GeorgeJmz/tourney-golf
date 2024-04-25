@@ -83,7 +83,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   }, [currentTournament?.cutOffDate]);
   return (
     <Box sx={{ height: "100vh" }}>
-      <Grid container spacing={2} sx={{ p: 3 }}>
+      <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
         <Grid item md={2} xs={12}>
           {isActiveTournament ? (
             <Link to={`/play-tournament/${id}`}>

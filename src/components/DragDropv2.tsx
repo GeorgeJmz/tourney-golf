@@ -183,6 +183,7 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
                 <Card
                   style={{
                     marginTop: 4,
+                    backgroundColor: "white",
                     maxWidth: 300,
                   }}
                 >
