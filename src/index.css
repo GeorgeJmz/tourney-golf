@@ -1,46 +1,3 @@
-@font-face {
-  font-family: 'Blockman-Solid';
-  src: url('./../fonts/blockman-solid.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Blockman-Outlined';
-  src: url('./../fonts/blockman-outlined.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Daniel';
-  src: url('./../fonts/daniel.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'DanielBD';
-  src: url('./../fonts/danielbd.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'RalewayBold';
-  src: url('./../fonts/Raleway-VariableFont_wght.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'BigBlackBear';
-  src: url('./../fonts/Big\ Black\ Bear.ttf') format('truetype');
-  font-weight: 900;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Sequel-Sans';
-  src: url('./../fonts/Sequel\ Sans\ Medium\ Body.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
@@ -55,16 +12,6 @@ code {
     monospace;
 }
 
-* {
-  border-radius: 0!important;
-}
-
 a {
   text-decoration: none;
-}
-
-button {
-  white-space: nowrap;
-  overflow: hidden;
-  width: auto;
 }

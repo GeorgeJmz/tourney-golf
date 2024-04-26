@@ -138,7 +138,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ background: "white", p: 3 }}>
       <Stepper activeStep={activeStep} orientation="vertical">
         {getFilteredSteps().map((step, index) => (
           <Step key={step.label}>
