@@ -347,24 +347,6 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
-      id: "nativeOaks",
-      name: "Native Oaks",
-      address: "14616 Woods Valley Road Valley Center, CA 92082",
-      distance: "",
-      teeBoxes: [
-        {
-          id: "nativeOaksBlack",
-          color: "Black",
-          length: "6707",
-        },
-        {
-          id: "nativeOaksBlue",
-          color: "Blue",
-          length: "6315",
-        },
-      ],
-    },
-    {
       id: "SingingHillsWillowGlen",
       name: "Singing Hills / Willow Glen",
       address: "3199 Stonefield Dr, Jamul, CA 91935",

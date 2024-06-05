@@ -185,6 +185,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
             {title}
           </Typography>
         </Box>
+
         <Box
           sx={{
             display: "flex",
