@@ -11,7 +11,6 @@ import { NavbarTitleProvider } from "./hooks/useNavContext";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
-import App from "./App";
 import Welcome from "./views/Welcome/Welcome";
 import Dashboard from "./views/Dashboard/Dashboard";
 import CreateAccount from "./views/CreateAccount/CreateAccount";

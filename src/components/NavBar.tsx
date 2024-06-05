@@ -67,6 +67,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
       setTitle("Manage League");
       setIsBackButton(true);
     }
+    window.scrollTo(0, 0);
   }, [location]);
 
   const isDevelopment = !window.location.href.includes("teeboxleague.com");
@@ -112,8 +113,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                       variant="caption"
                       component="div"
                     >
-                      {location.pathname} - version 1.2.0 - Password and Mobile
-                      Post Score Modal Scores and Notifications
+                      {location.pathname} - version 1.0.0 - Remove Messages
                     </Typography>
                   )}
                 </Box>

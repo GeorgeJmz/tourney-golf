@@ -12,8 +12,16 @@ import {
   MenuItem,
   Grid,
 } from "@mui/material";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import LooksOneIcon from "@mui/icons-material/LooksOne";
+import LooksTwoIcon from "@mui/icons-material/LooksTwo";
+import Looks3Icon from "@mui/icons-material/Looks3";
+import Divider from "@mui/material/Divider";
+import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useParams } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
@@ -52,6 +60,8 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     tournamentViewModel.setTournament(currentTournament);
     tournamentViewModel.setTournamentId(id);
     tournamentViewModel.setAuthor(userId);
+    tournamentViewModel.getStatsPlayersByTournament();
+    console.log("TournamentPage currentTournament", currentTournament);
   }
 
   React.useEffect(() => {
@@ -81,98 +91,141 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
 
     return compareDates(endDate, today);
   }, [currentTournament?.cutOffDate]);
-  return (
-    <Box sx={{ height: "100vh" }}>
-      <Grid container spacing={2} sx={{ background: "white", p: 3 }}>
-        <Grid item md={2} xs={12}>
-          {isActiveTournament ? (
-            <Link to={`/play-tournament/${id}`}>
-              <Button variant="text" color="primary">
-                Play
-              </Button>
-            </Link>
-          ) : (
-            <Button variant="text" disabled color="primary">
+
+  const standings = [
+    tournamentViewModel.statsPlayers[0] ?? [],
+    tournamentViewModel.statsPlayers[1] ?? [],
+    tournamentViewModel.statsPlayers[2] ?? [],
+  ];
+  const icons = [<LooksOneIcon />, <LooksTwoIcon />, <Looks3Icon />];
+
+  const isMobile = () =>
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+  const getStandings = () => (
+    <Box>
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: "bold",
+          pt: 2,
+        }}
+      >
+        STANDINGS
+      </Typography>
+      <Box
+        justifyContent="center"
+        alignItems="center"
+        display="flex"
+        flexDirection={isMobile() ? "column" : "row"}
+      >
+        {standings.map((player, index) => (
+          <List sx={{ minWidth: "200px", bgcolor: "background.paper" }}>
+            <ListItem key={player.tourneyName}>
+              <ListItemAvatar>
+                <Avatar
+                  sx={(theme) => ({
+                    backgroundColor: theme.palette.primary.main,
+                  })}
+                >
+                  {icons[index]}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <p
+                    style={{
+                      fontSize: "1.5em",
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    {player.tourneyName} - <strong>{player.totalPoints}</strong>
+                  </p>
+                }
+              />
+            </ListItem>
+          </List>
+        ))}
+      </Box>
+    </Box>
+  );
+
+  const getMenu = () => (
+    <Box
+      justifyContent="center"
+      alignItems="center"
+      gap="32px"
+      display="flex"
+      flexWrap="wrap"
+      sx={{
+        p: 2,
+      }}
+    >
+      <Box flexBasis={isMobile() ? "50%" : "10%"}>
+        {isActiveTournament ? (
+          <Link to={`/play-tournament/${id}`}>
+            <Button variant="text" color="primary">
               Play
             </Button>
-          )}
-        </Grid>
-        <Grid item md={2} xs={12}>
-          <Link to={`/results/${id}`}>
-            <Button
-              variant="text"
-              color="primary"
-              onClick={() => console.log("Ver Resultados")}
-            >
-              Results
-            </Button>
           </Link>
-        </Grid>
-        <Grid item md={2} xs={12}>
-          <Link to={`/stats-tournament/${id}`}>
-            <Button
-              variant="text"
-              color="primary"
-              onClick={() => console.log("Ver estadísticas")}
-            >
-              Board & Stats
-            </Button>
-          </Link>
-        </Grid>
-        {/* <Grid item md={2} xs={12}>
+        ) : (
+          <Button variant="text" disabled color="primary">
+            Play
+          </Button>
+        )}
+      </Box>
+      <Box flexBasis={isMobile() ? "50%" : "10%"}>
+        <Link to={`/results/${id}`}>
           <Button
             variant="text"
             color="primary"
-            disabled
-            onClick={() => console.log("Ver estadísticas")}
+            onClick={() => console.log("Ver Resultados")}
           >
-            Live Scores
+            Results
           </Button>
-        </Grid> */}
-        <Grid item md={2} xs={12}>
+        </Link>
+      </Box>
+      <Box flexBasis={isMobile() ? "50%" : "15%"}>
+        <Link to={`/stats-tournament/${id}`}>
           <Button
             variant="text"
             color="primary"
-            disabled
             onClick={() => console.log("Ver estadísticas")}
           >
-            Playoffs
+            Board & Stats
           </Button>
-        </Grid>
-        <Grid item md={2} xs={12}>
-          <Button variant="text" color="primary" onClick={handleClick}>
+        </Link>
+      </Box>
+      <Box flexBasis={isMobile() ? "50%" : "10%"}>
+        <Button
+          variant="text"
+          color="primary"
+          disabled
+          onClick={() => console.log("Ver estadísticas")}
+        >
+          Playoffs
+        </Button>
+      </Box>
+      <Box flexBasis={isMobile() ? "50%" : "10%"}>
+        <Link to={`/rules-tournament/${id}`}>
+          <Button
+            variant="text"
+            color="primary"
+            onClick={() => console.log("Ver estadísticas")}
+          >
             Rules
           </Button>
-          <Menu
-            id="basic-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
-            }}
-          >
-            <MenuItem>
-              <DownloadButton
-                pathName={`${currentTournament?.id}/`}
-                fileName="rules"
-              />
-            </MenuItem>
-            <MenuItem>
-              <DownloadButton
-                pathName={`${currentTournament?.id}/`}
-                fileName="calendar"
-              />
-            </MenuItem>
-            <MenuItem>
-              <DownloadButton
-                pathName={`${currentTournament?.id}/`}
-                fileName="calcutta"
-              />
-            </MenuItem>
-          </Menu>
-        </Grid>
-      </Grid>
+        </Link>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ height: "100vh", background: "white" }}>
+      {isMobile() ? [getStandings(), getMenu()] : [getMenu(), getStandings()]}
     </Box>
   );
 };

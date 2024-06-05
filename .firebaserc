@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "tourneygolf-65eed"
-  }
+    "default": "teeboxleague-11e39",
+    "production": "teeboxleague-11e39"
+  },
+  "targets": {},
+  "etags": {}
 }

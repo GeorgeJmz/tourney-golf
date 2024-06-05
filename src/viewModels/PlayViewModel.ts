@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 import { Messages } from "../helpers/messages";
-import MatchModel from "../models/Match";
+import MatchModel, { IMatch } from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
@@ -12,9 +12,17 @@ import UserViewModel from "./UserViewModel";
 import MatchViewModel from "./MatchViewModel";
 import TournamentViewModel from "./TournamentViewModel";
 import TournamentModel from "../models/Tournament";
+import { getMatchesByTournamentId } from "../services/firebase";
+import { fa } from "@faker-js/faker";
 
 export interface IGolfCourse {
   course: GolfCourse;
+  label?: string;
+  teeBoxes?: Array<{
+    id: string;
+    color: string;
+    length: number;
+  }>;
   isOpen: boolean;
 }
 
@@ -195,22 +203,17 @@ class PlayViewModel {
   }
 
   async getCourses(): Promise<void> {
-    const displayLoading = getMessages(Messages.LOADING);
-    const cuToast = toast.loading(displayLoading);
     try {
       const tempCourses = await getCourses().courses;
+
       this.courses = tempCourses.map((course) => ({
         isOpen: false,
+        label: course.name,
         course,
       }));
-      const displayMessage = getMessages(Messages.COURSES_LOADED);
-      toast.update(cuToast, {
-        render: displayMessage,
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 800,
-      });
     } catch (error) {
+      const displayLoading = getMessages(Messages.LOADING);
+      const cuToast = toast.loading(displayLoading);
       const codeError = (error as FirebaseError).code;
       const displayError = getMessages(codeError);
       toast.update(cuToast, {
@@ -226,10 +229,52 @@ class PlayViewModel {
     this.idMatch = id;
   }
 
-  async createMatch(): Promise<void> {
+  async createMatch(message: string, onFinish: () => void): Promise<void> {
+    const idTournament = this.tournamentId;
+    const matches = await getMatchesByTournamentId(idTournament);
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
     for (const match of this.matches) {
-      await match.createMatch();
+      const player1 = match.players[0].score.idPlayer;
+      const player2 = match.players[1].score.idPlayer;
+      const name1 = match.players[0].score.player;
+      const name2 = match.players[1].score.player;
+      const checkIfMatchExist = async (
+        player1: string,
+        player2: string,
+        matches: IMatch[]
+      ): Promise<boolean> => {
+        const exist = matches.some((match) => {
+          if (
+            match.matchResults[0].idPlayer === player1 &&
+            match.matchResults[1].idPlayer === player2
+          ) {
+            return true;
+          }
+          if (
+            match.matchResults[1].idPlayer === player1 &&
+            match.matchResults[0].idPlayer === player2
+          ) {
+            return true;
+          }
+        });
+        return exist;
+      };
+      const exist = await checkIfMatchExist(player1, player2, matches);
+      const alreadyMessage = `Match ${name1} vs ${name2} was previously posted.`;
+      if (!exist) {
+        await match.createMatch(message);
+      } else {
+        toast.update(cuToast, {
+          render: alreadyMessage,
+          type: toast.TYPE.ERROR,
+          isLoading: false,
+          autoClose: 7000,
+        });
+      }
     }
+    toast.dismiss(cuToast);
+    onFinish();
   }
 }
 

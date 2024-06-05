@@ -60,6 +60,8 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     []
   );
 
+  const lastCourses = React.useMemo(() => user.user.lastCourses, []);
+
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       playViewModel.currentStep === 2 &&
@@ -218,9 +220,10 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     setValue(newValue);
   };
 
-  const handleSubmit = () => {
-    playViewModel.createMatch();
-    setTimeout(() => navigate("/dashboard"), 5000);
+  const handleSubmit = (message: string) => {
+    playViewModel.createMatch(message, () => navigate("/dashboard"));
+    // console.log("Finished");
+    // setTimeout(() => navigate("/dashboard"), 5000);
   };
 
   const handleOnExit = () => {
@@ -236,6 +239,10 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [playViewModel.currentStep]);
   const isFull = playViewModel.matches.length > 2 || isMobile();
   return (
     <div>
@@ -253,6 +260,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       >
         {playViewModel.currentStep === 0 && (
           <CourseList
+            lastCourse={lastCourses}
             courses={playViewModel.courses}
             currentTeeBox={playViewModel.currentTeeBox}
             onOpenCourse={onOpenCourse}
@@ -338,10 +346,15 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 isOpen={openFinishModal}
                 onCloseModal={handleCancel}
                 isFull={isFull}
+                pathName={currentTournament?.id || ""}
+                fileName={
+                  `${currentTournament?.playersList[0].email}-${currentTournament?.playersList[1].email}` ||
+                  ""
+                }
                 onSubmit={
                   playViewModel.matches[0].match.winner !== ""
                     ? handleSubmit
-                    : () => {
+                    : (message: string) => {
                         handleOnExit();
                         if (blocker.state === "blocked") {
                           blocker.reset();

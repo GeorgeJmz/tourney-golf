@@ -87,13 +87,17 @@ export const getBodyMail = (
     const hasHandicap =
       currentPlayer.score.scoreHoles[indexHole] &&
       currentPlayer.score.scoreHolesHP[indexHole];
+    // const getScoreWithHP = hasHandicap
+    //   ? `${currentPlayer.score.scoreHoles[indexHole]}/${
+    //       currentPlayer.score.scoreHoles[indexHole] -
+    //       currentPlayer.score.scoreHolesHP[indexHole]
+    //     }`
+    //   : currentPlayer.score.scoreHoles[indexHole];
     const getScoreWithHP = hasHandicap
-      ? `${currentPlayer.score.scoreHoles[indexHole]}/${
-          currentPlayer.score.scoreHoles[indexHole] -
-          currentPlayer.score.scoreHolesHP[indexHole]
-        }`
+      ? `<div style="position: relative;"><span style="position: absolute;top: -17px;left: -5px;font-size: 20px;color: green;"> • </span><span>${
+          currentPlayer.score.scoreHoles[indexHole] || "-"
+        }</span> </div>`
       : currentPlayer.score.scoreHoles[indexHole];
-
     const upNumber = !hideTeam
       ? `<tr><td>${currentPlayer.score.teamPoints[indexHole] > 0 ? "+" : ""}${
           currentPlayer.score.teamPoints[indexHole] || "-"
@@ -138,7 +142,7 @@ export const getBodyMail = (
       ? realWinner[1]
       : realWinner[0];
 
-  const winnerResult = ` <tfoot><tr><td  colspan='25'>${finalWinner}</td></tr></tfoot>`;
+  const winnerResult = ` <tfoot><tr><td  colspan='25' style="font-size:28px">${finalWinner}</td></tr></tfoot>`;
   const table = `<table  style='margin-bottom: 50px; border: 1px solid'>${header}${body}${results}${winnerResult}</table>`;
   return table;
 };

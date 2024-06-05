@@ -20,6 +20,7 @@ import AuthActions from "./views/AuthActions/AuthActions";
 import CreateAccount from "./views/CreateAccount/CreateAccount";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import CreateTournament from "./views/CreateTournament/CreateTournament";
+import Rules from "./views/Rules/Rules";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -84,6 +85,14 @@ function Router(): JSX.Element {
           element: (
             <RequireAuth user={user}>
               <TournamentStats user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/rules-tournament/:id",
+          element: (
+            <RequireAuth user={user}>
+              <Rules user={userViewModel} />
             </RequireAuth>
           ),
         },
