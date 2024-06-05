@@ -23,6 +23,11 @@ export interface ITournament {
   pointsPerTie: number;
   pointsPerWinMedal: number;
   pointsPerTieMedal: number;
+  numberOfRounds?: number;
+  roundsDates?: string[];
+  championshipRound?: boolean;
+  champoinshipDate?: string;
+  minRounds?: number;
 }
 export interface ITournamentGroup {
   id: string;
@@ -79,6 +84,11 @@ export default class TournamentModel implements ITournament {
   pointsPerTie = 1;
   pointsPerWinMedal = 3;
   pointsPerTieMedal = 1;
+  numberOfRounds = 1;
+  roundDates = [new Date().toISOString()];
+  championshipRound = false;
+  champoinshipDate = new Date().toISOString();
+  minRounds = 1;
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

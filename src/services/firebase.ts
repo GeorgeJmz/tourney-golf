@@ -49,8 +49,8 @@ export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
 if (process.env.REACT_ENV === "LOCAL") {
-  connectFirestoreEmulator(db, "127.0.0.1", 8081);
-  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+connectFirestoreEmulator(db, "127.0.0.1", 8081);
+connectAuthEmulator(auth, "http://127.0.0.1:9099");
 }
 
 export const passwordReset = async (email: string): Promise<void> => {
@@ -676,6 +676,7 @@ export const updateTournament = async (
 ): Promise<void> => {
   try {
     const documentRef = doc(db, "tournament", documentId);
+    console.log(updatedData, "updatedData");
     await setDoc(documentRef, updatedData, { merge: true });
   } catch (error) {
     const code = error as FirebaseError;
