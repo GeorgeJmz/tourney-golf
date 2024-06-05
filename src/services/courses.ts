@@ -160,6 +160,24 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "nativeOaks",
+      name: "Native Oaks",
+      address: "14616 Woods Valley Road Valley Center, CA 92082",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "nativeOaksBlack",
+          color: "Black",
+          length: "6707",
+        },
+        {
+          id: "nativeOaksBlue",
+          color: "Blue",
+          length: "6315",
+        },
+      ],
+    },
+    {
       id: "RiverwalkGolfClub",
       name: "Riverwalk Golf Club",
       address: "1150 Fashion Valley Rd, San Diego, CA 92108",
@@ -221,6 +239,24 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "SanVicenteGolfCourse",
+      name: "San Vicente Golf Course",
+      address: "24157 San Vicente Rd, San Diego Country Estates, CA 92065",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlackSanVicenteGolfCourse",
+          color: "Black",
+          length: "6704",
+        },
+        {
+          id: "WhiteSanVicenteGolfCourse",
+          color: "White",
+          length: "6346",
+        },
+      ],
+    },
+    {
       id: "oakGlen",
       name: "Singing Hills / Oak Glen",
       address: "3007 Dehesa Rd, El Cajon, CA 92019",
@@ -240,24 +276,6 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "WhiteOak",
           color: "White",
           length: "6131",
-        },
-      ],
-    },
-    {
-      id: "nativeOaks",
-      name: "Native Oaks",
-      address: "14616 Woods Valley Road Valley Center, CA 92082",
-      distance: "",
-      teeBoxes: [
-        {
-          id: "nativeOaksBlack",
-          color: "Black",
-          length: "6707",
-        },
-        {
-          id: "nativeOaksBlue",
-          color: "Blue",
-          length: "6315",
         },
       ],
     },
@@ -848,6 +866,28 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3116, 36],
       out: [3199, 36],
       total: [6315, 72],
+    },
+    BlackSanVicenteGolfCourse: {
+      distance: [
+        540, 167, 354, 502, 420, 357, 390, 200, 393, 390, 535, 167, 378, 367,
+        194, 379, 539, 432,
+      ],
+      hcp: [7, 15, 9, 13, 1, 11, 17, 5, 3, 18, 4, 12, 10, 8, 14, 16, 6, 2],
+      par: [5, 3, 4, 5, 4, 4, 4, 3, 4, 4, 5, 3, 4, 4, 3, 4, 5, 4],
+      in: [3381, 36],
+      out: [3323, 36],
+      total: [6704, 72],
+    },
+    WhiteSanVicenteGolfCourse: {
+      distance: [
+        521, 157, 328, 483, 407, 341, 375, 190, 382, 356, 508, 153, 368, 350,
+        176, 345, 517, 389,
+      ],
+      hcp: [7, 15, 9, 13, 1, 11, 17, 5, 3, 18, 4, 12, 10, 8, 14, 16, 6, 2],
+      par: [5, 3, 4, 5, 4, 4, 4, 3, 4, 4, 5, 3, 4, 4, 3, 4, 5, 4],
+      in: [3162, 36],
+      out: [3184, 36],
+      total: [6346, 72],
     },
   };
   const course = details[id];

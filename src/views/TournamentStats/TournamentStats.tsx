@@ -88,8 +88,8 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
       <TableRow key={t.id}>
         <TableCell sx={namesStyles}>{i + 1}</TableCell>
         <TableCell sx={namesStyles}>{t.tourneyName}</TableCell>
-        <TableCell sx={{ textAlign: "center" }}>{t.matchesPlayed}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>{t.totalPoints}</TableCell>
+        <TableCell sx={{ textAlign: "center" }}>{t.matchesPlayed}</TableCell>
         <TableCell sx={{ textAlign: "center" }}>
           {t.grossAverage || "-"}
         </TableCell>
@@ -195,8 +195,8 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
               <TableRow>
                 <TableCell> </TableCell>
                 <TableCell> </TableCell>
-                <TableCell>Games Played</TableCell>
                 <TableCell>Total Points</TableCell>
+                <TableCell>Games Played</TableCell>
                 <TableCell>Gross Average</TableCell>
                 <TableCell>Handicap Average</TableCell>
                 <TableCell>Net Average</TableCell>

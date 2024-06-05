@@ -167,29 +167,29 @@ class ScoreViewModel {
   };
 
   async createScore(): Promise<string> {
-    const displayLoading = getMessages(Messages.LOADING);
-    const cuToast = toast.loading(displayLoading);
+    //const displayLoading = getMessages(Messages.LOADING);
+    //const cuToast = toast.loading(displayLoading);
     try {
       const scoreId = await createScore({
         ...this.score,
       });
-      const displayMessage = getMessages(Messages.SCORE_CREATED);
-      toast.update(cuToast, {
-        render: `${displayMessage}: ${this.score.player}`,
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 1000,
-      });
+      // const displayMessage = getMessages(Messages.SCORE_CREATED);
+      // toast.update(cuToast, {
+      //   render: `${displayMessage}: ${this.score.player}`,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 1000,
+      // });
       return scoreId || "";
     } catch (error) {
-      const codeError = (error as FirebaseError).code;
-      const displayError = getMessages(codeError);
-      toast.update(cuToast, {
-        render: displayError,
-        type: toast.TYPE.ERROR,
-        isLoading: false,
-        autoClose: 800,
-      });
+      // const codeError = (error as FirebaseError).code;
+      // const displayError = getMessages(codeError);
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
       return "";
     }
   }

@@ -19,6 +19,9 @@ import {
   query,
   where,
   deleteDoc,
+  arrayUnion,
+  updateDoc,
+  connectFirestoreEmulator,
 } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import type { IUser } from "../models/User";
@@ -30,6 +33,7 @@ import { IScore } from "../models/Score";
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { ITournamentPlayer } from "../models/Player";
+import "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -44,6 +48,10 @@ export const firebase = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
+if (process.env.REACT_ENV === "LOCAL") {
+  connectFirestoreEmulator(db, "127.0.0.1", 8081);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+}
 
 export const passwordReset = async (email: string): Promise<void> => {
   try {
@@ -524,29 +532,75 @@ export const updatePlayer = async (player: {
       where("email", "==", player.email.toLowerCase()),
       where("tournamentId", "==", player.tournamentId)
     );
+
     const querySnapshot = await getDocs(userQuery);
-    let playerData = null;
-    await querySnapshot.forEach(async (dc) => {
-      playerData = dc.data() as ITournamentPlayer;
-      const newPlayer = {
-        ...playerData,
-        opponent: [...(playerData.opponent || []), player.opponent],
-        pointsMatch: [...(playerData.pointsMatch || []), player.pointsMatch],
-        pointsStroke: [...(playerData.pointsStroke || []), player.pointsStroke],
-        pointsTeam: [...(playerData.pointsTeam || []), player.pointsTeam],
-        scoreId: [...(playerData.scoreId || []), player.scoreId],
-        gross: [...(playerData.gross || []), player.gross],
-        handicap: [...(playerData.handicap || []), player.handicap],
-        net: [...(playerData.net || []), player.net],
-      };
-      const documentRef = doc(db, "player", dc.id);
-      await setDoc(documentRef, newPlayer, { merge: true });
-    });
+
+    if (querySnapshot.empty) {
+      // No player document found, handle the case (e.g., create a new document)
+      return;
+    }
+
+    const playerDoc = querySnapshot.docs[0]; // Assuming only one matching document
+    const updateData = {
+      opponent: arrayUnion(player.opponent),
+      pointsMatch: [...playerDoc.data().pointsMatch, player.pointsMatch],
+      pointsStroke: [...playerDoc.data().pointsStroke, player.pointsStroke],
+      pointsTeam: [...playerDoc.data().pointsTeam, player.pointsTeam],
+      scoreId: arrayUnion(player.scoreId),
+      gross: [...playerDoc.data().gross, player.gross],
+      handicap: [...playerDoc.data().handicap, player.handicap],
+      net: [...playerDoc.data().net, player.net],
+    };
+
+    await updateDoc(doc(db, "player", playerDoc.id), updateData);
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
   }
 };
+
+// export const updatePlayer = async (player: {
+//   email: string;
+//   opponent: string;
+//   pointsMatch: number;
+//   pointsStroke: number;
+//   pointsTeam: number;
+//   scoreId: string;
+//   tournamentId: string;
+//   gross: number;
+//   handicap: number;
+//   net: number;
+// }): Promise<void> => {
+//   try {
+//     const userCollection = collection(db, "player");
+//     const userQuery = query(
+//       userCollection,
+//       where("email", "==", player.email.toLowerCase()),
+//       where("tournamentId", "==", player.tournamentId)
+//     );
+//     const querySnapshot = await getDocs(userQuery);
+//     let playerData = null;
+//     await querySnapshot.forEach(async (dc) => {
+//       playerData = dc.data() as ITournamentPlayer;
+//       const newPlayer = {
+//         ...playerData,
+//         opponent: [...(playerData.opponent || []), player.opponent],
+//         pointsMatch: [...(playerData.pointsMatch || []), player.pointsMatch],
+//         pointsStroke: [...(playerData.pointsStroke || []), player.pointsStroke],
+//         pointsTeam: [...(playerData.pointsTeam || []), player.pointsTeam],
+//         scoreId: [...(playerData.scoreId || []), player.scoreId],
+//         gross: [...(playerData.gross || []), player.gross],
+//         handicap: [...(playerData.handicap || []), player.handicap],
+//         net: [...(playerData.net || []), player.net],
+//       };
+//       const documentRef = doc(db, "player", dc.id);
+//       await setDoc(documentRef, newPlayer, { merge: true });
+//     });
+//   } catch (error) {
+//     const code = error as FirebaseError;
+//     throw code;
+//   }
+// };
 
 export const updatePlayerToAddMissingFields = async (): Promise<void> => {
   const playerCollection = collection(db, "player");
@@ -810,6 +864,69 @@ export const getPdfUrl = async (name: string): Promise<string> => {
   }
 };
 
+export const uploadIMG = async (file: File, name: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, "imgs/" + name);
+    const snap = await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(snap.ref);
+    return url;
+  } catch (error) {
+    const code = error as FirebaseError;
+    return "";
+  }
+};
+
+export const getIMGUrl = async (name: string): Promise<string> => {
+  try {
+    const storageRef = ref(storage, "imgs/" + name);
+    const url = await getDownloadURL(storageRef);
+    return url;
+  } catch (error) {
+    const code = error as FirebaseError;
+    return "";
+  }
+};
+
+// export const checkIfMatchExist = async (
+//   player1: string,
+//   player2: string,
+//   tournamentId: string
+// ): Promise<boolean> => {
+//   // Create a base query for the "match" collection
+//   const queryMatch = collection(db, "match");
+
+//   // Build the first where clause for player1
+//   const whereClause1 = query(
+//     queryMatch,
+//     where("tournamentId", "==", tournamentId),
+//     where("matchResults[0].idPlayer", "==", player1), // Use array-contains for array filtering
+//     where("matchResults[1].idPlayer", "==", player2) // Use array-contains for array filtering
+//   );
+
+//   // Build the second where clause for player2
+//   const whereClause2 = query(
+//     queryMatch,
+//     where("tournamentId", "==", tournamentId),
+//     where("matchResults[0].idPlayer", "==", player2), // Use array-contains for array filtering
+//     where("matchResults[1].idPlayer", "==", player1) // Use array-contains for array filtering
+//   );
+
+//   // Execute the queries and get snapshots
+//   const snapshot1 = await getDocs(whereClause1);
+//   const snapshot2 = await getDocs(whereClause2);
+
+//   console.log(whereClause1, "whereClause1");
+//   console.log(whereClause2, "whereClause2");
+//   console.log(snapshot1.size);
+//   console.log(snapshot2.size);
+
+//   console.log(snapshot1.docs);
+//   console.log(snapshot2.docs);
+
+//   // Check if either snapshot has documents (meaning a match exists)
+//   return !snapshot1.empty || !snapshot2.empty;
+// };
+
 export const checkIfMatchExist = async (
   player1: string,
   player2: string,
@@ -831,4 +948,26 @@ export const checkIfMatchExist = async (
     }
   });
   return exist;
+};
+
+export const updateMatches = async (): Promise<void> => {
+  const collectionRef = collection(db, "match");
+  getDocs(collectionRef).then((querySnapshot) => {
+    querySnapshot.forEach((docSnapshot) => {
+      const matchResultsData = docSnapshot.data().matchResults[0];
+      const matchResultsData1 = docSnapshot.data().matchResults[1];
+      const newMatchResultsObject: { [key: string]: string[] | number[] } = {}; // Add index signature
+
+      for (const property in matchResultsData) {
+        newMatchResultsObject[property] = [
+          matchResultsData[property],
+          matchResultsData1[property],
+        ];
+      }
+
+      const docRef = doc(db, "match", docSnapshot.id);
+      console.log(newMatchResultsObject, "newMatchResultsObject");
+      //updateDoc(docRef, { matchResults: newMatchResultsObject });
+    });
+  });
 };

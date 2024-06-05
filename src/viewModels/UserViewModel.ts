@@ -143,18 +143,11 @@ class UserViewModel {
   }
 
   async getTournaments(): Promise<void> {
-    const displayLoading = getMessages(Messages.LOADING);
-    const cuToast = toast.loading(displayLoading);
     try {
       this.tournaments = (await getTournamentsByAuthorID(this.user.id)) || [];
-      const displayMessage = getMessages(Messages.TOURNAMENTS_LOADED);
-      toast.update(cuToast, {
-        render: displayMessage,
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 800,
-      });
     } catch (error) {
+      const displayLoading = getMessages(Messages.LOADING);
+      const cuToast = toast.loading(displayLoading);
       const codeError = (error as FirebaseError).code;
       const displayError = getMessages(codeError);
       toast.update(cuToast, {

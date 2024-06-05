@@ -60,6 +60,8 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     []
   );
 
+  const lastCourses = React.useMemo(() => user.user.lastCourses, []);
+
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       playViewModel.currentStep === 2 &&
@@ -219,8 +221,9 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
 
   const handleSubmit = (message: string) => {
-    playViewModel.createMatch(message);
-    setTimeout(() => navigate("/dashboard"), 5000);
+    playViewModel.createMatch(message, () => navigate("/dashboard"));
+    // console.log("Finished");
+    // setTimeout(() => navigate("/dashboard"), 5000);
   };
 
   const handleOnExit = () => {
@@ -257,6 +260,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       >
         {playViewModel.currentStep === 0 && (
           <CourseList
+            lastCourse={lastCourses}
             courses={playViewModel.courses}
             currentTeeBox={playViewModel.currentTeeBox}
             onOpenCourse={onOpenCourse}
@@ -342,6 +346,11 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                 isOpen={openFinishModal}
                 onCloseModal={handleCancel}
                 isFull={isFull}
+                pathName={currentTournament?.id || ""}
+                fileName={
+                  `${currentTournament?.playersList[0].email}-${currentTournament?.playersList[1].email}` ||
+                  ""
+                }
                 onSubmit={
                   playViewModel.matches[0].match.winner !== ""
                     ? handleSubmit

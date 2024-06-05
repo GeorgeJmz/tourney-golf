@@ -204,8 +204,8 @@ class MatchViewModel {
   }
 
   async createMatch(messageModal: string): Promise<void> {
-    const displayLoading = getMessages(Messages.LOADING);
-    const cuToast = toast.loading(displayLoading);
+    // const displayLoading = getMessages(Messages.LOADING);
+    // const cuToast = toast.loading(displayLoading);
     const tournamentType = this.currentTournament.tournamentType;
     const playType = this.currentTournament.playType;
 
@@ -309,29 +309,30 @@ class MatchViewModel {
       const player1 = this.players[0].score.player;
       const player2 = this.players[1].score.player;
       const title = `${player1} vs ${player2}`;
-      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<p>${messageModal}</p>`;
+      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
       this.currentTournament.playersList.forEach(async (mail) => {
         if (mail.email) {
           await sendCustomEmail(mail.email, title, bodyMail);
         }
       });
 
-      const displayMessage = getMessages(Messages.MATCH_CREATED);
-      toast.update(cuToast, {
-        render: displayMessage,
-        type: toast.TYPE.SUCCESS,
-        isLoading: false,
-        autoClose: 800,
-      });
+      console.log("Match created - Email sent to players");
+      //const displayMessage = getMessages(Messages.MATCH_CREATED);
+      // toast.update(cuToast, {
+      //   render: displayMessage,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
     } catch (error) {
       const codeError = (error as FirebaseError).code;
       const displayError = getMessages(codeError);
-      toast.update(cuToast, {
-        render: displayError,
-        type: toast.TYPE.ERROR,
-        isLoading: false,
-        autoClose: 800,
-      });
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
     }
   }
 }
