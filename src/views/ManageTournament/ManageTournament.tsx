@@ -139,6 +139,14 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
         (s) => s.label !== "Groups Setup" && s.label !== "Conference Setup"
       );
     }
+    if (type === "dogfight") {
+      return steps.filter(
+        (s) =>
+          s.label !== "Groups Setup" &&
+          s.label !== "Conference Setup" &&
+          s.label !== "Teams Setup"
+      );
+    }
     return steps;
   };
 

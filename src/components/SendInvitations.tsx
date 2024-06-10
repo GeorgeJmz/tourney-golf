@@ -203,12 +203,12 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
                         </div>
                       ) : (
                         <React.Fragment>
-                          <IconButton
+                          {/* <IconButton
                             aria-label="edit"
                             onClick={() => startEditing(index)}
                           >
                             <EditIcon />
-                          </IconButton>
+                          </IconButton> */}
                           <IconButton
                             aria-label="delete"
                             onClick={() => onDelete(index)}

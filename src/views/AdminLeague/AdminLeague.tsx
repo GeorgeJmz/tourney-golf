@@ -239,6 +239,11 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     return emails.includes(playerToSwitch?.email || "");
   };
 
+  const isDogfight = tournamentType === "dogfight";
+  const isDraft = tournamentType === undefined;
+
+  console.log("tournamentType", tournamentType);
+
   return (
     <div>
       <Box
@@ -256,9 +261,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
         <React.Fragment>
           <Tabs value={value} onChange={handleChange} centered>
             <Tab label="League Setup" />
-            <Tab label="Results Review " />
-            <Tab label="Switch Players " />
-            <Tab label="Playoff Picture " />
+            {isDogfight ? (
+              <Tab label="Round Review " />
+            ) : isDraft ? null : (
+              <Tab label="Results Review " />
+            )}
+            {isDogfight || isDraft ? null : <Tab label="Switch Players " />}
+            {isDogfight || isDraft ? null : <Tab label="Playoff Picture " />}
             <Tab label="Finish League" />
           </Tabs>
           <TabPanel value={value} index={0}>
@@ -267,233 +276,249 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             </React.Fragment>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <form onSubmit={onSubmit}>
-              <TableContainer component={Box}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={headerStyles}>Date</TableCell>
-                      <TableCell sx={headerStyles}>
-                        <MenuItems
-                          noFirstOption
-                          options={tournamentViewModel.playersResultsOptions}
-                          placeholder="All Matches"
-                          onChange={(e) => {
-                            setRowChanged([]);
-                            setUserStats(e);
-                          }}
-                          isActive={true}
-                        />
-                      </TableCell>
-                      {!hideMatch && (
-                        <TableCell sx={headerStyles}>Match Points</TableCell>
-                      )}
-                      {!hideMedal && (
-                        <TableCell sx={headerStyles}>Medal Points</TableCell>
-                      )}
-                      {!hideTeam && (
-                        <TableCell sx={headerStyles}>Team Points</TableCell>
-                      )}
-                      <TableCell sx={headerStyles}>Gross</TableCell>
-                      <TableCell sx={headerStyles}>HDCP</TableCell>
-                      <TableCell sx={headerStyles}>Net</TableCell>
-                      <TableCell sx={headerStyles}></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tournamentViewModel.leagueResults
-                      .filter(
-                        (result) =>
-                          result.matchResults[0].idPlayer === userStats ||
-                          result.matchResults[1].idPlayer === userStats
-                      )
-                      .sort((a, b) => differenceDate(a.date, b.date))
-                      .map((match) => (
-                        <TableRow key={match.id}>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <TextField
-                              size="small"
-                              type="hidden"
-                              name="id"
-                              sx={{ display: "none" }}
-                              defaultValue={
-                                match.matchResults[0].idPlayer +
-                                "-" +
-                                match.matchResults[1].idPlayer
-                              }
-                            />{" "}
-                            {convertMomentDate(match.date)}{" "}
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            {match.matchResults[0].playerName} <br />{" "}
-                            {match.matchResults[1].playerName}
-                          </TableCell>
-                          {!hideMatch && (
+            {isDogfight ? (
+              <Box alignContent="center">Dogfight Round Review</Box>
+            ) : (
+              <form onSubmit={onSubmit}>
+                <TableContainer component={Box}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={headerStyles}>Date</TableCell>
+                        <TableCell sx={headerStyles}>
+                          <MenuItems
+                            noFirstOption
+                            options={tournamentViewModel.playersResultsOptions}
+                            placeholder="All Matches"
+                            onChange={(e) => {
+                              setRowChanged([]);
+                              setUserStats(e);
+                            }}
+                            isActive={true}
+                          />
+                        </TableCell>
+                        {!hideMatch && (
+                          <TableCell sx={headerStyles}>Match Points</TableCell>
+                        )}
+                        {!hideMedal && (
+                          <TableCell sx={headerStyles}>Medal Points</TableCell>
+                        )}
+                        {!hideTeam && (
+                          <TableCell sx={headerStyles}>Team Points</TableCell>
+                        )}
+                        <TableCell sx={headerStyles}>Gross</TableCell>
+                        <TableCell sx={headerStyles}>HDCP</TableCell>
+                        <TableCell sx={headerStyles}>Net</TableCell>
+                        <TableCell sx={headerStyles}></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {tournamentViewModel.leagueResults
+                        .filter(
+                          (result) =>
+                            result.matchResults[0].idPlayer === userStats ||
+                            result.matchResults[1].idPlayer === userStats
+                        )
+                        .sort((a, b) => differenceDate(a.date, b.date))
+                        .map((match) => (
+                          <TableRow key={match.id}>
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
                               <TextField
                                 size="small"
-                                type="text"
-                                name="matchpoints1"
-                                defaultValue={match.matchResults[0].matchPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
+                                type="hidden"
+                                name="id"
+                                sx={{ display: "none" }}
+                                defaultValue={
+                                  match.matchResults[0].idPlayer +
+                                  "-" +
+                                  match.matchResults[1].idPlayer
                                 }
                               />{" "}
-                              <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="matchpoints2"
-                                defaultValue={match.matchResults[1].matchPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              {convertMomentDate(match.date)}{" "}
                             </TableCell>
-                          )}
-                          {!hideMedal && (
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="medalPoints1"
-                                defaultValue={match.matchResults[0].medalPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
-                              <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="medalPoints2"
-                                defaultValue={match.matchResults[1].medalPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              {match.matchResults[0].playerName} <br />{" "}
+                              {match.matchResults[1].playerName}
                             </TableCell>
-                          )}
-                          {!hideTeam && (
+                            {!hideMatch && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="matchpoints1"
+                                  defaultValue={
+                                    match.matchResults[0].matchPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="matchpoints2"
+                                  defaultValue={
+                                    match.matchResults[1].matchPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
+                            {!hideMedal && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="medalPoints1"
+                                  defaultValue={
+                                    match.matchResults[0].medalPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="medalPoints2"
+                                  defaultValue={
+                                    match.matchResults[1].medalPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
+                            {!hideTeam && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="teampoints1"
+                                  defaultValue={
+                                    match.matchResults[0].teamPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="teampoints2"
+                                  defaultValue={
+                                    match.matchResults[1].teamPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="teampoints1"
-                                defaultValue={match.matchResults[0].teamPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].gross}
+                              </p>
                               <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="teampoints2"
-                                defaultValue={match.matchResults[1].teamPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].gross}
+                              </p>
                             </TableCell>
-                          )}
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].gross}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].gross}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].hcp}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].hcp}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].score}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].score}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <IconButton
-                              aria-label="delete"
-                              onClick={() => onDeleteMatch(match.id || "")}
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <DeleteIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        sx={{ textAlign: "center", minWidth: "80px" }}
-                      >
-                        <Button
-                          variant="contained"
-                          type="submit"
-                          disabled={rowChanged.length === 0}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].hcp}
+                              </p>
+                              <br />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].hcp}
+                              </p>
+                            </TableCell>
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
+                            >
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].score}
+                              </p>
+                              <br />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].score}
+                              </p>
+                            </TableCell>
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
+                            >
+                              <IconButton
+                                aria-label="delete"
+                                onClick={() => onDeleteMatch(match.id || "")}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      <TableRow>
+                        <TableCell
+                          colSpan={8}
+                          sx={{ textAlign: "center", minWidth: "80px" }}
                         >
-                          Update
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </form>
+                          <Button
+                            variant="contained"
+                            type="submit"
+                            disabled={rowChanged.length === 0}
+                          >
+                            Update
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </form>
+            )}
             {/* <TableContainer component={Box}>
               <Table sx={{ tableLayout: "fixed" }}>
                 <TableHead>

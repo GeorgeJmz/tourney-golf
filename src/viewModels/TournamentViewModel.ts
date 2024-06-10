@@ -144,11 +144,16 @@ class TournamentViewModel {
       playoffs: this.tournament.playOffs,
       startDate: this.tournament.startDate,
       cutOffDate: this.tournament.cutOffDate,
-      matchesPerRound: this.tournament.matchesPerRound,
+      matchesPerRound: toJS(this.tournament.matchesPerRound),
       pointsPerTie: this.tournament.pointsPerTie || 1,
       pointsPerWin: this.tournament.pointsPerWin || 3,
       pointsPerTieMedal: this.tournament.pointsPerTieMedal || 1,
       pointsPerWinMedal: this.tournament.pointsPerWinMedal || 3,
+      numberOfRounds: this.tournament.numberOfRounds || 1,
+      roundDates: toJS(this.tournament.roundDates) || [],
+      championshipRound: this.tournament.championshipRound || false,
+      championshipDate: this.tournament.champoinshipDate,
+      minRounds: this.tournament.minRounds || 1,
     };
   }
 

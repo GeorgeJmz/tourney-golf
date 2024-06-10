@@ -160,6 +160,36 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
           sx={{
             display: "flex",
             justifyContent: "center",
+            marginTop: "10px",
+            marginBottom: "10px",
+          }}
+        >
+          <TextField
+            id="outlined-basic"
+            label="Postgame comments"
+            variant="outlined"
+            placeholder="(Optional)"
+            fullWidth
+            multiline
+            maxRows={4}
+            value={message}
+            onChange={(event) => {
+              setMessage(event.target.value);
+            }}
+          />
+        </Box>
+        <Box
+          sx={{ display: "flex", justifyContent: "center", marginTop: "10px" }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {title}
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
             gap: "12px",
             marginTop: "10px",
           }}

@@ -8,6 +8,7 @@ export interface ITournamentElement {
     | "select"
     | "number"
     | "date"
+    | "multipleDates"
     | "switch"
     | "multiple"
     | "password";
@@ -47,7 +48,8 @@ export const step1: Array<ITournamentElement> = [
       { displayName: "League", value: "league" },
       { displayName: "League + Team Play", value: "leagueteamplay" },
       { displayName: "Team Play", value: "teamplay" },
-      { displayName: "Team 3 Stage", value: "3stage" },
+      // { displayName: "Team 3 Stage", value: "3stage" },
+      { displayName: "Dogfight", value: "dogfight" },
     ],
   },
   {
@@ -82,6 +84,26 @@ export const getStep1 = (type: string) => {
           lg: 6,
         },
         options: [{ displayName: "Stableford", value: "stableford" }],
+      },
+    ] as ITournamentElement[];
+  }
+  if (type === "dogfight") {
+    return [
+      step1[0],
+      step1[1],
+      {
+        name: "playType",
+        placeholder: "Type of Play",
+        input: "select",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+        options: [
+          { displayName: "Medal Play", value: "strokePlay" },
+          { displayName: "Stableford", value: "stableford" },
+        ],
       },
     ] as ITournamentElement[];
   }
@@ -238,7 +260,7 @@ export const rules: Array<ITournamentElement> = [
   },
 ];
 
-export const getRules = (type: string) => {
+export const getRules = (type: string, tournamentType: string) => {
   const matchPoints = [
     {
       name: "pointsPerWin",
@@ -283,6 +305,60 @@ export const getRules = (type: string) => {
       },
     },
   ];
+  if (tournamentType === "dogfight") {
+    return [
+      {
+        name: "numberOfRounds",
+        placeholder: "Number of Rounds",
+        input: "number",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "roundDates",
+        placeholder: "Round Dates",
+        input: "multipleDates",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "championshipRound",
+        placeholder: "Championship Round",
+        input: "switch",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+      },
+      {
+        name: "championshipDate",
+        placeholder: "Championship Date",
+        input: "date",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+      },
+      {
+        name: "minRounds",
+        placeholder: "Minimum Rounds to Qualify for Final",
+        input: "number",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+    ] as ITournamentElement[];
+  }
   if (type === "matchPlay") {
     return [
       rules[0],
