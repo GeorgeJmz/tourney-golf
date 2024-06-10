@@ -344,22 +344,22 @@ export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
     cutOffDate: yup.string().required("CutOff Date is required"),
     pointsPerWin: yup
       .number()
-      .min(2, "Min")
+      .min(1, "Min")
       .max(100, "Max")
       .required("Points Per Win is required"),
     pointsPerTie: yup
       .number()
-      .min(1, "Min")
+      .min(0, "Min")
       .max(100, "Max")
       .required("Points Per Tie is required"),
     pointsPerWinMedal: yup
       .number()
-      .min(2, "Min")
+      .min(1, "Min")
       .max(100, "Max")
       .required("Points Per Win is required"),
     pointsPerTieMedal: yup
       .number()
-      .min(1, "Min")
+      .min(0, "Min")
       .max(100, "Max")
       .required("Points Per Tie is required"),
     playoffs: yup.boolean().required("Playoffs"),
