@@ -132,6 +132,24 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "DelMarCountryClub",
+      name: "Del Mar Country Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueDelMarCountryClub",
+          color: "Blue",
+          length: "6959",
+        },
+        {
+          id: "WhiteDelMarCountryClub",
+          color: "White",
+          length: "6527",
+        },
+      ],
+    },
+    {
       id: "EnagicGolfClubatEastlake",
       name: "Enagic Golf Club at Eastlake",
       address: "2375 Clubhouse Dr, Chula Vista, CA 91915, Estados Unidos",
@@ -156,6 +174,37 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "WhiteTees",
           color: "White Tees",
           length: "68.2/122, 5834",
+        },
+      ],
+    },
+    {
+      id: "LaJollaCountryClub",
+      name: "La Jolla Country Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "LaJollaCountryClubBlue",
+          color: "Blue",
+          length: "6956",
+        },
+      ],
+    },
+    {
+      id: "MaderasGolfClub",
+      name: "Maderas Golf Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "maderasGolfClubMaderas",
+          color: "Maderas",
+          length: "6856",
+        },
+        {
+          id: "maderasGolfClubBlue",
+          color: "Blue",
+          length: "6670",
         },
       ],
     },
@@ -253,6 +302,24 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "WhiteSanVicenteGolfCourse",
           color: "White",
           length: "6346",
+        },
+      ],
+    },
+    {
+      id: "theLinksAtLakehouse",
+      name: "The Links at Lakehouse",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "blueLinksAtLakehouse",
+          color: "Blue",
+          length: "6398",
+        },
+        {
+          id: "whiteLinksAtLakehouse",
+          color: "White",
+          length: "6146",
         },
       ],
     },
@@ -888,6 +955,83 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3162, 36],
       out: [3184, 36],
       total: [6346, 72],
+    },
+    blueLinksAtLakehouse: {
+      distance: [
+        310, 394, 208, 447, 343, 163, 487, 359, 343, 460, 174, 606, 167, 369,
+        466, 412, 210, 480,
+      ],
+      hcp: [12, 6, 16, 2, 14, 18, 4, 10, 8, 3, 17, 1, 15, 11, 9, 5, 13, 7],
+      par: [4, 4, 3, 4, 4, 3, 5, 4, 4, 4, 3, 5, 3, 4, 5, 4, 3, 5],
+      in: [3344, 36],
+      out: [3054, 35],
+      total: [6398, 71],
+    },
+    whiteLinksAtLakehouse: {
+      distance: [
+        300, 375, 195, 427, 324, 148, 478, 340, 331, 438, 156, 597, 156, 364,
+        463, 403, 186, 465,
+      ],
+      hcp: [12, 6, 16, 2, 14, 18, 4, 10, 8, 3, 17, 1, 15, 11, 9, 5, 13, 7],
+      par: [4, 4, 3, 4, 4, 3, 5, 4, 4, 4, 3, 5, 3, 4, 5, 4, 3, 5],
+      in: [3228, 36],
+      out: [2918, 35],
+      total: [6146, 71],
+    },
+    maderasGolfClubMaderas: {
+      distance: [
+        394, 357, 583, 164, 460, 333, 190, 507, 382, 341, 359, 437, 385, 526,
+        240, 453, 165, 580,
+      ],
+      hcp: [17, 9, 7, 15, 1, 11, 13, 3, 5, 16, 18, 10, 8, 2, 6, 4, 14, 12],
+      par: [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 4, 4, 5, 3, 4, 3, 5],
+      in: [3486, 36],
+      out: [3370, 36],
+      total: [6856, 72],
+    },
+    maderasGolfClubBlue: {
+      distance: [
+        355, 357, 560, 164, 460, 333, 190, 507, 351, 305, 343, 410, 385, 526,
+        240, 439, 165, 580,
+      ],
+      hcp: [17, 9, 7, 15, 1, 11, 13, 3, 5, 16, 18, 10, 8, 2, 6, 4, 14, 12],
+      par: [4, 4, 5, 3, 4, 4, 3, 5, 4, 4, 4, 4, 4, 5, 3, 4, 3, 5],
+      in: [3393, 36],
+      out: [3277, 36],
+      total: [6670, 72],
+    },
+    LaJollaCountryClubBlue: {
+      distance: [
+        305, 161, 463, 379, 393, 421, 192, 579, 501, 318, 396, 418, 472, 333,
+        518, 184, 554, 369,
+      ],
+      hcp: [13, 17, 3, 7, 11, 9, 15, 1, 5, 16, 6, 8, 2, 14, 10, 18, 4, 12],
+      par: [4, 3, 4, 4, 4, 4, 3, 5, 4, 4, 4, 4, 4, 4, 5, 3, 5, 4],
+      in: [3562, 37],
+      out: [3394, 35],
+      total: [6956, 72],
+    },
+    BlueDelMarCountryClub: {
+      distance: [
+        407, 393, 201, 555, 176, 542, 388, 472, 419, 379, 530, 193, 390, 379,
+        549, 369, 185, 432,
+      ],
+      hcp: [11, 13, 17, 1, 15, 5, 9, 7, 3, 10, 8, 16, 4, 6, 12, 14, 18, 2],
+      par: [4, 4, 3, 5, 3, 5, 4, 4, 4, 4, 5, 3, 4, 4, 5, 4, 3, 4],
+      in: [3406, 36],
+      out: [3553, 36],
+      total: [6959, 72],
+    },
+    WhiteDelMarCountryClub: {
+      distance: [
+        378, 360, 181, 527, 159, 516, 368, 437, 404, 341, 506, 181, 365, 353,
+        519, 356, 165, 411,
+      ],
+      hcp: [11, 13, 17, 1, 15, 5, 9, 7, 3, 10, 8, 16, 4, 6, 12, 14, 18, 2],
+      par: [4, 4, 3, 5, 3, 5, 4, 4, 4, 4, 5, 3, 4, 4, 5, 4, 3, 4],
+      in: [3197, 36],
+      out: [3330, 36],
+      total: [6527, 72],
     },
   };
   const course = details[id];
