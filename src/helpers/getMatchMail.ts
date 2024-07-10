@@ -6,7 +6,8 @@ export const getBodyMail = (
   hideTeam: boolean,
   winner: string,
   hideMatch: boolean,
-  hideMedal: boolean
+  hideMedal: boolean,
+  isDogfight?: boolean
 ) => {
   const renderResultsMatch = (index: number) => {
     //Out
@@ -133,7 +134,7 @@ export const getBodyMail = (
   };
   const header = `<thead ><tr> ${headers()}</tr></thead>`;
   const body = ` <tbody >${renderPlayerRows()}</tbody>`;
-  const results = ` <tbody >${renderResultsRows()}</tbody>`;
+  const results = isDogfight ? "" : ` <tbody >${renderResultsRows()}</tbody>`;
   const realWinner = winner.split("/");
   const finalWinner =
     !hideMatch && !hideMedal
@@ -142,7 +143,9 @@ export const getBodyMail = (
       ? realWinner[1]
       : realWinner[0];
 
-  const winnerResult = ` <tfoot><tr><td  colspan='25' style="font-size:28px">${finalWinner}</td></tr></tfoot>`;
+  const winnerResult = finalWinner
+    ? ` <tfoot><tr><td  colspan='25' style="font-size:28px">${finalWinner}</td></tr></tfoot>`
+    : "";
   const table = `<table  style='margin-bottom: 50px; border: 1px solid'>${header}${body}${results}${winnerResult}</table>`;
   return table;
 };

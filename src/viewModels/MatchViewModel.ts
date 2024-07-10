@@ -69,6 +69,10 @@ class MatchViewModel {
     });
   }
 
+  calculateWinnersDogfight(): void {
+    this.match.winner = "Dogfight";
+  }
+
   calculateWinners(): void {
     const tournamentType = this.currentTournament.tournamentType;
     const playType = this.currentTournament.playType;
@@ -203,6 +207,18 @@ class MatchViewModel {
     });
   }
 
+  setDifferenceHPDogfight(): void {
+    const playersHandicap = this.players.map((p) => p.score.handicap);
+    this.differenceHP = playersHandicap;
+    this.players.forEach((p, i) => {
+      p.setDifferenceHandicap(
+        this.differenceHP[i],
+        this.currentHcp,
+        this.currentPar
+      );
+    });
+  }
+
   async createMatch(messageModal: string): Promise<void> {
     // const displayLoading = getMessages(Messages.LOADING);
     // const cuToast = toast.loading(displayLoading);
@@ -317,6 +333,158 @@ class MatchViewModel {
       });
 
       console.log("Match created - Email sent to players");
+      //const displayMessage = getMessages(Messages.MATCH_CREATED);
+      // toast.update(cuToast, {
+      //   render: displayMessage,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    } catch (error) {
+      const codeError = (error as FirebaseError).code;
+      const displayError = getMessages(codeError);
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    }
+  }
+
+  async createDogfightRound(
+    messageModal: string,
+    round: number
+  ): Promise<void> {
+    const tournamentType = this.currentTournament.tournamentType;
+    const playType = this.currentTournament.playType;
+
+    try {
+      const pointsPerWin = this.currentTournament.pointsPerWin;
+      const pointsPerTie = this.currentTournament.pointsPerTie;
+
+      const pointsPerWinMedal = this.currentTournament.pointsPerWinMedal;
+      const pointsPerTieMedal = this.currentTournament.pointsPerTieMedal;
+
+      const scoresIds = this.players.map(async (p) => await p.createScore());
+      this.match.scoresId = await Promise.all(scoresIds);
+      const matchResults = this.players.map((p) => ({
+        idPlayer: p.score.idPlayer,
+        playerName: p.score.player,
+        score: p.score.totalNet,
+        gross: p.score.totalGross,
+        hcp: `${p.score.handicap}`,
+        teamPoints: p.score.teamPoints.reduce((a, b) => a + b, 0),
+        isWinnerMatch: this.winnerMatch.includes(p.score.idPlayer),
+        isWinnerMedalPlay: this.winnerMedalPlay.includes(p.score.idPlayer),
+      }));
+      const playersMail = this.players.map((player) => player.score.idPlayer);
+      const winnerMatch = this.winnerMatch;
+      // const strokePlayPoints =
+      //   this.players[0].score.totalNet === this.players[1].score.totalNet
+      //     ? [pointsPerTieMedal, pointsPerTieMedal]
+      //     : this.players[0].score.totalNet < this.players[1].score.totalNet
+      //     ? [pointsPerWinMedal, 0]
+      //     : [0, pointsPerWinMedal];
+      // const teamPoints = [
+      //   this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
+      //   this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
+      // ] as Array<number>;
+      const matchsPoints =
+        winnerMatch.length > 1
+          ? [pointsPerTie, pointsPerTie]
+          : this.winnerMatch.includes(playersMail[0])
+          ? [pointsPerWin, 0]
+          : [0, pointsPerWin];
+
+      for (const indPlayer of this.players) {
+        console.log(indPlayer, "indPlayer");
+        const playerUpdated = {
+          email: indPlayer.score.idPlayer,
+          opponent: "", //playersMail[index === 0 ? 1 : 0],
+          pointsMatch: matchsPoints[this.players.indexOf(indPlayer)] || 0,
+          pointsStroke: 0,
+          pointsTeam: 0, //teamPoints[index],
+          tournamentId: this.tournamentId,
+          scoreId: this.match.scoresId[this.players.indexOf(indPlayer)],
+          gross: indPlayer.score.totalGross,
+          net: indPlayer.score.totalNet,
+          handicap: indPlayer.score.handicap,
+          // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
+          // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
+          // ties: winnerMatch.includes(playerMail) ? [] : [],
+        };
+        await updatePlayer({ ...playerUpdated });
+      }
+
+      // for (const playerMail of playersMail) {
+      //   const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
+      //   console.log("index", index);
+      //   console.log("playerMail", playerMail);
+      //   const playerUpdated = {
+      //     email: playerMail,
+      //     opponent: "", //playersMail[index === 0 ? 1 : 0],
+      //     pointsMatch: matchsPoints[index],
+      //     pointsStroke: 0,
+      //     pointsTeam: 0, //teamPoints[index],
+      //     tournamentId: this.tournamentId,
+      //     scoreId: this.match.scoresId[index],
+      //     gross: this.players[index].score.totalGross,
+      //     net: this.players[index].score.totalNet,
+      //     handicap: this.players[index].score.handicap,
+      //     // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
+      //     // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
+      //     // ties: winnerMatch.includes(playerMail) ? [] : [],
+      //   };
+      //   console.log("playerUpdated", playerUpdated);
+      //   await updatePlayer({ ...playerUpdated });
+      // }
+
+      const getCurrentMoment = () => {
+        const currentMoment = moment();
+        return {
+          eventDate: currentMoment.valueOf(),
+          eventTimezone: moment.tz.guess(),
+        };
+      };
+      const { eventDate, eventTimezone } = getCurrentMoment();
+      const saveDate = [String(eventDate), eventTimezone];
+      await createMatch({
+        ...this.match,
+        round: round,
+        author: this.author.getUserId(),
+        date: saveDate,
+        tournamentId: this.tournamentId,
+        matchResults,
+      });
+      const hideTeam =
+        tournamentType !== "leagueteamplay" && tournamentType !== "teamplay";
+      const hideMatch =
+        playType !== "matchPlay" && playType !== "matchstrokePlay";
+      const hideMedal =
+        playType !== "strokePlay" &&
+        playType !== "matchstrokePlay" &&
+        playType !== "stableford";
+      const result = getBodyMail(
+        this.players,
+        this.winByHole,
+        hideTeam,
+        "",
+        hideMatch,
+        hideMedal,
+        true
+      );
+      const leagueName = this.currentTournament.name;
+      const player1 = this.players[0].score.player;
+      const player2 = this.players[1].score.player;
+      const title = `${leagueName} Scorecard`;
+      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
+      this.currentTournament.playersList.forEach(async (mail) => {
+        if (mail.email) {
+          await sendCustomEmail(mail.email, title, bodyMail);
+        }
+      });
+
       //const displayMessage = getMessages(Messages.MATCH_CREATED);
       // toast.update(cuToast, {
       //   render: displayMessage,

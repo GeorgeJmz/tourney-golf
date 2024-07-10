@@ -52,8 +52,6 @@ const CourseList: React.FC<ICourseList> = ({
     setAllCourses(all);
     setPreviousCourses(previous);
   }, [lastCourse, courses]);
-
-  console.log(toJS(courses), toJS(lastCourse));
   return (
     <List>
       <Autocomplete

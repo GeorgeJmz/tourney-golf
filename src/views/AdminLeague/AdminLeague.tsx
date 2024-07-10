@@ -4,27 +4,15 @@ import UserViewModel from "../../viewModels/UserViewModel";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TournamentViewModel from "../../viewModels/TournamentViewModel";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import StepContent from "@mui/material/StepContent";
+
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SwitchAccountIcon from "@mui/icons-material/SwitchAccount";
-import Modal from "@mui/material/Modal";
 
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import {
   Box,
   FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -36,19 +24,10 @@ import {
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Button from "@mui/material/Button";
-import { Link, useParams } from "react-router-dom";
-import TourneySetup from "./../CreateTournament/components/CreateTournament/TourneySetup";
-import RulesSetup from "./../CreateTournament/components/CreateTournament/RulesSetup";
-import PlayerSetup from "./../CreateTournament/components/CreateTournament/PlayerSetup";
-import GroupsSetup from "./../CreateTournament/components/CreateTournament/GroupsSetup";
-import ConferenceSetup from "./../CreateTournament/components/CreateTournament/ConferenceSetup";
-import TeamSetup from "./../CreateTournament/components/CreateTournament/TeamSetup";
-import CalendarsSetup from "./../CreateTournament/components/CreateTournament/CalendarsSetup";
+import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ManageTournament from "../ManageTournament/ManageTournament";
-import { set } from "firebase/database";
 import { convertMomentDate, differenceDate } from "../../helpers/convertDate";
-import { IMatchResults } from "../../models/Match";
 import MenuItems from "../../components/MenuItems";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -59,12 +38,10 @@ import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { toJS } from "mobx";
 import { IPlayer } from "../../models/Tournament";
-import { TextInput } from "../../components/TextInput";
-import { useFormik } from "formik";
-import { step2Fields } from "../../helpers/getTournamentFields";
 import { getMessages } from "../../helpers/getMessages";
 import { toast } from "react-toastify";
 import { Messages } from "../../helpers/messages";
+import RoundReviewDogfight from "../../components/RoundReviewDogfight";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -95,7 +72,6 @@ function TabPanel(props: TabPanelProps) {
 const headerStyles = {
   border: 0,
   textAlign: "center",
-
   backgroundColor: "Green",
   color: "white",
   fontWeight: "bold",
@@ -212,8 +188,18 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     setOpenDeleteModal(true);
   };
 
+  const onDeleteRound = (idRound: string, idPlayer: string) => {
+    setMatchToDelete(`${idRound}-${idPlayer}`);
+    setOpenDeleteModal(true);
+  };
+
   const onDeleteMatchConfirm = () => {
-    tournamentViewModel.deleteMatch(matchToDelete);
+    !isDogfight
+      ? tournamentViewModel.deleteMatch(matchToDelete)
+      : tournamentViewModel.deleteRound(
+          matchToDelete.split("-")[0],
+          matchToDelete.split("-")[1]
+        );
     setTimeout(() => navigate("/dashboard"), 1200);
     setOpenDeleteModal(false);
   };
@@ -239,6 +225,17 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     return emails.includes(playerToSwitch?.email || "");
   };
 
+  const isDogfight = tournamentType === "dogfight";
+  const isDraft = tournamentType === undefined;
+  console.log("tournamentType", tournamentType);
+  const getCurrentPlayer = () => {
+    return tournamentViewModel.leagueResults
+      .filter((result) =>
+        result.matchResults.find((m) => m.idPlayer === userStats)
+      )
+      .sort((a, b) => (a?.round ?? 0) - (b?.round ?? 0));
+  };
+
   return (
     <div>
       <Box
@@ -255,11 +252,19 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
       >
         <React.Fragment>
           <Tabs value={value} onChange={handleChange} centered>
-            <Tab label="League Setup" />
-            <Tab label="Results Review " />
-            <Tab label="Switch Players " />
-            <Tab label="Playoff Picture " />
-            <Tab label="Finish League" />
+            <Tab label="League Setup" value={0} />
+            {isDogfight ? (
+              <Tab label="Round Review " value={1} />
+            ) : isDraft ? null : (
+              <Tab label="Results Review " value={1} />
+            )}
+            {isDogfight || isDraft ? null : (
+              <Tab label="Switch Players " value={2} />
+            )}
+            {isDogfight || isDraft ? null : (
+              <Tab label="Playoff Picture " value={3} />
+            )}
+            <Tab label="Finish League" value={4} />
           </Tabs>
           <TabPanel value={value} index={0}>
             <React.Fragment>
@@ -267,361 +272,362 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             </React.Fragment>
           </TabPanel>
           <TabPanel value={value} index={1}>
-            <form onSubmit={onSubmit}>
-              <TableContainer component={Box}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={headerStyles}>Date</TableCell>
-                      <TableCell sx={headerStyles}>
-                        <MenuItems
-                          noFirstOption
-                          options={tournamentViewModel.playersResultsOptions}
-                          placeholder="All Matches"
-                          onChange={(e) => {
-                            setRowChanged([]);
-                            setUserStats(e);
-                          }}
-                          isActive={true}
-                        />
-                      </TableCell>
-                      {!hideMatch && (
-                        <TableCell sx={headerStyles}>Match Points</TableCell>
-                      )}
-                      {!hideMedal && (
-                        <TableCell sx={headerStyles}>Medal Points</TableCell>
-                      )}
-                      {!hideTeam && (
-                        <TableCell sx={headerStyles}>Team Points</TableCell>
-                      )}
-                      <TableCell sx={headerStyles}>Gross</TableCell>
-                      <TableCell sx={headerStyles}>HDCP</TableCell>
-                      <TableCell sx={headerStyles}>Net</TableCell>
-                      <TableCell sx={headerStyles}></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {tournamentViewModel.leagueResults
-                      .filter(
-                        (result) =>
-                          result.matchResults[0].idPlayer === userStats ||
-                          result.matchResults[1].idPlayer === userStats
-                      )
-                      .sort((a, b) => differenceDate(a.date, b.date))
-                      .map((match) => (
-                        <TableRow key={match.id}>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <TextField
-                              size="small"
-                              type="hidden"
-                              name="id"
-                              sx={{ display: "none" }}
-                              defaultValue={
-                                match.matchResults[0].idPlayer +
-                                "-" +
-                                match.matchResults[1].idPlayer
-                              }
-                            />{" "}
-                            {convertMomentDate(match.date)}{" "}
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            {match.matchResults[0].playerName} <br />{" "}
-                            {match.matchResults[1].playerName}
-                          </TableCell>
-                          {!hideMatch && (
+            {isDogfight ? (
+              <RoundReviewDogfight
+                leagueResults={tournamentViewModel.leagueResults}
+                onDeleteRound={onDeleteRound}
+                playersResultsOptions={
+                  tournamentViewModel.playersResultsOptions
+                }
+              />
+            ) : (
+              // <Box alignContent="center">
+              //   <form onSubmit={onSubmit}>
+              //     <TableContainer component={Box}>
+              //       <Table>
+              //         <TableHead>
+              //           <TableRow>
+              //             <TableCell sx={headerStyles}>Round</TableCell>
+              //             <TableCell sx={headerStyles}>
+              //               <MenuItems
+              //                 noFirstOption
+              //                 options={
+              //                   tournamentViewModel.playersResultsOptions
+              //                 }
+              //                 placeholder="All Matches"
+              //                 onChange={(e) => {
+              //                   setRowChanged([]);
+              //                   setUserStats(e);
+              //                 }}
+              //                 isActive={true}
+              //               />
+              //             </TableCell>
+              //             <TableCell sx={headerStyles}>Gross</TableCell>
+              //             <TableCell sx={headerStyles}>HDCP</TableCell>
+              //             <TableCell sx={headerStyles}>Net</TableCell>
+              //             <TableCell sx={headerStyles}></TableCell>
+              //           </TableRow>
+              //         </TableHead>
+              //         <TableBody>
+              //           {getCurrentPlayer().map((match) => (
+              //             <TableRow key={match.id}>
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 <TextField
+              //                   size="small"
+              //                   type="hidden"
+              //                   name="id"
+              //                   sx={{ display: "none" }}
+              //                   defaultValue={
+              //                     match.matchResults[0].idPlayer +
+              //                     "-" +
+              //                     match.matchResults[1].idPlayer
+              //                   }
+              //                 />{" "}
+              //                 {match.round}
+              //               </TableCell>
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 {
+              //                   match.matchResults.find(
+              //                     (player) => player.idPlayer === userStats
+              //                   )?.playerName
+              //                 }{" "}
+              //                 <br />{" "}
+              //               </TableCell>
+
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 <p style={{ margin: 0 }}>
+              //                   {
+              //                     match.matchResults.find(
+              //                       (player) => player.idPlayer === userStats
+              //                     )?.gross
+              //                   }
+              //                 </p>
+              //               </TableCell>
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 <p style={{ margin: 0 }}>
+              //                   {
+              //                     match.matchResults.find(
+              //                       (player) => player.idPlayer === userStats
+              //                     )?.hcp
+              //                   }
+              //                 </p>
+              //               </TableCell>
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 <p style={{ margin: 0 }}>
+              //                   {
+              //                     match.matchResults.find(
+              //                       (player) => player.idPlayer === userStats
+              //                     )?.score
+              //                   }
+              //                 </p>
+              //               </TableCell>
+              //               <TableCell
+              //                 sx={{ textAlign: "center", minWidth: "80px" }}
+              //               >
+              //                 <IconButton
+              //                   aria-label="delete"
+              //                   onClick={() => onDeleteMatch(match.id || "")}
+              //                 >
+              //                   <DeleteIcon />
+              //                 </IconButton>
+              //               </TableCell>
+              //             </TableRow>
+              //           ))}
+              //         </TableBody>
+              //       </Table>
+              //     </TableContainer>
+              //   </form>
+              // </Box>
+              <form onSubmit={onSubmit}>
+                <TableContainer component={Box}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={headerStyles}>Date</TableCell>
+                        <TableCell sx={headerStyles}>
+                          <MenuItems
+                            noFirstOption
+                            options={tournamentViewModel.playersResultsOptions}
+                            placeholder="All Matches"
+                            onChange={(e) => {
+                              setRowChanged([]);
+                              setUserStats(e);
+                            }}
+                            isActive={true}
+                          />
+                        </TableCell>
+                        {!hideMatch && (
+                          <TableCell sx={headerStyles}>Match Points</TableCell>
+                        )}
+                        {!hideMedal && (
+                          <TableCell sx={headerStyles}>Medal Points</TableCell>
+                        )}
+                        {!hideTeam && (
+                          <TableCell sx={headerStyles}>Team Points</TableCell>
+                        )}
+                        <TableCell sx={headerStyles}>Gross</TableCell>
+                        <TableCell sx={headerStyles}>HDCP</TableCell>
+                        <TableCell sx={headerStyles}>Net</TableCell>
+                        <TableCell sx={headerStyles}></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {tournamentViewModel.leagueResults
+                        .filter(
+                          (result) =>
+                            result.matchResults[0].idPlayer === userStats ||
+                            result.matchResults[1].idPlayer === userStats
+                        )
+                        .sort((a, b) => differenceDate(a.date, b.date))
+                        .map((match) => (
+                          <TableRow key={match.id}>
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
                               <TextField
                                 size="small"
-                                type="text"
-                                name="matchpoints1"
-                                defaultValue={match.matchResults[0].matchPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
+                                type="hidden"
+                                name="id"
+                                sx={{ display: "none" }}
+                                defaultValue={
+                                  match.matchResults[0].idPlayer +
+                                  "-" +
+                                  match.matchResults[1].idPlayer
                                 }
                               />{" "}
-                              <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="matchpoints2"
-                                defaultValue={match.matchResults[1].matchPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              {convertMomentDate(match.date)}{" "}
                             </TableCell>
-                          )}
-                          {!hideMedal && (
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="medalPoints1"
-                                defaultValue={match.matchResults[0].medalPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
-                              <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="medalPoints2"
-                                defaultValue={match.matchResults[1].medalPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              {match.matchResults[0].playerName} <br />{" "}
+                              {match.matchResults[1].playerName}
                             </TableCell>
-                          )}
-                          {!hideTeam && (
+                            {!hideMatch && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="matchpoints1"
+                                  defaultValue={
+                                    match.matchResults[0].matchPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="matchpoints2"
+                                  defaultValue={
+                                    match.matchResults[1].matchPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
+                            {!hideMedal && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="medalPoints1"
+                                  defaultValue={
+                                    match.matchResults[0].medalPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="medalPoints2"
+                                  defaultValue={
+                                    match.matchResults[1].medalPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
+                            {!hideTeam && (
+                              <TableCell
+                                sx={{ textAlign: "center", minWidth: "80px" }}
+                              >
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="teampoints1"
+                                  defaultValue={
+                                    match.matchResults[0].teamPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                                <br />{" "}
+                                <TextField
+                                  size="small"
+                                  type="text"
+                                  name="teampoints2"
+                                  defaultValue={
+                                    match.matchResults[1].teamPoints
+                                  }
+                                  onChange={() =>
+                                    handleUpdateRow(
+                                      match.matchResults[0].idPlayer +
+                                        "-" +
+                                        match.matchResults[1].idPlayer
+                                    )
+                                  }
+                                />{" "}
+                              </TableCell>
+                            )}
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="teampoints1"
-                                defaultValue={match.matchResults[0].teamPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].gross}
+                              </p>
                               <br />{" "}
-                              <TextField
-                                size="small"
-                                type="text"
-                                name="teampoints2"
-                                defaultValue={match.matchResults[1].teamPoints}
-                                onChange={() =>
-                                  handleUpdateRow(
-                                    match.matchResults[0].idPlayer +
-                                      "-" +
-                                      match.matchResults[1].idPlayer
-                                  )
-                                }
-                              />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].gross}
+                              </p>
                             </TableCell>
-                          )}
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].gross}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].gross}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].hcp}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].hcp}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[0].score}
-                            </p>
-                            <br />{" "}
-                            <p style={{ margin: 0 }}>
-                              {match.matchResults[1].score}
-                            </p>
-                          </TableCell>
-                          <TableCell
-                            sx={{ textAlign: "center", minWidth: "80px" }}
-                          >
-                            <IconButton
-                              aria-label="delete"
-                              onClick={() => onDeleteMatch(match.id || "")}
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              <DeleteIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        sx={{ textAlign: "center", minWidth: "80px" }}
-                      >
-                        <Button
-                          variant="contained"
-                          type="submit"
-                          disabled={rowChanged.length === 0}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].hcp}
+                              </p>
+                              <br />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].hcp}
+                              </p>
+                            </TableCell>
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
+                            >
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[0].score}
+                              </p>
+                              <br />{" "}
+                              <p style={{ margin: 0 }}>
+                                {match.matchResults[1].score}
+                              </p>
+                            </TableCell>
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
+                            >
+                              <IconButton
+                                aria-label="delete"
+                                onClick={() => onDeleteMatch(match.id || "")}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      <TableRow>
+                        <TableCell
+                          colSpan={8}
+                          sx={{ textAlign: "center", minWidth: "80px" }}
                         >
-                          Update
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </form>
-            {/* <TableContainer component={Box}>
-              <Table sx={{ tableLayout: "fixed" }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={headerStyles}>Name</TableCell>
-                    <TableCell sx={headerStyles}>Edit Matches</TableCell>
-                    <TableCell sx={headerStyles}>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      Adrian Aburto
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <nav aria-label="secondary mailbox folders">
-                        <List>
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <ListItemText
-                                primary="Daniela Cuenca"
-                                secondary="12/11/2023"
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <ListItemText
-                                primary="Matias Aburto"
-                                secondary="12/11/2023"
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                        </List>
-                      </nav>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleOpen}
-                      >
-                        Remove from League
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      Matias Aburto
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <nav aria-label="secondary mailbox folders">
-                        <List>
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <ListItemText
-                                primary="Adrian Aburto"
-                                secondary="12/11/2023"
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                        </List>
-                      </nav>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleOpen}
-                      >
-                        Remove from League
-                      </Button>{" "}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      Daniela Cuenca
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <nav aria-label="secondary mailbox folders">
-                        <List>
-                          <ListItem disablePadding>
-                            <ListItemButton>
-                              <ListItemText
-                                primary="Adrian Aburto"
-                                secondary="12/11/2023"
-                              />
-                            </ListItemButton>
-                          </ListItem>
-                        </List>
-                      </nav>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleOpen}
-                      >
-                        Remove from League
-                      </Button>{" "}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow sx={{ background: "rgba(0, 0, 0, 0.06)" }}>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      Player Inactive
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      <nav aria-label="secondary mailbox folders">
-                        <List>
-                          <ListItem disablePadding>
-                            <ListItemText
-                              primary="Adrian Aburto"
-                              secondary="12/11/2023"
-                            />
-                          </ListItem>
-                        </List>
-                      </nav>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
-                      Inactive for moving to another country
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer> */}
+                          <Button
+                            variant="contained"
+                            type="submit"
+                            disabled={rowChanged.length === 0}
+                          >
+                            Update
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </form>
+            )}
           </TabPanel>
           <TabPanel value={value} index={2}>
             <Grid container spacing={2}>
@@ -710,14 +716,26 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             onClose={() => setOpenDeleteModal(false)}
             aria-describedby="alert-dialog-slide-description"
           >
-            <DialogTitle>Delete match?</DialogTitle>
+            <DialogTitle>Delete {!isDogfight ? "match" : "round"}?</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-slide-description">
                 <Typography variant="h6" textAlign="center">
-                  {tournamentViewModel.leagueResults
-                    .find((m) => m.id === matchToDelete)
-                    ?.matchResults.map((p) => p.playerName)
-                    .join(" vs ") || ""}
+                  {!isDogfight
+                    ? tournamentViewModel.leagueResults
+                        .find((m) => m.id === matchToDelete)
+                        ?.matchResults.map((p) => p.playerName)
+                        .join(" vs ") || ""
+                    : `Round ${
+                        tournamentViewModel.leagueResults.find(
+                          (m) => m.id === matchToDelete.split("-")[0]
+                        )?.round || ""
+                      } - ${
+                        tournamentViewModel.leagueResults
+                          .find((m) => m.id === matchToDelete.split("-")[0])
+                          ?.matchResults.find(
+                            (p) => p.idPlayer === matchToDelete.split("-")[1]
+                          )?.playerName || ""
+                      }`}
                 </Typography>
               </DialogContentText>
             </DialogContent>

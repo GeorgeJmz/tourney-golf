@@ -113,7 +113,7 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
                       variant="caption"
                       component="div"
                     >
-                      {location.pathname} - version 1.0.0 - Remove Messages
+                      {location.pathname} - version 1.0.0 - DogFight
                     </Typography>
                   )}
                 </Box>
