@@ -48,6 +48,7 @@ export const messages: MessagesType = {
   "data-loss": "An unrecoverable data loss or corruption occurred.",
   unauthenticated: "You are not authenticated to perform this operation.",
   "match-deleted": "Match Deleted Successfully",
+  "round-deleted": "Round Deleted Successfully",
   "auth/invalid-login-credentials":
     "Invalid login credentials. Please try again.",
   "tournaments-loaded": "Leagues Loaded Successfully",
@@ -68,5 +69,6 @@ export enum Messages {
   "MATCH_UPDATED" = "match-updated",
   "SCORE_CREATED" = "score-created",
   "MATCH_DELETED" = "match-deleted",
+  "ROUND_DELETED" = "round-deleted",
   "INVALID_LOGIN_CREDENTIALS" = "auth/invalid-login-credentials",
 }

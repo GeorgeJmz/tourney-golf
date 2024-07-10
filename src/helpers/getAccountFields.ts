@@ -181,6 +181,16 @@ export const createAccountElements: Array<ITournamentElement> = [
       lg: 3,
     },
   },
+  {
+    name: "ghinNumber",
+    placeholder: "GHIN Number",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 3,
+      lg: 3,
+    },
+  },
 ];
 
 export interface IAccountElement {
@@ -188,6 +198,7 @@ export interface IAccountElement {
   lastName: string;
   email: string;
   password: string;
+
   [key: string]: string;
 }
 

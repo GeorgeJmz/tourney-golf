@@ -49,8 +49,8 @@ export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
 if (process.env.REACT_ENV === "LOCAL") {
-connectFirestoreEmulator(db, "127.0.0.1", 8081);
-connectAuthEmulator(auth, "http://127.0.0.1:9099");
+  connectFirestoreEmulator(db, "127.0.0.1", 8081);
+  connectAuthEmulator(auth, "http://127.0.0.1:9099");
 }
 
 export const passwordReset = async (email: string): Promise<void> => {
@@ -114,6 +114,7 @@ export const createUser = async (
       id: credentials.user?.uid,
       name: user.name,
       lastName: user.lastName,
+      ghinNumber: user.ghinNumber || "",
     } as IUser;
     const idUser = await getUserIdByEmail(user?.email?.toLowerCase() || "");
     if (!idUser) {
@@ -554,6 +555,7 @@ export const updatePlayer = async (player: {
 
     await updateDoc(doc(db, "player", playerDoc.id), updateData);
   } catch (error) {
+    console.log("Error updating player", error);
     const code = error as FirebaseError;
     throw code;
   }
@@ -739,6 +741,25 @@ export const getMatchesByTournamentId = async (
   const userQuery = query(
     tournamentCollection,
     where("tournamentId", "==", id)
+  );
+  const querySnapshot = await getDocs(userQuery);
+  const matches = [] as Array<IMatch>;
+  querySnapshot.forEach((doc) => {
+    matches.push({ ...doc.data(), id: doc.id } as unknown as IMatch);
+  });
+
+  return matches || ([] as Array<IMatch>);
+};
+
+export const getMatchesByTournamentIdAndRound = async (
+  id: string,
+  round: number
+): Promise<Array<IMatch>> => {
+  const tournamentCollection = collection(db, "match");
+  const userQuery = query(
+    tournamentCollection,
+    where("tournamentId", "==", id),
+    where("round", "==", round)
   );
   const querySnapshot = await getDocs(userQuery);
   const matches = [] as Array<IMatch>;

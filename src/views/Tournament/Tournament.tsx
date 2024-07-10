@@ -56,6 +56,8 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     []
   );
 
+  const isDogfight = () => currentTournament?.tournamentType === "dogfight";
+
   if (currentTournament && id && tournamentViewModel.author === "") {
     tournamentViewModel.setTournament(currentTournament);
     tournamentViewModel.setTournamentId(id);
@@ -142,7 +144,10 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
                       padding: 0,
                     }}
                   >
-                    {player.tourneyName} - <strong>{player.totalPoints}</strong>
+                    {player.tourneyName} -{" "}
+                    <strong>
+                      {isDogfight() ? player.netAverage : player.totalPoints}
+                    </strong>
                   </p>
                 }
               />
@@ -166,7 +171,13 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     >
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
         {isActiveTournament ? (
-          <Link to={`/play-tournament/${id}`}>
+          <Link
+            to={
+              isDogfight()
+                ? `/play-tournament-dogfight/${id}`
+                : `/play-tournament/${id}`
+            }
+          >
             <Button variant="text" color="primary">
               Play
             </Button>
@@ -178,7 +189,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
         )}
       </Box>
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Link to={`/results/${id}`}>
+        <Link to={isDogfight() ? `/results-dogfight/${id}` : `/results/${id}`}>
           <Button
             variant="text"
             color="primary"
@@ -189,7 +200,13 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
         </Link>
       </Box>
       <Box flexBasis={isMobile() ? "50%" : "15%"}>
-        <Link to={`/stats-tournament/${id}`}>
+        <Link
+          to={
+            isDogfight()
+              ? `/stats-tournament-dogfight/${id}`
+              : `/stats-tournament/${id}`
+          }
+        >
           <Button
             variant="text"
             color="primary"
@@ -199,16 +216,18 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           </Button>
         </Link>
       </Box>
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Button
-          variant="text"
-          color="primary"
-          disabled
-          onClick={() => console.log("Ver estadísticas")}
-        >
-          Playoffs
-        </Button>
-      </Box>
+      {!isDogfight && (
+        <Box flexBasis={isMobile() ? "50%" : "10%"}>
+          <Button
+            variant="text"
+            color="primary"
+            disabled
+            onClick={() => console.log("Ver estadísticas")}
+          >
+            Playoffs
+          </Button>
+        </Box>
+      )}
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
         <Link to={`/rules-tournament/${id}`}>
           <Button

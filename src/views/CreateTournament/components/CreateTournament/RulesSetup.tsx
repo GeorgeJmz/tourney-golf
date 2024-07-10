@@ -56,6 +56,7 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
         numberOfRounds: parseInt(newValues.numberOfRounds.toString()),
         championshipRound: newValues.championshipRound as boolean,
         minRounds: parseInt(newValues.minRounds.toString()),
+        roundDates: (toJS(values.roundDates) as string[]) || [], // Fix: Ensure roundDates is always an array
       });
       handleNext();
     },

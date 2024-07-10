@@ -14,6 +14,7 @@ export interface TextInputProps {
   inputProps?: InputBaseComponentProps | undefined;
   inputRef?: React.RefObject<HTMLInputElement | null>;
   isDisabled?: boolean;
+  isRequired?: boolean;
 }
 export const TextInput: React.FC<TextInputProps> = ({
   inputElement,
@@ -24,6 +25,7 @@ export const TextInput: React.FC<TextInputProps> = ({
   value,
   inputRef,
   isDisabled,
+  isRequired = true,
 }) => {
   return (
     <Grid item xs={inputElement.size.xs} md={inputElement.size.md}>
@@ -38,7 +40,7 @@ export const TextInput: React.FC<TextInputProps> = ({
         onChange={onChangeHandler}
         error={isError}
         helperText={error}
-        required
+        required={isRequired}
         disabled={isDisabled}
         inputRef={inputRef}
       />

@@ -292,7 +292,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
         lastName: values.lastName,
         email: values?.email.toLowerCase() || "",
         password: values.password,
-        ghinNumber: "",
+        ghinNumber: values.ghinNumber.toLowerCase() || "",
         handicap: 0,
       });
       //user.updateUser(newUser);
@@ -386,6 +386,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
                     ? formik.errors[inputElement.name]
                     : ""
                 }
+                isRequired={inputElement.name !== "ghinNumber"}
                 value={formik.values[inputElement.name]}
               />
             );

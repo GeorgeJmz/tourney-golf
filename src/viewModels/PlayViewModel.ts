@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, toJS } from "mobx";
 import { Messages } from "../helpers/messages";
-import MatchModel, { IMatch } from "../models/Match";
+import MatchModel, { IMatch, IMatchResults } from "../models/Match";
 import { toast } from "react-toastify";
 import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
@@ -10,10 +10,11 @@ import type { IPlayer } from "../models/Tournament";
 import ScoreViewModel from "./ScoreViewModel";
 import UserViewModel from "./UserViewModel";
 import MatchViewModel from "./MatchViewModel";
-import TournamentViewModel from "./TournamentViewModel";
 import TournamentModel from "../models/Tournament";
-import { getMatchesByTournamentId } from "../services/firebase";
-import { fa } from "@faker-js/faker";
+import {
+  getMatchesByTournamentId,
+  getMatchesByTournamentIdAndRound,
+} from "../services/firebase";
 
 export interface IGolfCourse {
   course: GolfCourse;
@@ -46,6 +47,7 @@ class PlayViewModel {
   currentStep = 0;
   allPlayers: Array<ScoreViewModel> = [];
   matches: Array<MatchViewModel> = [];
+  emailListPlayedRound: Array<string> = [];
 
   constructor() {
     makeObservable(this, {
@@ -66,6 +68,7 @@ class PlayViewModel {
       parModal: observable,
       modalKey: observable,
       allPlayers: observable,
+      emailListPlayedRound: observable,
       getCourses: action,
       openCloseCourse: action,
       selectTeeBox: action,
@@ -83,7 +86,10 @@ class PlayViewModel {
 
   setCurrentStep(step: number): void {
     this.currentStep = step;
-    if (this.currentStep === 2) {
+    if (
+      this.currentStep === 2 &&
+      this.currentTournament.tournamentType !== "dogfight"
+    ) {
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
       players.forEach((player) => {
@@ -105,6 +111,27 @@ class PlayViewModel {
         this.matches.push(newMatch);
       });
     }
+    if (
+      this.currentStep === 2 &&
+      this.currentTournament.tournamentType === "dogfight"
+    ) {
+      const author = this.allPlayers[0];
+      const players = [...this.allPlayers].slice(1);
+      const newMatch = new MatchViewModel();
+      newMatch.setAuthor(this.author);
+      newMatch.setPlayers([author, ...players]);
+      newMatch.tournamentId = this.tournamentId;
+      newMatch.matchResults = [];
+      newMatch.setMatch(this.match);
+      newMatch.currentDistance = this.currentDistance;
+      newMatch.currentHcp = this.currentHcp;
+      newMatch.currentPar = this.currentPar;
+      newMatch.tournamentId = this.tournamentId;
+      newMatch.currentTournament = this.currentTournament;
+      newMatch.setDifferenceHPDogfight();
+      this.matches.push(newMatch);
+      console.log(toJS(this.currentTournament), "currentTournament");
+    }
   }
 
   setModalValues(key: number): void {
@@ -118,17 +145,32 @@ class PlayViewModel {
   }
 
   setScoreModal(scores: Array<number>, hole: number): void {
-    scores.forEach((score, key) => {
-      this.allPlayers[key].setHoleScore(hole, score);
-    });
-    const author = scores[0];
-    const allScores = [...scores].slice(1);
-    const allScoresMatches = allScores.map((score) => [author, score]);
-    this.matches.forEach((match, key) => {
-      match.setHoleScores(allScoresMatches[key], hole);
-      match.calculateWinners();
-    });
-    //this.setModal(false);
+    if (this.currentTournament.tournamentType !== "dogfight") {
+      scores.forEach((score, key) => {
+        this.allPlayers[key].setHoleScore(hole, score);
+      });
+      const author = scores[0];
+      const allScores = [...scores].slice(1);
+      const allScoresMatches = allScores.map((score) => [author, score]);
+      this.matches.forEach((match, key) => {
+        match.setHoleScores(allScoresMatches[key], hole);
+        match.calculateWinners();
+      });
+      //this.setModal(false);
+    }
+    if (this.currentTournament.tournamentType === "dogfight") {
+      scores.forEach((score, key) => {
+        this.allPlayers[key].setHoleScore(hole, score);
+      });
+      const author = scores[0];
+      const allScores = [...scores].slice(1);
+      const allScoresMatches = allScores.map((score) => [author, allScores]);
+      this.matches.forEach((match, key) => {
+        match.setHoleScores(scores, hole);
+        match.calculateWinnersDogfight();
+      });
+      //this.setModal(false);
+    }
   }
 
   getAuthor(): string {
@@ -272,6 +314,114 @@ class PlayViewModel {
           autoClose: 7000,
         });
       }
+    }
+    toast.dismiss(cuToast);
+    onFinish();
+  }
+
+  async getPlayersOfChampionshipRound(): Promise<string[]> {
+    const matches = await getMatchesByTournamentId(this.tournamentId);
+    const matchesByRound: { [key: number]: IMatchResults[] } = matches
+      .filter((match) => match.round !== 0)
+      .reduce((acc, curr) => {
+        if (curr.round) {
+          if (acc[curr.round]) {
+            acc[curr.round] = [...acc[curr.round], ...curr.matchResults];
+          } else {
+            acc[curr.round] = [...curr.matchResults];
+          }
+        }
+        return acc;
+      }, {} as { [key: number]: IMatchResults[] }); // Add index signature to the type
+    const hashMapPlayersWithRoundsData = Object.keys(matchesByRound).reduce(
+      (acc, curr) => {
+        const playersPerRound = matchesByRound[parseInt(curr)];
+        playersPerRound.forEach((player) => {
+          console.log(player, "player    '''''''");
+          if (acc[player.idPlayer]) {
+            acc[player.idPlayer] = [...acc[player.idPlayer], player];
+          } else {
+            acc[player.idPlayer] = [player];
+          }
+        });
+        return acc;
+      },
+      {} as { [key: string]: IMatchResults[] }
+    ); // Add index signature to the type
+    return Object.keys(hashMapPlayersWithRoundsData).map((player) => player);
+  }
+
+  async checkIfRoundPlayed(round: number, playerMail: string): Promise<void> {
+    if (round !== 0) {
+      const matches = await getMatchesByTournamentIdAndRound(
+        this.tournamentId,
+        round
+      );
+      this.emailListPlayedRound = matches.flatMap((match) => {
+        return match.matchResults.map((player) => player.idPlayer);
+      });
+    }
+    if (round === 0) {
+      const players = await this.getPlayersOfChampionshipRound();
+      const matches = await getMatchesByTournamentIdAndRound(
+        this.tournamentId,
+        round
+      );
+      const played = matches.flatMap((match) => {
+        return match.matchResults.map((player) => player.idPlayer);
+      });
+      this.emailListPlayedRound = players.filter(
+        (player) => !played.includes(player)
+      );
+    }
+  }
+
+  async createRound(
+    message: string,
+    round: number,
+    onFinish: () => void
+  ): Promise<void> {
+    // const matches = await getMatchesByTournamentId(idTournament);
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    for (const match of this.matches) {
+      // const player1 = match.players[0].score.idPlayer;
+      // const player2 = match.players[1].score.idPlayer;
+      // const name1 = match.players[0].score.player;
+      // const name2 = match.players[1].score.player;
+      // const checkIfMatchExist = async (
+      //   player1: string,
+      //   player2: string,
+      //   matches: IMatch[]
+      // ): Promise<boolean> => {
+      //   const exist = matches.some((match) => {
+      //     if (
+      //       match.matchResults[0].idPlayer === player1 &&
+      //       match.matchResults[1].idPlayer === player2
+      //     ) {
+      //       return true;
+      //     }
+      //     if (
+      //       match.matchResults[1].idPlayer === player1 &&
+      //       match.matchResults[0].idPlayer === player2
+      //     ) {
+      //       return true;
+      //     }
+      //   });
+      //   return exist;
+      // };
+      // const exist = await checkIfMatchExist(player1, player2, matches);
+      // const alreadyMessage = `Match ${name1} vs ${name2} was previously posted.`;
+      // if (!exist) {
+      await match.createDogfightRound(message, round);
+      // } else {
+      //   toast.update(cuToast, {
+      //     render: alreadyMessage,
+      //     type: toast.TYPE.ERROR,
+      //     isLoading: false,
+      //     autoClose: 7000,
+      //   });
+      // }
     }
     toast.dismiss(cuToast);
     onFinish();

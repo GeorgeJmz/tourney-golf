@@ -156,7 +156,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
           </Typography>
         </Box>
 
-        <Box
+        {/* <Box
           sx={{
             display: "flex",
             justifyContent: "center",
@@ -184,7 +184,7 @@ export const ScoreBeforeLeave: React.FC<IScoreBeforeLeaveProps> = ({
           <Typography id="modal-modal-title" variant="h6" component="h2">
             {title}
           </Typography>
-        </Box>
+        </Box> */}
 
         <Box
           sx={{

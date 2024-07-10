@@ -16,6 +16,7 @@ import {
   updateScore,
   updateMatch,
   assignNewActiveTourneyByEmail,
+  getMatchesByTournamentIdAndRound,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -33,12 +34,19 @@ import type {
   ITournamentGroup,
 } from "../models/Tournament";
 import PlayerModel, { ITournamentPlayer } from "../models/Player";
-import { IMatch } from "../models/Match";
+import { IMatch, IMatchResults } from "../models/Match";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
   author = "";
   idTournament = "";
+  dogfightStats: Array<{
+    id: string;
+    name: string;
+    gross: number;
+    handicap: number;
+    net: string;
+  }> = [];
   statsPlayers: Array<{
     id: number;
     position: number;
@@ -96,6 +104,7 @@ class TournamentViewModel {
       getStatsPlayersByTournament: action,
       startTournament: action,
       statsPlayers: observable,
+      dogfightStats: observable,
       statsTeams: observable,
       conferencesOptions: observable,
       groupsOptions: observable,
@@ -108,6 +117,7 @@ class TournamentViewModel {
       switchPlayer: action,
     });
     this.statsPlayers = [];
+    this.dogfightStats = [];
   }
 
   setTournament(tournament: Partial<ITournament>): void {
@@ -399,6 +409,39 @@ class TournamentViewModel {
     });
   }
 
+  async deleteRound(matchId: string, playerId: string): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    const match = this.leagueResults.find((m) => m.id === matchId);
+
+    const playerIndexToRemove = match?.matchResults.findIndex(
+      (m) => m.idPlayer === playerId
+    );
+
+    const scoreID = playerIndexToRemove
+      ? match?.scoresId[playerIndexToRemove]
+      : "";
+    const newMatch = {
+      ...match,
+      matchResults: match?.matchResults.filter((m) => m.idPlayer !== playerId),
+      scoresId: match?.scoresId.filter((s, i) => i !== playerIndexToRemove),
+    };
+    if (scoreID && scoreID !== "") {
+      await deleteScore(scoreID);
+    }
+    if (matchId && newMatch) {
+      await updateMatch(matchId, newMatch);
+    }
+
+    const displayMessage = getMessages(Messages.ROUND_DELETED);
+    toast.update(cuToast, {
+      render: displayMessage,
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+  }
+
   async switchPlayer(prevId: string, newId: string, newName: string) {
     const players = (await getPlayersByTournamentId(this.idTournament)) || [];
     const player = players.find((p) => p.email === prevId);
@@ -509,6 +552,125 @@ class TournamentViewModel {
     }
   }
 
+  async getPlayersOfChampionshipRound(): Promise<void> {
+    this.dogfightStats = [];
+    const matches = await getMatchesByTournamentId(this.idTournament);
+    const matchesByRound: { [key: number]: IMatchResults[] } = matches
+      .filter((match) => match.round !== 0)
+      .reduce((acc, curr) => {
+        if (curr.round) {
+          if (acc[curr.round]) {
+            acc[curr.round] = [...acc[curr.round], ...curr.matchResults];
+          } else {
+            acc[curr.round] = [...curr.matchResults];
+          }
+        }
+        return acc;
+      }, {} as { [key: number]: IMatchResults[] }); // Add index signature to the type
+    const hashMapPlayersWithRoundsData = Object.keys(matchesByRound).reduce(
+      (acc, curr) => {
+        const playersPerRound = matchesByRound[parseInt(curr)];
+        playersPerRound.forEach((player) => {
+          console.log(player, "player    '''''''");
+          if (acc[player.idPlayer]) {
+            acc[player.idPlayer] = [...acc[player.idPlayer], player];
+          } else {
+            acc[player.idPlayer] = [player];
+          }
+        });
+        return acc;
+      },
+      {} as { [key: string]: IMatchResults[] }
+    ); // Add index signature to the type
+    const emails = Object.keys(hashMapPlayersWithRoundsData).map(
+      (player) => player
+    );
+    const names = (await getNamesByEmails(emails)) || []; // Optimized name fetching
+    const nameMap = new Map(
+      names.map((player) => [player.email, player.name + " " + player.lastName])
+    );
+    const players = Object.keys(hashMapPlayersWithRoundsData).map((player) => ({
+      name: nameMap.get(player) || player,
+      id: player,
+      data: hashMapPlayersWithRoundsData[player],
+    }));
+
+    const getAverage = (values: Array<number>) => {
+      const average = values.reduce((acc, curr) => acc + curr, 0);
+      return average > 0 ? (average / values.length).toFixed(1) : "0";
+    };
+
+    this.dogfightStats = players
+      .filter((player) => player.data.length >= this.tournament.minRounds)
+      .map((player) => {
+        const playerData = {
+          id: player.id,
+          name: player.name.toString(), // Fix: Convert the 'name' property to a string
+          gross: parseInt(getAverage(player.data.map((d) => d.gross))), // player.data.reduce((acc, curr) => acc + curr.gross, 0),
+          handicap: parseInt(
+            getAverage(player.data.map((d) => parseInt(d.hcp)))
+          ),
+          net: getAverage(player.data.map((d) => d.score)).toString(),
+        };
+        return playerData;
+      })
+      .sort((a, b) => {
+        if (parseInt(a.net) > 0 && parseInt(b.net) > 0) {
+          return parseInt(b.net) - parseInt(a.net);
+        } else if (parseInt(a.net) <= 0 && parseInt(b.net) <= 0) {
+          return 0;
+        } else {
+          return parseInt(a.net) - parseInt(b.net);
+        }
+      })
+      .reverse();
+  }
+
+  async getPlayersPerRound(round: number): Promise<void> {
+    this.dogfightStats = [];
+    const matches = await getMatchesByTournamentIdAndRound(
+      this.idTournament,
+      round
+    );
+    const fullPlayers = await getPlayersByTournamentId(this.idTournament);
+    const emails = fullPlayers.map((player) => player.email);
+
+    console.log(fullPlayers, emails, "fullPlayers");
+    // Use a more efficient approach for large datasets:
+    const names = (await getNamesByEmails(emails)) || []; // Optimized name fetching
+    const nameMap = new Map(
+      names.map((player) => [player.email, player.name + " " + player.lastName])
+    );
+
+    const players = fullPlayers.map((player) => ({
+      ...player,
+      name: nameMap.get(player.email) || player.name,
+    }));
+    const newPlayers = matches.map((match) => match.matchResults).flat();
+    this.dogfightStats = newPlayers
+      .map((player) => {
+        const playerStats = players.find((p) => p.email === player.idPlayer);
+        const playerData = {
+          id: player.idPlayer,
+          name: playerStats?.name || "",
+          gross: player.gross,
+          handicap: Number(player.hcp), // Convert the handicap to a number
+          net: player.score.toString(),
+        };
+        return playerData;
+      })
+      .sort((a, b) => {
+        if (parseInt(a.net) > 0 && parseInt(b.net) > 0) {
+          return parseInt(b.net) - parseInt(a.net);
+        } else if (parseInt(a.net) <= 0 && parseInt(b.net) <= 0) {
+          return 0;
+        } else {
+          return parseInt(a.net) - parseInt(b.net);
+        }
+      })
+      .reverse();
+  }
+
   async getStatsPlayersByTournament(): Promise<void> {
     const t1 = performance.now();
 
@@ -526,6 +688,8 @@ class TournamentViewModel {
       tournamentType === "leagueteamplay" && playType === "strokePlay";
     const isLMATCH = tournamentType === "league" && playType === "matchPlay";
     const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+
+    const isDogFight = tournamentType === "dogfight";
 
     // Fetch players and optimize data fetching
     const fullPlayers = await getPlayersByTournamentId(this.idTournament);
@@ -669,9 +833,22 @@ class TournamentViewModel {
     );
 
     // Sort players by total points
-    this.statsPlayers = newPlayers.sort(
-      (a, b) => b.totalPoints - a.totalPoints
-    );
+    this.statsPlayers = !isDogFight
+      ? newPlayers.sort((a, b) => b.totalPoints - a.totalPoints)
+      : newPlayers
+          .sort((a, b) => {
+            if (parseInt(a.netAverage) > 0 && parseInt(b.netAverage) > 0) {
+              return parseInt(b.netAverage) - parseInt(a.netAverage);
+            } else if (
+              parseInt(a.netAverage) <= 0 &&
+              parseInt(b.netAverage) <= 0
+            ) {
+              return 0;
+            } else {
+              return parseInt(a.netAverage) - parseInt(b.netAverage);
+            }
+          })
+          .reverse();
 
     // ... rest of the function logic (with potential optimizations for data structure usage and caching)
     if (players) {

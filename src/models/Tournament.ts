@@ -24,9 +24,9 @@ export interface ITournament {
   pointsPerWinMedal: number;
   pointsPerTieMedal: number;
   numberOfRounds?: number;
-  roundsDates?: string[];
+  roundDates?: string[];
   championshipRound?: boolean;
-  champoinshipDate?: string;
+  championshipDate?: string;
   minRounds?: number;
 }
 export interface ITournamentGroup {

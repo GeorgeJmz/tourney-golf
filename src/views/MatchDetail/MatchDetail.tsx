@@ -39,7 +39,20 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
   const [hideMedal, setHideMedal] = React.useState<boolean>(false);
 
   const getScores = async () => {
-    const players = [id?.split("-")[0], id?.split("-")[1]];
+    const n = id?.split("-") || []; // "oRkIhspefwzCGhdNQJZ6-match-false-team-true-medal-true".split("-");
+    const npl = [] as string[];
+    let aux = true;
+    if (n.length > 0) {
+      n.forEach((element) => {
+        if (element === "match") {
+          aux = false;
+        }
+        if (aux) {
+          npl.push(element);
+        }
+      });
+    }
+    const players = npl;
     const m = id?.split("-")[3] === "true" ? false : true;
     const team = id?.split("-")[5] === "true" ? false : true;
     const medal = id?.split("-")[7] === "true" ? false : true;
@@ -56,7 +69,9 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
 
     match.players = score;
 
-    match.calculateWinners();
+    if (score.length > 1) {
+      match.calculateWinners();
+    }
     setHideMatch(m);
     setHideMedal(medal);
     setHideTeam(team);

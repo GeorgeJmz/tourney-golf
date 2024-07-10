@@ -102,7 +102,7 @@ export const getStep1 = (type: string) => {
         },
         options: [
           { displayName: "Medal Play", value: "strokePlay" },
-          { displayName: "Stableford", value: "stableford" },
+          //{ displayName: "Stableford", value: "stableford" },
         ],
       },
     ] as ITournamentElement[];

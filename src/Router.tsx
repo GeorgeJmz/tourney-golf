@@ -9,7 +9,9 @@ import Play from "./views/Play/Play";
 import Tournament from "./views/Tournament/Tournament";
 import { NavBar } from "./components/NavBar";
 import TournamentStats from "./views/TournamentStats/TournamentStats";
+import TournamentDogfightStats from "./views/TournamentStats/DogfightStats";
 import TournamentResults from "./views/TournamentResults/TournamentResults";
+import TournamentResultsDogfight from "./views/TournamentResults/DogfightResults";
 import Profile from "./views/Profile/Profile";
 import MatchDetail from "./views/MatchDetail/MatchDetail";
 import AdminLeague from "./views/AdminLeague/AdminLeague";
@@ -21,6 +23,7 @@ import CreateAccount from "./views/CreateAccount/CreateAccount";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import CreateTournament from "./views/CreateTournament/CreateTournament";
 import Rules from "./views/Rules/Rules";
+import Dogfight from "./views/Play/Dogfight";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -89,6 +92,14 @@ function Router(): JSX.Element {
           ),
         },
         {
+          path: "/stats-tournament-dogfight/:id",
+          element: (
+            <RequireAuth user={user}>
+              <TournamentDogfightStats user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
           path: "/rules-tournament/:id",
           element: (
             <RequireAuth user={user}>
@@ -105,10 +116,26 @@ function Router(): JSX.Element {
           ),
         },
         {
+          path: "/play-tournament-dogfight/:id",
+          element: (
+            <RequireAuth user={user}>
+              <Dogfight user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
           path: "/results/:id",
           element: (
             <RequireAuth user={user}>
               <TournamentResults user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/results-dogfight/:id",
+          element: (
+            <RequireAuth user={user}>
+              <TournamentResultsDogfight user={userViewModel} />
             </RequireAuth>
           ),
         },

@@ -22,6 +22,7 @@ export interface IMatch {
   tournamentId: string;
   matchResults: Array<IMatchResults>;
   id?: string;
+  round?: number;
 }
 
 export default class MatchModel implements IMatch {
@@ -36,6 +37,7 @@ export default class MatchModel implements IMatch {
   scoresId = ["", ""];
   date = ["", ""];
   matchResults = [];
+  round = 0;
 
   constructor(init?: Partial<MatchModel>) {
     Object.assign(this, init);
