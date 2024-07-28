@@ -19,6 +19,19 @@ export interface GolfCoursesResponse {
 export const getCourses = (): GolfCoursesResponse => ({
   courses: [
     {
+      id: "ArrowoodGolfCourse",
+      name: "Arrowood Golf Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "AceArrowoodGolfCourse",
+          color: "Ace",
+          length: "6292",
+        },
+      ],
+    },
+    {
       id: "BalboaParkGolfCourse",
       name: "Balboa Park Golf Course",
       address: "2600 Golf Course Dr. San Diego, CA 92102",
@@ -1032,6 +1045,17 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3197, 36],
       out: [3330, 36],
       total: [6527, 72],
+    },
+    AceArrowoodGolfCourse: {
+      distance: [
+        384, 587, 165, 387, 338, 275, 346, 171, 515, 359, 163, 387, 503, 353,
+        168, 442, 371, 378,
+      ],
+      hcp: [6, 4, 10, 2, 12, 18, 16, 8, 14, 15, 11, 3, 17, 13, 9, 1, 5, 7],
+      par: [4, 5, 3, 4, 4, 4, 4, 3, 5, 4, 3, 4, 5, 4, 3, 4, 4, 4],
+      in: [3124, 35],
+      out: [3168, 36],
+      total: [6294, 72],
     },
   };
   const course = details[id];
