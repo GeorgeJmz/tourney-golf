@@ -33,6 +33,7 @@ import moment from "moment-timezone";
 import { convertDate } from "../../helpers/convertDate";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { URLS } from "../../helpers/URLS";
 
 interface IDashboardProps {
   user: UserViewModel;
@@ -254,6 +255,11 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             <Link to="/edit-profile">
               <Button variant="outlined" sx={{ width: "120px" }} size="small">
                 Edit Profile
+              </Button>
+            </Link>
+            <Link to={URLS.DASHBOARD}>
+              <Button variant="outlined" sx={{ width: "120px" }} size="small">
+                New Dashboard
               </Button>
             </Link>
           </ListItem>

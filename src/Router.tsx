@@ -25,6 +25,16 @@ import CreateTournament from "./views/CreateTournament/CreateTournament";
 import Rules from "./views/Rules/Rules";
 import Dogfight from "./views/Play/Dogfight";
 
+import { Login as LoginNew } from "./views/NewLook/Login";
+import { Welcome as WelcomeNew } from "./views/NewLook/Welcome";
+import { PasswordReset as PasswordResetNew } from "./views/NewLook/PasswordReset";
+import { CreateAccount as CreateAccountNew } from "./views/NewLook/CreateAccount";
+import { Dashboard as DashboardNew } from "./views/NewLook/Dashboard";
+import { Profile as ProfileNew } from "./views/NewLook/Profile";
+import { Rules as RulesNew } from "./views/NewLook/Rules";
+import { League } from "./views/NewLook/League";
+import { URLS } from "./helpers/URLS";
+
 function Router(): JSX.Element {
   const { user } = useAuth();
   const userViewModel = React.useMemo(() => new UserViewModel(), []);
@@ -33,6 +43,42 @@ function Router(): JSX.Element {
   }
 
   const router = createBrowserRouter([
+    { path: URLS.LOGIN, element: <LoginNew /> },
+    { path: URLS.WELCOME, element: <WelcomeNew /> },
+    { path: URLS.PASSWORDRESET, element: <PasswordResetNew /> },
+    { path: URLS.CREATEACCOUNT, element: <CreateAccountNew /> },
+    {
+      path: URLS.DASHBOARD,
+      element: (
+        <RequireAuth user={user}>
+          <DashboardNew user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: URLS.EDITPROFILE,
+      element: (
+        <RequireAuth user={user}>
+          <ProfileNew user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: `${URLS.LEAGUE}:id`,
+      element: (
+        <RequireAuth user={user}>
+          <League user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: `${URLS.RULES}:id`,
+      element: (
+        <RequireAuth user={user}>
+          <RulesNew user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
     {
       path: "/",
       element: <NavBar isVisible={Boolean(user)} />,

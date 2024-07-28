@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "MDNichromeTestRegular";
+  src: url("./MDNichromeTest-Regular.otf") format("opentype");
+  /* Add additional font formats if necessary */
+  /* Specify the correct path to the font files */
+}
+
+@font-face {
+  font-family: "MDNichromeTestBold";
+  src: url("./MDNichromeTest-Bold.otf") format("opentype");
+  /* Add additional font formats if necessary */
+  /* Specify the correct path to the font files */
+}
