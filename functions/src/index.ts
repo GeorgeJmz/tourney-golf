@@ -12,6 +12,42 @@ import * as logger from "firebase-functions/logger";
 /* eslint-disable */
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const puppeteer = require("puppeteer");
+const sharp = require("sharp");
+const { getStorage, ref, uploadBytes } = require("firebase-storage");
+
+async function storeImageInFirebase(outputBuffer, imageName) {
+  const storage = getStorage();
+  const storageRef = ref(storage, `images/${imageName}.jpg`); // Adjust path as needed
+
+  try {
+    await uploadBytes(storageRef, outputBuffer);
+    console.log("Image uploaded successfully!");
+  } catch (error) {
+    console.error("Error uploading image:", error);
+  }
+}
+
+async function generateImageFromHTML(htmlContent: string) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlContent);
+
+  // Adjust viewport size and other options as needed
+  await page.setViewport({ width: 800, height: 600 });
+
+  const screenshotBuffer = await page.screenshot();
+  await browser.close();
+
+  // Process the image using Sharp (optional)
+  const image = sharp(screenshotBuffer);
+  // Apply image processing options (resize, format, etc.)
+  const outputBuffer = await image.toBuffer();
+
+  // Save or use the image buffer as needed
+  return outputBuffer;
+}
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
@@ -40,13 +76,15 @@ export const onCreateMatch = functions.firestore
         .then((querySnapshot) => {
           //   logger.info("QuerySnapshot ---", { structuredData: true });
           //   logger.info(querySnapshot, { structuredData: true });
-          querySnapshot.forEach((doc) => {
+          querySnapshot.forEach(async (doc) => {
             // logger.info("Doc ---", { structuredData: true });
             // logger.info(doc, { structuredData: true });
 
             const userData = doc.data();
             // logger.info("UserData ---", { structuredData: true });
             // logger.info(userData, { structuredData: true });
+            logger.info(userData, { structuredData: true });
+
             const lastCourses = new Set(userData.lastCourses || []);
             lastCourses.add(matchData.course);
             const updatedUserData = {
@@ -56,6 +94,10 @@ export const onCreateMatch = functions.firestore
                   ? Array.from(lastCourses).slice(1)
                   : Array.from(lastCourses),
             };
+            const image = await generateImageFromHTML(
+              "<p>IT is working ? </p>"
+            );
+            await storeImageInFirebase(image, "test");
 
             doc.ref.update(updatedUserData);
 
