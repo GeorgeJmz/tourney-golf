@@ -50,7 +50,7 @@ const DashboardRow: React.FC<DashboardRowProps> = ({
                 sx={{
                   lineHeight: "1",
                   color: "white",
-                  fontSize: "1.2rem",
+                  fontSize: "18px",
                   textAlign: "left",
                 }}
               >

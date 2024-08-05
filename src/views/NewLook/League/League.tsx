@@ -100,10 +100,13 @@ export const League: React.FC<ILeagueProps> = observer(({ user }) => {
             <Box width="100%">
               <Typography
                 variant="h5"
+                align="center"
                 sx={{
-                  color: "white",
-                  textTransform: "uppercase",
                   fontWeight: 700,
+                  fontSize: "32px",
+                  color: "white",
+                  lineHeight: "36px",
+                  textTransform: "uppercase",
                 }}
               >
                 Standings
@@ -120,6 +123,7 @@ export const League: React.FC<ILeagueProps> = observer(({ user }) => {
                     paddingLeft: 1,
                     paddingRight: 1,
                     alignItems: "center",
+                    marginBottom: 2,
                   }}
                 >
                   <Box>

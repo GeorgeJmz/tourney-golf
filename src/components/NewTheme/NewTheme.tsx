@@ -32,7 +32,7 @@ const theme = createTheme({
     fontFamily: "'Inter', sans-serif",
   },
   backgrounds: {
-    dark: "#000",
+    dark: "#000000",
     darkgray: "#424242",
     light: "#fff",
     green: "BDFF69",
@@ -44,6 +44,11 @@ const theme = createTheme({
     secondary: {
       main: "#F90066",
     },
+    success: {
+      main: "#BDFF69",
+    },
+    mode: "dark",
+    background: { paper: "#424242" },
   },
   components: {
     MuiTextField: {

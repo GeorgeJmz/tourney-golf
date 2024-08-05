@@ -9,6 +9,11 @@ export const convertMomentDate = (date: Array<string>): string => {
   return nformattedDate.format("MM/DD/YYYY");
 };
 
+export const convertMomentSimplified = (date: Array<string>): string => {
+  const nformattedDate = moment.tz(parseInt(date[0]), date[1]);
+  return nformattedDate.format("MM/DD");
+};
+
 export const differenceDate = (
   date1: Array<string>,
   date2: Array<string>

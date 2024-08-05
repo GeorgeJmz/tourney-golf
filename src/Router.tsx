@@ -33,7 +33,10 @@ import { Dashboard as DashboardNew } from "./views/NewLook/Dashboard";
 import { Profile as ProfileNew } from "./views/NewLook/Profile";
 import { Rules as RulesNew } from "./views/NewLook/Rules";
 import { League } from "./views/NewLook/League";
+import { PlayLeague } from "./views/NewLook/PlayLeague";
+import { ResultsLeague } from "./views/NewLook/ResultsLeague";
 import { URLS } from "./helpers/URLS";
+import { StatsLeague } from "./views/NewLook/StatsLeague";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -76,6 +79,30 @@ function Router(): JSX.Element {
       element: (
         <RequireAuth user={user}>
           <RulesNew user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: `${URLS.PLAYLEAGUE}:id`,
+      element: (
+        <RequireAuth user={user}>
+          <PlayLeague user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: `${URLS.RESULTSLEAGUE}:id`,
+      element: (
+        <RequireAuth user={user}>
+          <ResultsLeague user={userViewModel} />
+        </RequireAuth>
+      ),
+    },
+    {
+      path: `${URLS.STATSLEAGUE}:id`,
+      element: (
+        <RequireAuth user={user}>
+          <StatsLeague user={userViewModel} />
         </RequireAuth>
       ),
     },
