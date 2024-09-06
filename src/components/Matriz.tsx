@@ -144,10 +144,7 @@ const Matriz: React.FC<MatrizValuesProps> = ({ matrizValues }) => {
                                   }
                                 </TableCell>
                                 <TableCell sx={sxCell}>
-                                  {
-                                    matrizValues.data[email1]?.[email2]?.[1]
-                                      .net
-                                  }
+                                  {matrizValues.data[email1]?.[email2]?.[1].net}
                                 </TableCell>
                               </TableRow>
                               <TableRow>
@@ -161,7 +158,10 @@ const Matriz: React.FC<MatrizValuesProps> = ({ matrizValues }) => {
                                   {matrizValues.data[email1]?.[email2]?.[1].hcp}
                                 </TableCell>
                                 <TableCell sx={sxCell}>
-                                  {matrizValues.data[email1]?.[email2]?.[1].score}
+                                  {
+                                    matrizValues.data[email1]?.[email2]?.[1]
+                                      .score
+                                  }
                                 </TableCell>
                               </TableRow>
                             </TableBody>
