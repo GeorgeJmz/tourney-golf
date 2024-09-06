@@ -24,6 +24,7 @@ import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import CreateTournament from "./views/CreateTournament/CreateTournament";
 import Rules from "./views/Rules/Rules";
 import Dogfight from "./views/Play/Dogfight";
+import PlayOffsPlayer from "./views/PlayOffs/PlayOffsPlayer";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -88,6 +89,14 @@ function Router(): JSX.Element {
           element: (
             <RequireAuth user={user}>
               <TournamentStats user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/playoffs-tournament/:id",
+          element: (
+            <RequireAuth user={user}>
+              <PlayOffsPlayer user={userViewModel} />
             </RequireAuth>
           ),
         },

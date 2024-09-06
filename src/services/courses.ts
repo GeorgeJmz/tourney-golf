@@ -19,6 +19,19 @@ export interface GolfCoursesResponse {
 export const getCourses = (): GolfCoursesResponse => ({
   courses: [
     {
+      id: "AndalusiaCountryClub",
+      name: "Andalusia Country Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueAndalusiaCountryClub",
+          color: "Blue",
+          length: "7075",
+        },
+      ],
+    },
+    {
       id: "ArrowoodGolfCourse",
       name: "Arrowood Golf Course",
       address: "",
@@ -218,6 +231,24 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "maderasGolfClubBlue",
           color: "Blue",
           length: "6670",
+        },
+      ],
+    },
+    {
+      id: "MissionTrailsGolfCourse",
+      name: "Mission Trails Golf Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "MissionTrailsGolfCourseBack",
+          color: "Back",
+          length: "5940",
+        },
+        {
+          id: "MissionTrailsGolfCourseMiddle",
+          color: "Middle",
+          length: "5515",
         },
       ],
     },
@@ -1056,6 +1087,39 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3124, 35],
       out: [3168, 36],
       total: [6294, 72],
+    },
+    BlueAndalusiaCountryClub: {
+      distance: [
+        423, 183, 530, 450, 398, 415, 186, 377, 524, 406, 376, 190, 463, 168,
+        531, 459, 415, 581,
+      ],
+      hcp: [5, 17, 9, 1, 11, 3, 13, 15, 7, 8, 18, 10, 2, 16, 14, 12, 4, 6],
+      par: [4, 3, 5, 4, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5],
+      in: [3589, 36],
+      out: [3486, 36],
+      total: [7075, 72],
+    },
+    MissionTrailsGolfCourseBack: {
+      distance: [
+        354, 326, 155, 291, 340, 467, 144, 362, 167, 195, 354, 456, 365, 572,
+        344, 389, 215, 264,
+      ],
+      hcp: [2, 12, 16, 10, 4, 8, 18, 6, 14, 11, 3, 9, 5, 1, 13, 15, 7, 17],
+      par: [5, 4, 3, 4, 4, 5, 3, 4, 3, 3, 4, 5, 4, 5, 4, 4, 3, 4],
+      in: [3154, 36],
+      out: [2786, 35],
+      total: [5940, 71],
+    },
+    MissionTrailsGolfCourseMiddle: {
+      distance: [
+        525, 314, 145, 257, 288, 444, 132, 331, 155, 186, 338, 419, 356, 557,
+        337, 340, 162, 229,
+      ],
+      hcp: [2, 12, 18, 12, 4, 10, 16, 6, 14, 7, 3, 9, 5, 1, 15, 13, 11, 17],
+      par: [5, 4, 3, 4, 4, 5, 3, 4, 3, 3, 4, 5, 4, 5, 4, 4, 3, 4],
+      in: [2924, 36],
+      out: [2591, 35],
+      total: [5515, 71],
     },
   };
   const course = details[id];

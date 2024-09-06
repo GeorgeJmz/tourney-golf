@@ -319,13 +319,13 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
           </Grid>
         ))}
       </Grid>
-      <Grid container spacing={2} sx={{ mt: 1 }}>
+      {/* <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">
             TEE BOX Stakes
           </Typography>
         </Grid>
-      </Grid>
+      </Grid> */}
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
           <Typography gutterBottom align="left" variant="h6" component="div">

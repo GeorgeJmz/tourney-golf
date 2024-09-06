@@ -17,6 +17,8 @@ import {
   updateMatch,
   assignNewActiveTourneyByEmail,
   getMatchesByTournamentIdAndRound,
+  addPlayOffsToTournament,
+  getPlayoffsMatchesByTournamentId,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -35,6 +37,7 @@ import type {
 } from "../models/Tournament";
 import PlayerModel, { ITournamentPlayer } from "../models/Player";
 import { IMatch, IMatchResults } from "../models/Match";
+import { convertMomentDate } from "../helpers/convertDate";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -74,6 +77,29 @@ class TournamentViewModel {
   conferencesOptions: Array<{ value: string; label: string }> = [];
   groupsOptions: Array<{ value: string; label: string }> = [];
   leagueResults: Array<IMatch> = [];
+  playOffsResults: Array<IMatch> = [];
+  matrizValues: {
+    leagueName: string;
+    data: {
+      [key: string]: {
+        [key: string]: Array<{
+          gross: number;
+          hcp: number;
+          score: number;
+          date: string;
+          net: number;
+        }>;
+      };
+    };
+    names: {
+      conferenceName: string;
+      results: { [key: string]: string };
+    }[];
+  } = {
+    leagueName: "",
+    data: {},
+    names: [],
+  };
   playersResultsOptions: Array<{ label: string; value: string }> = [];
 
   constructor() {
@@ -110,6 +136,7 @@ class TournamentViewModel {
       groupsOptions: observable,
       getAllMatchesResultsByTournament: action,
       leagueResults: observable,
+      playOffsResults: observable,
       playersResultsOptions: observable,
       updatePlayersAndMatches: action,
       deleteLeague: action,
@@ -305,6 +332,23 @@ class TournamentViewModel {
     //this.updateTournament(toJS(this.tournament));
   }
 
+  async addPlayOffsDetails(
+    numberOfPlayers: number,
+    previousPlayers: { [key: string]: string },
+    matches: { [key: string]: string[] }
+  ): Promise<void> {
+    console.log(toJS(this.tournament));
+    //if (this.tournament.playOffs) {
+    this.tournament.playOffsDetail.players = numberOfPlayers;
+    this.tournament.playOffsDetail.brackets = previousPlayers;
+    this.tournament.playOffsDetail.matches = matches;
+    await addPlayOffsToTournament(
+      this.idTournament,
+      this.tournament.playOffsDetail
+    );
+    //}
+  }
+
   async getAllMatchesResultsByTournament(): Promise<void> {
     const players = (await getPlayersByTournamentId(this.idTournament)) || [];
     if (players.length === 0) {
@@ -323,6 +367,10 @@ class TournamentViewModel {
       }))
       .sort((a, b) => a.label.localeCompare(b.label));
     const matches = await getMatchesByTournamentId(this.idTournament);
+    const playOffsMatches = await getPlayoffsMatchesByTournamentId(
+      this.idTournament
+    );
+    console.log(toJS(playOffsMatches), "playOffsMatches");
     const getPointsPerMatch = (idPlayer: string, idOpponent: string) => {
       const player = players.find((p) => p.email === idPlayer);
       const opponentIndex =
@@ -346,6 +394,107 @@ class TournamentViewModel {
           : result.playerName,
       })),
     }));
+
+    this.playOffsResults = playOffsMatches.map((match) => ({
+      ...match,
+      matchResults: match.matchResults.map((result) => ({
+        ...result,
+        ...getPointsPerMatch(
+          result.idPlayer,
+          match.matchResults.find((r) => r.idPlayer !== result.idPlayer)
+            ?.idPlayer || ""
+        ),
+        playerName: listEmails
+          ? listEmails[result.idPlayer]
+          : result.playerName,
+      })),
+    }));
+
+    console.log("playOffsResults", toJS(this.playOffsResults));
+
+    // Crear la constante matrizValues
+    this.matrizValues = {
+      leagueName: "League Name",
+      data: {},
+      names: [],
+    };
+
+    this.matrizValues.names = listEmails
+      ? Object.keys(listEmails).reduce((acc, curr) => {
+          const conference =
+            players.find((p) => p.email === curr)?.conference || "";
+          if (acc.find((a) => a.conferenceName === conference)) {
+            const index = acc.findIndex((a) => a.conferenceName === conference);
+            acc[index].results[curr] = listEmails[curr];
+          } else {
+            acc.push({
+              conferenceName: conference,
+              results: {
+                [curr]: listEmails[curr],
+              },
+            });
+          }
+          return acc;
+        }, [] as { conferenceName: string; results: { [key: string]: string } }[])
+      : [];
+
+    console.log(toJS(this.matrizValues), "matrizValues");
+    console.log(toJS(this.leagueResults), "this.leagueResults");
+
+    // Iterar sobre leagueResults para llenar this.matrizValues
+    this.leagueResults.forEach((match) => {
+      const playerEmail = match.matchResults[0];
+      const opponentEmail = match.matchResults[1];
+
+      if (!this.matrizValues.data[playerEmail.idPlayer]) {
+        this.matrizValues.data[playerEmail.idPlayer] = {};
+      }
+
+      if (!this.matrizValues.data[opponentEmail.idPlayer]) {
+        this.matrizValues.data[opponentEmail.idPlayer] = {};
+      }
+
+      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer] = [];
+      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer] = [];
+
+      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer].push(
+        {
+          gross: opponentEmail.gross || 0,
+          hcp: parseInt(opponentEmail.hcp) || 0,
+          score: opponentEmail.score,
+          date: convertMomentDate(match.date),
+          net: opponentEmail.medalPoints || 0,
+        }
+      );
+      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer].push(
+        {
+          gross: playerEmail.gross || 0,
+          hcp: parseInt(playerEmail.hcp) || 0,
+          score: playerEmail.score,
+          date: convertMomentDate(match.date),
+          net: playerEmail.medalPoints || 0,
+        }
+      );
+
+      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer].push(
+        {
+          gross: playerEmail.gross || 0,
+          hcp: parseInt(playerEmail.hcp) || 0,
+          score: playerEmail.score,
+          date: convertMomentDate(match.date),
+          net: playerEmail.medalPoints || 0,
+        }
+      );
+      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer].push(
+        {
+          gross: opponentEmail.gross || 0,
+          hcp: parseInt(opponentEmail.hcp) || 0,
+          score: opponentEmail.score,
+          date: convertMomentDate(match.date),
+          net: opponentEmail.medalPoints || 0,
+        }
+      );
+    });
   }
 
   async deleteMatch(matchId: string): Promise<void> {
