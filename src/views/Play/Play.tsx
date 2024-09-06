@@ -23,6 +23,7 @@ import { ITournamentPlayer } from "../../models/Player";
 import { ScoreBeforeLeave } from "./components/ScoreBeforeLeave";
 import { LeaveModal } from "./components/LeaveModal";
 import { useBlocker } from "react-router-dom";
+import { toJS } from "mobx";
 
 interface IPlayProps {
   user: UserViewModel;
@@ -121,6 +122,42 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
 
   const getPlayersByConference = (conferenceId: string) => {
+    //console.log("currentTournament", toJS(currentTournament));
+    const playOffsDetail = currentTournament?.playOffsDetail;
+    let a;
+    if (playOffsDetail && playOffsDetail.players > 0) {
+      const currentMatch = Object.keys(playOffsDetail.matches).reverse();
+      //console.log("currentMatch", currentMatch);
+      let founded = false;
+      currentMatch.forEach((m, i) => {
+        const match = playOffsDetail.matches[currentMatch[i]];
+        if (match && match.includes(user.user.email) && !founded) {
+          const players = currentTournament?.playersList.filter((player) =>
+            match.includes(player.email || "")
+          );
+          a = players;
+          founded = true;
+          //console.log("a - ",i,  a);
+          return players;
+        }
+      });
+      //console.log("a", a);
+      return a;
+      // let founded = false;
+      // let i = 0;
+
+      // while (!founded || i < currentMatch.length) {
+      //   const match = playOffsDetail.matches[currentMatch[i]];
+      //   if (match && match.includes(user.user.email)) {
+      //     founded = true;
+      //     const players = currentTournament?.playersList.filter((player) =>
+      //       match.includes(player.email || "")
+      //     );
+      //     return players;
+      //   }
+      //   i++;
+      // }
+    }
     const players = currentTournament?.playersList.filter(
       (player) =>
         player.conference === conferenceId &&
@@ -221,7 +258,12 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
 
   const handleSubmit = (message: string) => {
-    playViewModel.createMatch(message, () => navigate("/dashboard"));
+    const playOffsDetail = currentTournament?.playOffsDetail;
+    if (playOffsDetail && playOffsDetail.players > 0) {
+      playViewModel.createMatchPlayoffs(message, () => navigate("/dashboard"));
+    } else {
+      playViewModel.createMatch(message, () => navigate("/dashboard"));
+    }
     // console.log("Finished");
     // setTimeout(() => navigate("/dashboard"), 5000);
   };

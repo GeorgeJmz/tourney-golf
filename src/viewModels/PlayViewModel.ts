@@ -14,6 +14,7 @@ import TournamentModel from "../models/Tournament";
 import {
   getMatchesByTournamentId,
   getMatchesByTournamentIdAndRound,
+  getPlayoffsMatchesByTournamentId,
 } from "../services/firebase";
 
 export interface IGolfCourse {
@@ -306,6 +307,57 @@ class PlayViewModel {
       const alreadyMessage = `Match ${name1} vs ${name2} was previously posted.`;
       if (!exist) {
         await match.createMatch(message);
+      } else {
+        toast.update(cuToast, {
+          render: alreadyMessage,
+          type: toast.TYPE.ERROR,
+          isLoading: false,
+          autoClose: 7000,
+        });
+      }
+    }
+    toast.dismiss(cuToast);
+    onFinish();
+  }
+
+  async createMatchPlayoffs(
+    message: string,
+    onFinish: () => void
+  ): Promise<void> {
+    const idTournament = this.tournamentId;
+    const matches = await getPlayoffsMatchesByTournamentId(idTournament);
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    for (const match of this.matches) {
+      const player1 = match.players[0].score.idPlayer;
+      const player2 = match.players[1].score.idPlayer;
+      const name1 = match.players[0].score.player;
+      const name2 = match.players[1].score.player;
+      const checkIfMatchExist = async (
+        player1: string,
+        player2: string,
+        matches: IMatch[]
+      ): Promise<boolean> => {
+        const exist = matches.some((match) => {
+          if (
+            match.matchResults[0].idPlayer === player1 &&
+            match.matchResults[1].idPlayer === player2
+          ) {
+            return true;
+          }
+          if (
+            match.matchResults[1].idPlayer === player1 &&
+            match.matchResults[0].idPlayer === player2
+          ) {
+            return true;
+          }
+        });
+        return exist;
+      };
+      const exist = await checkIfMatchExist(player1, player2, matches);
+      const alreadyMessage = `Match ${name1} vs ${name2} was previously posted.`;
+      if (!exist) {
+        await match.createPlayoffsMatch(message);
       } else {
         toast.update(cuToast, {
           render: alreadyMessage,

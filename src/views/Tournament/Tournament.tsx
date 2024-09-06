@@ -27,6 +27,8 @@ import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
 import { DownloadButton } from "../../components/DownloadButton";
 import { NavbarTitleContext } from "../../hooks/useNavContext";
+import { toJS } from "mobx";
+import { object } from "yup";
 
 interface ITournamentPageProps {
   user: UserViewModel;
@@ -81,6 +83,19 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
       const date1 = new Date(d1).getTime();
       const date2 = new Date(d2).getTime();
       if (date1 < date2) {
+        if (
+          !isDogfight() &&
+          currentTournament?.playOffsDetail &&
+          currentTournament?.playOffsDetail?.players !== 0
+        ) {
+          const matchesOfPlayOffs = Object.keys(
+            currentTournament?.playOffsDetail?.brackets
+          );
+          const playersOfPlayOffs = matchesOfPlayOffs.map(
+            (match) => currentTournament?.playOffsDetail?.brackets[match]
+          );
+          return playersOfPlayOffs.includes(user.user.email);
+        }
         return false;
         //console.log(`${d1} is less than ${d2}`);
       } else if (date1 > date2) {
@@ -216,18 +231,21 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           </Button>
         </Link>
       </Box>
-      {!isDogfight && (
-        <Box flexBasis={isMobile() ? "50%" : "10%"}>
-          <Button
-            variant="text"
-            color="primary"
-            disabled
-            onClick={() => console.log("Ver estadísticas")}
-          >
-            Playoffs
-          </Button>
-        </Box>
-      )}
+      {!isDogfight() &&
+        currentTournament?.playOffsDetail &&
+        currentTournament?.playOffsDetail?.players !== 0 && (
+          <Box flexBasis={isMobile() ? "50%" : "10%"}>
+            <Link to={`/playoffs-tournament/${id}`}>
+              <Button
+                variant="text"
+                color="primary"
+                onClick={() => console.log("Ver estadísticas")}
+              >
+                Playoffs
+              </Button>
+            </Link>
+          </Box>
+        )}
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
         <Link to={`/rules-tournament/${id}`}>
           <Button

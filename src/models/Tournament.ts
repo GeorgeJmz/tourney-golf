@@ -28,6 +28,17 @@ export interface ITournament {
   championshipRound?: boolean;
   championshipDate?: string;
   minRounds?: number;
+  playOffsDetail: IPlayOffsDetail;
+}
+
+export interface IPlayOffsDetail {
+  players: number;
+  brackets: {
+    [key: string]: string;
+  };
+  matches: {
+    [key: string]: string[];
+  };
 }
 export interface ITournamentGroup {
   id: string;
@@ -89,6 +100,11 @@ export default class TournamentModel implements ITournament {
   championshipRound = false;
   champoinshipDate = new Date().toISOString();
   minRounds = 1;
+  playOffsDetail = {
+    players: 0,
+    brackets: {},
+    matches: {},
+  };
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

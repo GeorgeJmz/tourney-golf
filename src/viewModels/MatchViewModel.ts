@@ -6,7 +6,9 @@ import { getMessages } from "../helpers/getMessages";
 import type { FirebaseError } from "firebase/app";
 import {
   createMatch,
+  createPlayoffMatch,
   sendCustomEmail,
+  updatePlayOffPlayer,
   updatePlayer,
 } from "../services/firebase";
 import ScoreViewModel from "./ScoreViewModel";
@@ -300,6 +302,139 @@ class MatchViewModel {
       const { eventDate, eventTimezone } = getCurrentMoment();
       const saveDate = [String(eventDate), eventTimezone];
       await createMatch({
+        ...this.match,
+        author: this.author.getUserId(),
+        date: saveDate,
+        tournamentId: this.tournamentId,
+        matchResults,
+      });
+      const hideTeam =
+        tournamentType !== "leagueteamplay" && tournamentType !== "teamplay";
+      const hideMatch =
+        playType !== "matchPlay" && playType !== "matchstrokePlay";
+      const hideMedal =
+        playType !== "strokePlay" &&
+        playType !== "matchstrokePlay" &&
+        playType !== "stableford";
+      const result = getBodyMail(
+        this.players,
+        this.winByHole,
+        hideTeam,
+        this.match.winner,
+        hideMatch,
+        hideMedal
+      );
+      const player1 = this.players[0].score.player;
+      const player2 = this.players[1].score.player;
+      const title = `${player1} vs ${player2}`;
+      const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
+      this.currentTournament.playersList.forEach(async (mail) => {
+        if (mail.email) {
+          await sendCustomEmail(mail.email, title, bodyMail);
+        }
+      });
+
+      console.log("Match created - Email sent to players");
+      //const displayMessage = getMessages(Messages.MATCH_CREATED);
+      // toast.update(cuToast, {
+      //   render: displayMessage,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    } catch (error) {
+      const codeError = (error as FirebaseError).code;
+      const displayError = getMessages(codeError);
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    }
+  }
+
+  async createPlayoffsMatch(messageModal: string): Promise<void> {
+    // const displayLoading = getMessages(Messages.LOADING);
+    // const cuToast = toast.loading(displayLoading);
+    const tournamentType = this.currentTournament.tournamentType;
+    const playType = this.currentTournament.playType;
+
+    const isLMATCHMEDAL =
+      tournamentType === "league" && playType === "matchstrokePlay";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+    try {
+      const pointsPerWin = this.currentTournament.pointsPerWin;
+      const pointsPerTie = this.currentTournament.pointsPerTie;
+
+      const pointsPerWinMedal = this.currentTournament.pointsPerWinMedal;
+      const pointsPerTieMedal = this.currentTournament.pointsPerTieMedal;
+
+      const scoresIds = this.players.map(async (p) => await p.createScore());
+      this.match.scoresId = await Promise.all(scoresIds);
+      const matchResults = this.players.map((p) => ({
+        idPlayer: p.score.idPlayer,
+        playerName: p.score.player,
+        score: p.score.totalNet,
+        gross: p.score.totalGross,
+        hcp: `${p.score.handicap}`,
+        teamPoints: p.score.teamPoints.reduce((a, b) => a + b, 0),
+        isWinnerMatch: this.winnerMatch.includes(p.score.idPlayer),
+        isWinnerMedalPlay: this.winnerMedalPlay.includes(p.score.idPlayer),
+      }));
+      const playersMail = [
+        this.players[0].score.idPlayer,
+        this.players[1].score.idPlayer,
+      ];
+      const winnerMatch = this.winnerMatch;
+      const strokePlayPoints =
+        this.players[0].score.totalNet === this.players[1].score.totalNet
+          ? [pointsPerTieMedal, pointsPerTieMedal]
+          : this.players[0].score.totalNet < this.players[1].score.totalNet
+          ? [pointsPerWinMedal, 0]
+          : [0, pointsPerWinMedal];
+      const teamPoints = [
+        this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
+        this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
+      ] as Array<number>;
+      const matchsPoints =
+        winnerMatch.length > 1
+          ? [pointsPerTie, pointsPerTie]
+          : this.winnerMatch.includes(playersMail[0])
+          ? [pointsPerWin, 0]
+          : [0, pointsPerWin];
+
+      for (const playerMail of playersMail) {
+        const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
+        const playerUpdated = {
+          email: playerMail,
+          opponent: playersMail[index === 0 ? 1 : 0],
+          pointsMatch: matchsPoints[index],
+          pointsStroke: strokePlayPoints[index],
+          pointsTeam: teamPoints[index],
+          tournamentId: this.tournamentId,
+          scoreId: this.match.scoresId[index],
+          gross: this.players[index].score.totalGross,
+          net: this.players[index].score.totalNet,
+          handicap: this.players[index].score.handicap,
+          // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
+          // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
+          // ties: winnerMatch.includes(playerMail) ? [] : [],
+        };
+        await updatePlayOffPlayer({ ...playerUpdated });
+      }
+
+      const getCurrentMoment = () => {
+        const currentMoment = moment();
+        return {
+          eventDate: currentMoment.valueOf(),
+          eventTimezone: moment.tz.guess(),
+        };
+      };
+      const { eventDate, eventTimezone } = getCurrentMoment();
+      const saveDate = [String(eventDate), eventTimezone];
+      await createPlayoffMatch({
         ...this.match,
         author: this.author.getUserId(),
         date: saveDate,

@@ -42,6 +42,7 @@ import { getMessages } from "../../helpers/getMessages";
 import { toast } from "react-toastify";
 import { Messages } from "../../helpers/messages";
 import RoundReviewDogfight from "../../components/RoundReviewDogfight";
+import PLayOffs from "../PlayOffs/PlayOffs";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -676,7 +677,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             </Grid>
           </TabPanel>
           <TabPanel value={value} index={3}>
-            <p>Playoff Picture </p>
+            <PLayOffs tournamentViewModel={tournamentViewModel} />
           </TabPanel>
           <TabPanel value={value} index={4}>
             <p>

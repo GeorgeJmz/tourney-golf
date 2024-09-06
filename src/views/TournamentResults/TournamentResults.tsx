@@ -32,6 +32,7 @@ import MenuItems from "../../components/MenuItems";
 import HorizontalScoreCard from "../Play/components/HorizontalScoreCard";
 import MatchViewModel from "../../viewModels/MatchViewModel";
 import { set, toJS } from "mobx";
+import Matriz from "../../components/Matriz";
 
 interface ITournamentStatsProps {
   user: UserViewModel;
@@ -118,6 +119,98 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   const hideMatch = playType === "strokePlay";
   const hideMedal = playType === "matchPlay";
 
+  // const matrizValues = {
+  //   leagueName: "League Name",
+  //   conferenceName: "Conference Name",
+  //   data: {
+  //     "jeckox@gmail.com": {
+  //       "matias@gmail.com": [
+  //         {
+  //           gross: 12,
+  //           hcp: 4,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         }
+  //       ],
+  //       "danuapp@gmail.com": [
+  //         {
+  //           gross: 20,
+  //           hcp: 2,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         },
+  //       ],
+  //     },
+  //     "matias@gmail.com": {
+  //       "jeckox@gmail.com": [
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 12,
+  //           hcp: 4,
+  //           score: 5,
+  //         },
+  //       ],
+  //       "danuapp@gmail.com": [
+  //         {
+  //           gross: 50,
+  //           hcp: 2,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         },
+  //       ],
+  //     },
+  //     "danuapp@gmail.com": {
+  //       "matias@gmail.com": [
+
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 50,
+  //           hcp: 2,
+  //           score: 5,
+  //         },
+  //       ],
+  //       "jeckox@gmail.com": [
+  //         {
+  //           gross: 10,
+  //           hcp: 5,
+  //           score: 5,
+  //         },
+  //         {
+  //           gross: 20,
+  //           hcp: 2,
+  //           score: 5,
+  //         },
+  //       ],
+
+  //     },
+  //   },
+  //   names: {
+  //     "jeckox@gmail.com": "Adrian Aburto",
+  //     "matias@gmail.com": "Matias Aburto Cuenca",
+  //     "danuapp@gmail.com": "Daniela Cuenca",
+  //   }
+  // };
+
   return (
     <Box sx={{ background: "white", p: 3, height: "100vh" }}>
       <MenuItems
@@ -127,9 +220,16 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
         isActive={true}
       />
 
-      <Typography gutterBottom align="left" variant="h6" component="div">
-        Previous Matches
-      </Typography>
+      {userStats !== "" && (
+        <Typography gutterBottom align="left" variant="h6" component="div">
+          Regular Season
+        </Typography>
+      )}
+      {userStats === "" && hideTeam && (
+        <Box>
+          <Matriz matrizValues={tournamentViewModel.matrizValues} />
+        </Box>
+      )}
       <div
         style={{
           display: "flex",
@@ -144,7 +244,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
               ? value.matchResults.some(
                   (element) => element.idPlayer === userStats
                 )
-              : true;
+              : !hideTeam;
           })
           .sort((a, b) => differenceDate(a.date, b.date))
           .map((match) => (
@@ -238,6 +338,125 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
             </div>
           ))}
       </div>
+      <Box sx={{ marginTop: 2 }}>
+        {userStats !== "" && (
+          <Typography gutterBottom align="left" variant="h6" component="div">
+            Playoffs
+          </Typography>
+        )}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+            alignItems: "stretch",
+          }}
+        >
+          {tournamentViewModel.playOffsResults
+            .filter((value) => {
+              return userStats !== ""
+                ? value.matchResults.some(
+                    (element) => element.idPlayer === userStats
+                  )
+                : false;
+            })
+            .sort((a, b) => differenceDate(a.date, b.date))
+            .map((match) => (
+              <div style={styleTable}>
+                <TableContainer component={Box}>
+                  <Table sx={{ tableLayout: "fixed" }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={nameStyles}>
+                          {" "}
+                          {convertMomentDate(match.date)}{" "}
+                        </TableCell>
+                        <TableCell sx={headerStyles}>Match</TableCell>
+                        <TableCell sx={headerStyles}>Gross</TableCell>
+                        <TableCell sx={headerStyles}>HDCP</TableCell>
+                        <TableCell sx={headerStyles}>Net</TableCell>
+                        {!hideTeam && (
+                          <TableCell sx={headerStyles}>Team</TableCell>
+                        )}
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      <React.Fragment>
+                        {match.matchResults.map((players) => (
+                          <TableRow
+                            key={`${match.author} - ${players.playerName}`}
+                          >
+                            <TableCell sx={nameStyles}>
+                              {players.playerName}
+                            </TableCell>
+                            <TableCell sx={cellStyles}>
+                              {!isLMEDAL &&
+                                !isLTMEDAL &&
+                                (match.matchResults[0].isWinnerMatch &&
+                                match.matchResults[1].isWinnerMatch
+                                  ? "Tie Match"
+                                  : players.isWinnerMatch
+                                  ? "Winner Match"
+                                  : "")}
+                              <br />
+                              {!isLTMATCH &&
+                                !isLMATCH &&
+                                (match.matchResults[0].isWinnerMedalPlay &&
+                                match.matchResults[1].isWinnerMedalPlay
+                                  ? "Tie Medal"
+                                  : players.isWinnerMedalPlay
+                                  ? "Winner Medal"
+                                  : "")}
+                            </TableCell>
+                            <TableCell sx={cellStyles}>
+                              {players.gross}
+                            </TableCell>
+                            <TableCell sx={cellStyles}>{players.hcp}</TableCell>
+                            <TableCell sx={cellStyles}>
+                              {players.score}
+                            </TableCell>
+                            {!isLMATCH && !isLMEDAL && !isLMATCHMEDAL && (
+                              <TableCell sx={cellStyles}>
+                                {players.teamPoints}
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>{}</TableCell>
+                          <TableCell sx={{ textAlign: "center" }} colSpan={3}>
+                            <Link
+                              to={`/match/${match.scoresId[0]}-${
+                                match.scoresId[1]
+                              }-match-${!hideMatch ? "true" : "false"}-team-${
+                                !hideTeam ? "true" : "false"
+                              }-medal-${!hideMedal ? "true" : "false"}`}
+                            >
+                              <Button variant="text" color="primary">
+                                View Scorecard
+                              </Button>
+                            </Link>
+                          </TableCell>
+
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                          <TableCell sx={{ textAlign: "center" }}></TableCell>
+                        </TableRow>
+                      </React.Fragment>
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </div>
+            ))}
+        </div>
+      </Box>
     </Box>
   );
 };
