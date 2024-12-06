@@ -4,6 +4,7 @@ export interface IUser {
   lastName: string;
   email: string;
   activeTournaments: string[];
+  historyTournaments: string[];
   password?: string;
   ghinNumber?: string;
   handicap?: number;
@@ -19,6 +20,7 @@ export default class UserModel implements IUser {
   ghinNumber? = "";
   handicap? = 0;
   activeTournaments = [] as string[];
+  historyTournaments = [] as string[];
   lastCourses = [] as string[];
 
   constructor(init?: Partial<UserModel>) {

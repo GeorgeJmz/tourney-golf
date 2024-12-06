@@ -49,7 +49,9 @@ const PlayoffsPlayer: React.FC<IPlayoffsPlayerProps> = ({ user }) => {
   );
   const { id } = useParams();
   const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
+    () =>
+      user.activeTournaments.find((t) => t.id === id) ||
+      user.historyTournaments.find((t) => t.id === id),
     []
   );
 
@@ -59,10 +61,18 @@ const PlayoffsPlayer: React.FC<IPlayoffsPlayerProps> = ({ user }) => {
     tournamentViewModel.setAuthor(userId);
   }
 
+  React.useEffect(() => {
+    if (id) {
+      tournamentViewModel.getAllMatchesResultsByTournament();
+    }
+  }, [id]);
+
   const isMobile = () =>
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
+
+  console.log("tournamentViewModel", toJS(tournamentViewModel));
 
   return (
     <Box sx={{ background: "white", p: 3, height: "100vh" }}>

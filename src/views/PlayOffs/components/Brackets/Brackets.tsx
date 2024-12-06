@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SelectInput } from "../../../../components/SelectInput";
 import Box from "@mui/material/Box";
 import { IPlayer } from "../../../../models/Tournament";
 import { ITournamentElement } from "../../../../helpers/getTournamentFields";
 import { Button } from "@mui/material";
+import html2canvas from "html2canvas"; // Install the library
+import { uploadIMGData } from "../../../../services/firebase";
 
 interface BracketProps {
   bracketId?: string;
@@ -108,7 +110,7 @@ const Bracket = ({
         })}
       </Box>
       {!hideWinner && (
-        <Box border="1px solid black" padding={1} width={250}>
+        <Box border="1px solid black" padding={1} width={250} marginLeft={15}>
           {isPlayer ? (
             players.find((p) => p.id === selectedPlayers[winner])?.name || " - "
           ) : (
@@ -142,6 +144,10 @@ interface BracketComponentProps {
     matches: { [key: string]: string[] },
     numberOfPlayers: number
   ) => void;
+  exportMatrix?: {
+    name: string;
+    emails: string[];
+  };
 }
 
 const BracketComponent = ({
@@ -151,6 +157,7 @@ const BracketComponent = ({
   numberOfPreviousPlayers,
   onSaveBracket,
   isPlayer,
+  exportMatrix,
 }: BracketComponentProps) => {
   const [numberOfPlayers, setNumberOfPlayers] = useState(
     numberOfPreviousPlayers || 4
@@ -284,6 +291,74 @@ const BracketComponent = ({
   const rounds = createTournamentRounds(generateBrackets(numberOfPlayers));
 
   let BRB = 0;
+
+  const exportRef = React.useRef<HTMLElement>(null);
+  const [exported, setExported] = React.useState(false);
+
+  useEffect(() => {
+    if (exported) {
+      handleDownloadImage();
+    }
+  }, [exported]);
+
+  const stylesToExport =
+    !exported && numberOfPlayers > 8
+      ? {
+          transform: "scale(0.5)",
+          transformOrigin: "top left",
+          marginBottom: "calc((0.5 - 1) * 100%)",
+        }
+      : {};
+
+  const handleDownloadImage = async () => {
+    if (exportRef.current) {
+      const elementToCapture = exportRef.current;
+
+      // **1. Calculate total width:**
+      const totalWidth = elementToCapture.scrollWidth;
+
+      // **2. Adjust canvas width:**
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = totalWidth;
+      canvas.height = elementToCapture.offsetHeight; // Maintain original height
+
+      // **3. Disable scroll and set width for capture:**
+      elementToCapture.style.overflow = "hidden";
+      elementToCapture.style.width = totalWidth + "px"; // Ensure full width capture
+
+      let left = 0;
+      while (left < totalWidth) {
+        elementToCapture.scrollLeft = left; // Scroll horizontally
+
+        // **4. Capture each section:**
+        const capturedImage = await html2canvas(elementToCapture, {
+          scale: 1, // Adjust scale as needed
+          useCORS: true,
+        });
+
+        context?.drawImage(capturedImage, left, 0);
+        left += capturedImage.width; // Update left position for next capture
+      }
+
+      // **5. Reset scroll and width:**
+      elementToCapture.style.overflow = "auto";
+      elementToCapture.style.width = "auto";
+
+      const dataURL = canvas.toDataURL("image/png"); // Change format as needed
+      const blob = await fetch(dataURL).then((res) => res.blob());
+      await uploadIMGData(
+        blob,
+        exportMatrix?.name || "bracket",
+        exportMatrix?.emails || []
+      );
+      setExported(false);
+      onSaveBracket(selectedPlayers, matches, numberOfPlayers);
+    } else {
+      console.error("Element for export not found");
+    }
+  };
+
   return (
     <Box>
       {!isPlayer && (
@@ -311,9 +386,11 @@ const BracketComponent = ({
             overflow: "auto",
             display: "flex",
           }}
+          ref={exportRef}
+          id="bracketToExport"
         >
           {rounds.map((round, roundIndex) => (
-            <Box key={roundIndex}>
+            <Box key={roundIndex} sx={stylesToExport}>
               <Box
                 display={"flex"}
                 flexDirection="column"
@@ -334,7 +411,7 @@ const BracketComponent = ({
                         handleOnSetMatches(keyM, value, previous);
                       }}
                       selectedPlayers={selectedPlayers}
-                      isPlayer={isPlayer}
+                      isPlayer={isPlayer || exported}
                     />
                   );
                 })}
@@ -343,7 +420,14 @@ const BracketComponent = ({
           ))}
         </Box>
         {!isPlayer && (
-          <>
+          <Box
+            sx={{
+              position: "fixed",
+              bottom: 0,
+              background: "white",
+              display: "flex",
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -351,10 +435,18 @@ const BracketComponent = ({
                 onSaveBracket(selectedPlayers, matches, numberOfPlayers);
               }}
             >
-              Save Playoffs
+              Save
             </Button>
             <Button
-              variant="contained"
+              variant="outlined"
+              color="primary"
+              size="large"
+              onClick={() => setExported(true)}
+            >
+              Save & Send Email
+            </Button>
+            <Button
+              variant="outlined"
               color="error"
               onClick={() => {
                 onSaveBracket({}, {}, 0);
@@ -362,7 +454,7 @@ const BracketComponent = ({
             >
               Reset
             </Button>
-          </>
+          </Box>
         )}
       </Box>
     </Box>

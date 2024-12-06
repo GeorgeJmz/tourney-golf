@@ -29,13 +29,12 @@ import { DownloadButton } from "../../components/DownloadButton";
 import { NavbarTitleContext } from "../../hooks/useNavContext";
 import { toJS } from "mobx";
 import { object } from "yup";
-import TeamBoard from "../TournamentStats/TeamBoard";
 
-interface ITournamentPageProps {
+interface IHistoryLeagueProps {
   user: UserViewModel;
 }
 
-const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
+const HistoryLeague: React.FC<IHistoryLeagueProps> = ({ user }) => {
   const userId = React.useMemo(() => user.getUserId(), []);
   const { setTitle } = React.useContext(NavbarTitleContext);
 
@@ -55,12 +54,11 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   const { id } = useParams();
 
   const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
+    () => user.historyTournaments.find((t) => t.id === id),
     []
   );
 
   const isDogfight = () => currentTournament?.tournamentType === "dogfight";
-  const isTeamPlay = () => currentTournament?.tournamentType === "teamplay";
 
   if (currentTournament && id && tournamentViewModel.author === "") {
     tournamentViewModel.setTournament(currentTournament);
@@ -132,7 +130,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           pt: 2,
         }}
       >
-        STANDINGS
+        STANDINGS - {currentTournament?.name}
       </Typography>
       <Box
         justifyContent="center"
@@ -140,39 +138,37 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
         display="flex"
         flexDirection={isMobile() ? "column" : "row"}
       >
-        {isTeamPlay() && <TeamBoard user={user} isSmall />}
-        {!isTeamPlay() &&
-          standings.map((player, index) => (
-            <List sx={{ minWidth: "200px", bgcolor: "background.paper" }}>
-              <ListItem key={player.tourneyName}>
-                <ListItemAvatar>
-                  <Avatar
-                    sx={(theme) => ({
-                      backgroundColor: theme.palette.primary.main,
-                    })}
+        {standings.map((player, index) => (
+          <List sx={{ minWidth: "200px", bgcolor: "background.paper" }}>
+            <ListItem key={player.tourneyName}>
+              <ListItemAvatar>
+                <Avatar
+                  sx={(theme) => ({
+                    backgroundColor: theme.palette.primary.main,
+                  })}
+                >
+                  {icons[index]}
+                </Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <p
+                    style={{
+                      fontSize: "1.5em",
+                      margin: 0,
+                      padding: 0,
+                    }}
                   >
-                    {icons[index]}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <p
-                      style={{
-                        fontSize: "1.5em",
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
-                      {player.tourneyName} -{" "}
-                      <strong>
-                        {isDogfight() ? player.netAverage : player.totalPoints}
-                      </strong>
-                    </p>
-                  }
-                />
-              </ListItem>
-            </List>
-          ))}
+                    {player.tourneyName} -{" "}
+                    <strong>
+                      {isDogfight() ? player.netAverage : player.totalPoints}
+                    </strong>
+                  </p>
+                }
+              />
+            </ListItem>
+          </List>
+        ))}
       </Box>
     </Box>
   );
@@ -189,27 +185,6 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
       }}
     >
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        {isActiveTournament ? (
-          <Link
-            to={
-              isDogfight()
-                ? `/play-tournament-dogfight/${id}`
-                : isTeamPlay()
-                ? `/play-tournament-team/${id}`
-                : `/play-tournament/${id}`
-            }
-          >
-            <Button variant="text" color="primary">
-              Play
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="text" disabled color="primary">
-            Play
-          </Button>
-        )}
-      </Box>
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
         <Link to={isDogfight() ? `/results-dogfight/${id}` : `/results/${id}`}>
           <Button
             variant="text"
@@ -220,74 +195,36 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           </Button>
         </Link>
       </Box>
-      {!isTeamPlay() && (
-        <Box flexBasis={isMobile() ? "50%" : "15%"}>
-          <Link
-            to={
-              isDogfight()
-                ? `/stats-tournament-dogfight/${id}`
-                : `/stats-tournament/${id}`
-            }
-          >
-            <Button
-              variant="text"
-              color="primary"
-              onClick={() => console.log("Ver estadísticas")}
-            >
-              Board & Stats
-            </Button>
-          </Link>
-        </Box>
-      )}
-      {!isDogfight() &&
-        !isTeamPlay() &&
-        currentTournament?.playOffsDetail &&
-        currentTournament?.playOffsDetail?.players !== 0 && (
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/playoffs-tournament/${id}`}>
-              <Button
-                variant="text"
-                color="primary"
-                onClick={() => console.log("Ver estadísticas")}
-              >
-                Playoffs
-              </Button>
-            </Link>
-          </Box>
-        )}
-      {isTeamPlay() && (
-        <>
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/team-board/${id}`}>
-              <Button
-                variant="text"
-                color="primary"
-                onClick={() => console.log("Ver estadísticas")}
-              >
-                Team Board
-              </Button>
-            </Link>
-          </Box>
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/player-board/${id}`}>
-              <Button variant="text" color="primary">
-                Player Board
-              </Button>
-            </Link>
-          </Box>
-        </>
-      )}
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Link to={`/rules-tournament/${id}`}>
+      <Box flexBasis={isMobile() ? "50%" : "15%"}>
+        <Link
+          to={
+            isDogfight()
+              ? `/stats-tournament-dogfight/${id}`
+              : `/stats-tournament/${id}`
+          }
+        >
           <Button
             variant="text"
             color="primary"
             onClick={() => console.log("Ver estadísticas")}
           >
-            Rules
+            Board & Stats
           </Button>
         </Link>
       </Box>
+      {!isDogfight() && (
+        <Box flexBasis={isMobile() ? "50%" : "10%"}>
+          <Link to={`/playoffs-tournament/${id}`}>
+            <Button
+              variant="text"
+              color="primary"
+              onClick={() => console.log("Ver estadísticas")}
+            >
+              Playoffs
+            </Button>
+          </Link>
+        </Box>
+      )}
     </Box>
   );
 
@@ -298,4 +235,4 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   );
 };
 
-export default observer(TournamentPage);
+export default observer(HistoryLeague);

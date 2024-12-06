@@ -36,13 +36,14 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { toJS } from "mobx";
+import { set, toJS } from "mobx";
 import { IPlayer } from "../../models/Tournament";
 import { getMessages } from "../../helpers/getMessages";
 import { toast } from "react-toastify";
 import { Messages } from "../../helpers/messages";
 import RoundReviewDogfight from "../../components/RoundReviewDogfight";
 import PLayOffs from "../PlayOffs/PlayOffs";
+import { TextInput } from "../../components/TextInput";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -100,6 +101,8 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   const userId = React.useMemo(() => user.getUserId(), []);
 
   const [value, setValue] = React.useState(0);
+  const [newLeagueName, setNewLeagueName] = React.useState("");
+  const [newChampion, setNewChampion] = React.useState("");
   const [userStats, setUserStats] = React.useState("");
   const [rowChanged, setRowChanged] = React.useState<Array<string>>([]);
   const navigate = useNavigate();
@@ -122,6 +125,8 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   }
   if (currentTournament && tournamentViewModel.author === "") {
     tournamentViewModel.setTournament(currentTournament);
+    setNewLeagueName(currentTournament.name);
+    setNewChampion(currentTournament.champion || "");
     tournamentViewModel.setAuthor(userId);
   }
 
@@ -236,6 +241,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
       )
       .sort((a, b) => (a?.round ?? 0) - (b?.round ?? 0));
   };
+
+  const isTeamPlay = tournamentType === "teamplay";
+
+  const fieldText = isTeamPlay ? "Champion Team Name" : "Champion's Name";
+  const finishLeagueText = isTeamPlay
+    ? "All players will see the league taken off from League Action and find Results and Leaderboards in their League History as view only."
+    : "All players will see the league taken off from League Action and find Results, Leaderboard and Playoff Bracket in their League History as view only.";
 
   return (
     <div>
@@ -426,8 +438,8 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                       {tournamentViewModel.leagueResults
                         .filter(
                           (result) =>
-                            result.matchResults[0].idPlayer === userStats ||
-                            result.matchResults[1].idPlayer === userStats
+                            result.matchResults[0]?.idPlayer === userStats ||
+                            result.matchResults[1]?.idPlayer === userStats
                         )
                         .sort((a, b) => differenceDate(a.date, b.date))
                         .map((match) => (
@@ -441,9 +453,9 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                 name="id"
                                 sx={{ display: "none" }}
                                 defaultValue={
-                                  match.matchResults[0].idPlayer +
+                                  match.matchResults[0]?.idPlayer +
                                   "-" +
-                                  match.matchResults[1].idPlayer
+                                  match.matchResults[1]?.idPlayer
                                 }
                               />{" "}
                               {convertMomentDate(match.date)}{" "}
@@ -451,8 +463,8 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
-                              {match.matchResults[0].playerName} <br />{" "}
-                              {match.matchResults[1].playerName}
+                              {match.matchResults[0]?.playerName} <br />{" "}
+                              {match.matchResults[1]?.playerName}
                             </TableCell>
                             {!hideMatch && (
                               <TableCell
@@ -463,13 +475,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   type="text"
                                   name="matchpoints1"
                                   defaultValue={
-                                    match.matchResults[0].matchPoints
+                                    match.matchResults[0]?.matchPoints
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -479,13 +491,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   type="text"
                                   name="matchpoints2"
                                   defaultValue={
-                                    match.matchResults[1].matchPoints
+                                    match.matchResults[1]?.matchPoints
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -504,9 +516,9 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -516,13 +528,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   type="text"
                                   name="medalPoints2"
                                   defaultValue={
-                                    match.matchResults[1].medalPoints
+                                    match.matchResults[1]?.medalPoints
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -537,13 +549,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   type="text"
                                   name="teampoints1"
                                   defaultValue={
-                                    match.matchResults[0].teamPoints
+                                    match.matchResults[0]?.teamPoints
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -553,13 +565,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                   type="text"
                                   name="teampoints2"
                                   defaultValue={
-                                    match.matchResults[1].teamPoints
+                                    match.matchResults[1]?.teamPoints
                                   }
                                   onChange={() =>
                                     handleUpdateRow(
-                                      match.matchResults[0].idPlayer +
+                                      match.matchResults[0]?.idPlayer +
                                         "-" +
-                                        match.matchResults[1].idPlayer
+                                        match.matchResults[1]?.idPlayer
                                     )
                                   }
                                 />{" "}
@@ -569,33 +581,33 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[0].gross}
+                                {match.matchResults[0]?.gross}
                               </p>
                               <br />{" "}
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[1].gross}
+                                {match.matchResults[1]?.gross}
                               </p>
                             </TableCell>
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[0].hcp}
+                                {match.matchResults[0]?.hcp}
                               </p>
                               <br />{" "}
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[1].hcp}
+                                {match.matchResults[1]?.hcp}
                               </p>
                             </TableCell>
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[0].score}
+                                {match.matchResults[0]?.score}
                               </p>
                               <br />{" "}
                               <p style={{ margin: 0 }}>
-                                {match.matchResults[1].score}
+                                {match.matchResults[1]?.score}
                               </p>
                             </TableCell>
                             <TableCell
@@ -681,19 +693,59 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
           </TabPanel>
           <TabPanel value={value} index={4}>
             <p>
-              Click here if <strong>{currentTournament?.name}</strong> has
-              concluded{" "}
+              Once
+              <strong> {currentTournament?.name}</strong> has concluded, confirm
+              the following information:
             </p>
             <p>
-              Scores and stats will be saved and set as view-only in
-              participant’s League History
+              <TextInput
+                inputElement={{
+                  name: "name",
+                  placeholder:
+                    "Confirm League's Name as it will be saved in League History",
+                  input: "text",
+                  size: {
+                    xs: 12,
+                    md: 12,
+                    lg: 6,
+                  },
+                }}
+                isError={false}
+                error=""
+                onChangeHandler={(e) => setNewLeagueName(e.target.value)}
+                isDisabled={false}
+                value={newLeagueName}
+              />
             </p>
+            <p>
+              <TextInput
+                inputElement={{
+                  name: "champion",
+                  placeholder: fieldText,
+                  input: "text",
+                  size: {
+                    xs: 12,
+                    md: 12,
+                    lg: 6,
+                  },
+                }}
+                isError={false}
+                error=""
+                onChangeHandler={(e) => setNewChampion(e.target.value)}
+                isDisabled={false}
+                value={newChampion}
+              />
+            </p>
+            <p>This league will be permanently removed from your Admin tab.</p>
+            <p>{finishLeagueText}</p>
             <Button
               variant="contained"
               type="button"
-              onClick={() => sendEmail()}
+              onClick={() =>
+                tournamentViewModel.finishLeague(newLeagueName, newChampion)
+              }
             >
-              Finish League
+              Save & Finish League
             </Button>
             <Box sx={{ marginTop: "100px" }}>
               <p>

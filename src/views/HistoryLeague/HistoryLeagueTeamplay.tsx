@@ -31,11 +31,13 @@ import { toJS } from "mobx";
 import { object } from "yup";
 import TeamBoard from "../TournamentStats/TeamBoard";
 
-interface ITournamentPageProps {
+interface IHistoryLeagueTeamPlayProps {
   user: UserViewModel;
 }
 
-const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
+const HistoryLeagueTeamPlay: React.FC<IHistoryLeagueTeamPlayProps> = ({
+  user,
+}) => {
   const userId = React.useMemo(() => user.getUserId(), []);
   const { setTitle } = React.useContext(NavbarTitleContext);
 
@@ -55,7 +57,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   const { id } = useParams();
 
   const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
+    () => user.historyTournaments.find((t) => t.id === id),
     []
   );
 
@@ -67,7 +69,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     tournamentViewModel.setTournamentId(id);
     tournamentViewModel.setAuthor(userId);
     tournamentViewModel.getStatsPlayersByTournament();
-    console.log("TournamentPage currentTournament", currentTournament);
+    console.log("HistoryLeagueTeamPlay currentTournament", currentTournament);
   }
 
   React.useEffect(() => {
@@ -189,27 +191,6 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
       }}
     >
       <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        {isActiveTournament ? (
-          <Link
-            to={
-              isDogfight()
-                ? `/play-tournament-dogfight/${id}`
-                : isTeamPlay()
-                ? `/play-tournament-team/${id}`
-                : `/play-tournament/${id}`
-            }
-          >
-            <Button variant="text" color="primary">
-              Play
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="text" disabled color="primary">
-            Play
-          </Button>
-        )}
-      </Box>
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
         <Link to={isDogfight() ? `/results-dogfight/${id}` : `/results/${id}`}>
           <Button
             variant="text"
@@ -277,17 +258,6 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
           </Box>
         </>
       )}
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Link to={`/rules-tournament/${id}`}>
-          <Button
-            variant="text"
-            color="primary"
-            onClick={() => console.log("Ver estadísticas")}
-          >
-            Rules
-          </Button>
-        </Link>
-      </Box>
     </Box>
   );
 
@@ -298,4 +268,4 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   );
 };
 
-export default observer(TournamentPage);
+export default observer(HistoryLeagueTeamPlay);

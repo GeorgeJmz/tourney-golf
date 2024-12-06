@@ -4,6 +4,7 @@ import type TournamentViewModel from "../../viewModels/TournamentViewModel";
 import BracketComponent from "./components/Brackets/Brackets";
 import { toJS } from "mobx";
 import { useNavigate } from "react-router-dom";
+import { IPlayer } from "../../models/Tournament";
 
 interface PLayOffsProps {
   tournamentViewModel: TournamentViewModel;
@@ -14,6 +15,14 @@ const PLayOffs: React.FC<PLayOffsProps> = ({
   tournamentViewModel,
   isPlayer,
 }) => {
+  const playersNames = tournamentViewModel.matrizValues.names.map((value) => {
+    const playersResults = Object.keys(value.results).map((key) => ({
+      name: value.results[key] || "",
+      id: key || "",
+    }));
+    return playersResults;
+  });
+
   const players = toJS(tournamentViewModel.tournament.playersList);
   const details = toJS(tournamentViewModel.tournament.playOffsDetail);
   const navigate = useNavigate();
@@ -38,12 +47,16 @@ const PLayOffs: React.FC<PLayOffsProps> = ({
   return (
     <Box alignContent="center">
       <BracketComponent
-        players={players}
+        players={playersNames.flat() as Partial<IPlayer>[]}
         numberOfPreviousPlayers={details.players}
         previousPlayers={details.brackets}
         previousMatches={details.matches}
         onSaveBracket={onSaveBracket}
         isPlayer={isPlayer}
+        exportMatrix={{
+          name: tournamentViewModel.tournament.name,
+          emails: players.map((player) => player.email || "") || [],
+        }}
       />
     </Box>
   );

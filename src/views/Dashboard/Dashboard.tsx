@@ -30,7 +30,7 @@ import CardContent from "@mui/material/CardContent";
 import { Button, CardActionArea, CardMedia } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import moment from "moment-timezone";
-import { convertDate } from "../../helpers/convertDate";
+import { convertDate, getYearDayJS } from "../../helpers/convertDate";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
@@ -42,6 +42,8 @@ interface IhistoryLeague {
   champion: string;
   year: number;
   name: string;
+  id?: string;
+  isTeamplay?: boolean;
 }
 interface IIdLeague {
   [key: string]: IhistoryLeague[];
@@ -60,6 +62,7 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
       user.getTournaments();
       //user.getMatches();
       user.getActiveTournaments();
+      user.getHistoryTournaments();
     }
   }, []);
 
@@ -217,15 +220,27 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
     } as IIdLeague;
 
     let empty: IhistoryLeague[] = [];
-    user.activeTournaments.forEach((active) => {
+    const gorMull = [...user.activeTournaments, ...user.historyTournaments];
+    gorMull.forEach((active) => {
       if (mapLeagues[active.id || ""]) {
         empty = [...empty, ...mapLeagues[active.id || ""]];
       }
     });
 
+    empty = [
+      ...user.historyTournaments.map((tournament) => {
+        return {
+          champion: tournament.champion || "",
+          year: tournament.startDate ? getYearDayJS(tournament.startDate) : 0,
+          name: tournament.name,
+          id: tournament.id,
+          isTeamplay: tournament.tournamentType === "teamplay",
+        } as IhistoryLeague;
+      }),
+      ...empty,
+    ];
     setHistoryLeague(empty);
   }, [user.activeTournaments]);
-
   return (
     <div>
       {user && (
@@ -289,35 +304,37 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             League Action
           </Typography>
         </Grid>
-        {user.activeTournaments.map((tournament) => (
-          <Grid item xs={6} md={4} lg={2} key={tournament.name}>
-            <Link to={`/tournament/${tournament.id}`}>
-              <Card>
-                <CardActionArea>
-                  <CardContent
-                    sx={{
-                      textAlign: "center",
-                      lineHeight: "0.5",
-                      minHeight: "80px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="div"
-                      sx={{ lineHeight: "1" }}
+        {user.activeTournaments
+          .filter((tournament) => tournament.status !== "closed")
+          .map((tournament) => (
+            <Grid item xs={6} md={4} lg={2} key={tournament.name}>
+              <Link to={`/tournament/${tournament.id}`}>
+                <Card>
+                  <CardActionArea>
+                    <CardContent
+                      sx={{
+                        textAlign: "center",
+                        lineHeight: "0.5",
+                        minHeight: "80px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      {tournament.name}
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Link>
-          </Grid>
-        ))}
+                      <Typography
+                        gutterBottom
+                        variant="h6"
+                        component="div"
+                        sx={{ lineHeight: "1" }}
+                      >
+                        {tournament.name}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Link>
+            </Grid>
+          ))}
       </Grid>
       {/* <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={12}>
@@ -342,26 +359,57 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
               <Grid container spacing={2} sx={{ mt: 1 }}>
                 {historyLeague.map((league) => (
                   <Grid item xs={6} md={4} lg={2} key={league.name}>
-                    <Card>
-                      <CardContent>
-                        <Typography
-                          gutterBottom
-                          variant="h6"
-                          component="div"
-                          sx={{
-                            fontSize: "1rem",
-                          }}
-                        >
-                          {league.champion}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Champion
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {league.name} {league.year}
-                        </Typography>
-                      </CardContent>
-                    </Card>
+                    {league.id ? (
+                      <Link
+                        to={
+                          league.isTeamplay
+                            ? `/history-league-teamplay/${league.id}`
+                            : `/history-league/${league.id}`
+                        }
+                      >
+                        <Card>
+                          <CardContent>
+                            <Typography
+                              gutterBottom
+                              variant="h6"
+                              component="div"
+                              sx={{
+                                fontSize: "1rem",
+                              }}
+                            >
+                              {league.champion}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Champion
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {league.name}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ) : (
+                      <Card>
+                        <CardContent>
+                          <Typography
+                            gutterBottom
+                            variant="h6"
+                            component="div"
+                            sx={{
+                              fontSize: "1rem",
+                            }}
+                          >
+                            {league.champion}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Champion
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {league.name} - {league.year}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    )}
                   </Grid>
                 ))}
               </Grid>
@@ -421,24 +469,28 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             </Button>
           </Link>
         </Grid>
-        {user.tournaments.map((tournament) => (
-          <Grid item xs={6} md={4} lg={2} key={tournament.name}>
-            <Link to={`/manage-tournament/${tournament.id}`}>
-              <Card>
-                <CardActionArea>
-                  <CardContent sx={{ textAlign: "center", lineHeight: "0.5" }}>
-                    <Typography gutterBottom variant="h6" component="div">
-                      {tournament.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {tournament?.playersList?.length || 0} Players
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Link>
-          </Grid>
-        ))}
+        {user.tournaments
+          .filter((t) => t.status !== "closed")
+          .map((tournament) => (
+            <Grid item xs={6} md={4} lg={2} key={tournament.name}>
+              <Link to={`/manage-tournament/${tournament.id}`}>
+                <Card>
+                  <CardActionArea>
+                    <CardContent
+                      sx={{ textAlign: "center", lineHeight: "0.5" }}
+                    >
+                      <Typography gutterBottom variant="h6" component="div">
+                        {tournament.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {tournament?.playersList?.length || 0} Players
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Link>
+            </Grid>
+          ))}
       </Grid>
 
       {/* <Box sx={{ "& > :not(style)": { m: 1 } }}>

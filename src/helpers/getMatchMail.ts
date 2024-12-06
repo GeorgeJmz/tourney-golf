@@ -111,8 +111,11 @@ export const getBodyMail = (
 
   const renderPlayerRow = (player: string, rowIndex: number) => {
     const lengthRows = hideTeam ? 23 : 24;
+    const playerName = player.split(" ");
     return `<tr style="border: 1px solid;"><td style="writing-mode: vertical-lr; text-orientation: mixed; ">${
-      player.split(" ")[0]
+      playerName[0] !== "undefined" && playerName[0] !== ""
+        ? playerName[0]
+        : playerName[1] || playerName
     }</td>${Array.from(
       { length: lengthRows },
       (_, index) =>

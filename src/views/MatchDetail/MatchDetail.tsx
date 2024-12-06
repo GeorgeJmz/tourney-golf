@@ -37,10 +37,12 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
   const [hideMatch, setHideMatch] = React.useState<boolean>(false);
   const [hideTeam, setHideTeam] = React.useState<boolean>(false);
   const [hideMedal, setHideMedal] = React.useState<boolean>(false);
+  const [hideWinner, setHideWinner] = React.useState<boolean>(false);
 
   const getScores = async () => {
     const n = id?.split("-") || []; // "oRkIhspefwzCGhdNQJZ6-match-false-team-true-medal-true".split("-");
     const npl = [] as string[];
+    const nparam = [] as string[];
     let aux = true;
     if (n.length > 0) {
       n.forEach((element) => {
@@ -49,13 +51,17 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
         }
         if (aux) {
           npl.push(element);
+        } else {
+          nparam.push(element);
         }
       });
     }
     const players = npl;
-    const m = id?.split("-")[3] === "true" ? false : true;
-    const team = id?.split("-")[5] === "true" ? false : true;
-    const medal = id?.split("-")[7] === "true" ? false : true;
+    const params = nparam;
+    const m = params[1] === "true" ? false : true;
+    const team = params[3] === "true" ? false : true;
+    const medal = params[5] === "true" ? false : true;
+    const hideW = params[7] === "true" ? false : true;
     const score = [];
     for (const player of players) {
       const scores = await getScoresByID(player || "");
@@ -75,6 +81,7 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
     setHideMatch(m);
     setHideMedal(medal);
     setHideTeam(team);
+    setHideWinner(hideW);
     setTimeout(() => {
       setMatchId("sadasdasdsa");
     }, 500);
@@ -104,6 +111,7 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
             hideMatch={hideMatch}
             hideTeam={hideTeam}
             hideMedal={hideMedal}
+            hideWinner={hideWinner}
           />
         )}
       </Box>

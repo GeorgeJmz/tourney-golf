@@ -30,7 +30,7 @@ interface SendInvitationsProps {
   validationSchema: yup.ObjectSchema<IStep2InputElement>;
   onSubmit: (email: string, name: string) => void;
   onEdit: (email: string, name: string, index: number) => void;
-  onDelete: (index: number) => void;
+  onDelete: (index: number, email: string) => void;
 }
 
 export const SendInvitations: React.FC<SendInvitationsProps> = ({
@@ -52,7 +52,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       focusInput();
-      onSubmit(values.email, values.name);
+      onSubmit(values.email, values.name.trim());
       formik.setValues(step2Fields); // Reset the form values
     },
   });
@@ -211,7 +211,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
                           </IconButton> */}
                           <IconButton
                             aria-label="delete"
-                            onClick={() => onDelete(index)}
+                            onClick={() => onDelete(index, email || "")}
                           >
                             <DeleteIcon />
                           </IconButton>

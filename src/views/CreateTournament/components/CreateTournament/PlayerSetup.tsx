@@ -30,8 +30,9 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
     tournamentViewModel.editEmailList(email, name, index);
   };
 
-  const onRemoveHandler = (key: number) => {
+  const onRemoveHandler = (key: number, email: string) => {
     tournamentViewModel.removeEmailFromList(key);
+    tournamentViewModel.removePlayerFromTournament(email);
   };
 
   const onNextHandler = () => {

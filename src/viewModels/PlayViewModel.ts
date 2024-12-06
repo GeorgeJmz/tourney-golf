@@ -16,6 +16,7 @@ import {
   getMatchesByTournamentIdAndRound,
   getPlayoffsMatchesByTournamentId,
 } from "../services/firebase";
+import { convertDate, convertMomentDate } from "../helpers/convertDate";
 
 export interface IGolfCourse {
   course: GolfCourse;
@@ -87,10 +88,13 @@ class PlayViewModel {
 
   setCurrentStep(step: number): void {
     this.currentStep = step;
+    console.log(this.currentStep, "newMatch currentStep");
     if (
       this.currentStep === 2 &&
-      this.currentTournament.tournamentType !== "dogfight"
+      this.currentTournament.tournamentType !== "dogfight" &&
+      this.currentTournament.tournamentType !== "teamplay"
     ) {
+      console.log(this.allPlayers, "no dogfight no teamplay");
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
       players.forEach((player) => {
@@ -114,8 +118,11 @@ class PlayViewModel {
     }
     if (
       this.currentStep === 2 &&
-      this.currentTournament.tournamentType === "dogfight"
+      (this.currentTournament.tournamentType === "dogfight" ||
+        this.currentTournament.tournamentType === "teamplay")
     ) {
+      console.log(this.allPlayers, "dogfight or teamplay  ");
+      console.log(toJS(this.matches), "matches");
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
       const newMatch = new MatchViewModel();
@@ -130,6 +137,7 @@ class PlayViewModel {
       newMatch.tournamentId = this.tournamentId;
       newMatch.currentTournament = this.currentTournament;
       newMatch.setDifferenceHPDogfight();
+      console.log(toJS(newMatch), "newMatch");
       this.matches.push(newMatch);
       console.log(toJS(this.currentTournament), "currentTournament");
     }
@@ -146,7 +154,10 @@ class PlayViewModel {
   }
 
   setScoreModal(scores: Array<number>, hole: number): void {
-    if (this.currentTournament.tournamentType !== "dogfight") {
+    if (
+      this.currentTournament.tournamentType !== "dogfight" &&
+      this.currentTournament.tournamentType !== "teamplay"
+    ) {
       scores.forEach((score, key) => {
         this.allPlayers[key].setHoleScore(hole, score);
       });
@@ -159,7 +170,10 @@ class PlayViewModel {
       });
       //this.setModal(false);
     }
-    if (this.currentTournament.tournamentType === "dogfight") {
+    if (
+      this.currentTournament.tournamentType === "dogfight" ||
+      this.currentTournament.tournamentType === "teamplay"
+    ) {
       scores.forEach((score, key) => {
         this.allPlayers[key].setHoleScore(hole, score);
       });
@@ -477,6 +491,24 @@ class PlayViewModel {
     }
     toast.dismiss(cuToast);
     onFinish();
+  }
+
+  /// TeamPlay
+  async checkIfCanPlayToday(date: string, player: string): Promise<void> {
+    const matches = await getMatchesByTournamentId(this.tournamentId);
+    console.log(matches, "matches");
+    const matchesOfToday = matches.filter((match) => {
+      const dateMatch = convertMomentDate(match.date);
+      const dateToday = convertDate(date, "MM/DD/YYYY");
+
+      console.log(dateMatch, dateToday, "dateMatch, dateToday");
+      return dateMatch === dateToday;
+    });
+    const playersOfToday = matchesOfToday.flatMap((match) => {
+      return match.matchResults.map((player) => player.idPlayer);
+    });
+    console.log(playersOfToday, "playersOfToday");
+    this.emailListPlayedRound = playersOfToday;
   }
 }
 

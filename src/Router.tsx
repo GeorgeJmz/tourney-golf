@@ -25,6 +25,11 @@ import CreateTournament from "./views/CreateTournament/CreateTournament";
 import Rules from "./views/Rules/Rules";
 import Dogfight from "./views/Play/Dogfight";
 import PlayOffsPlayer from "./views/PlayOffs/PlayOffsPlayer";
+import HistoryLeague from "./views/HistoryLeague/HistoryLeague";
+import Teamplay from "./views/Play/Teamplay";
+import TeamBoard from "./views/TournamentStats/TeamBoard";
+import PlayerBoard from "./views/TournamentStats/PlayerBoard";
+import HistoryLeagueTeamplay from "./views/HistoryLeague/HistoryLeagueTeamplay";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -75,7 +80,22 @@ function Router(): JSX.Element {
             </RequireAuth>
           ),
         },
-
+        {
+          path: "/history-league/:id",
+          element: (
+            <RequireAuth user={user}>
+              <HistoryLeague user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/history-league-teamplay/:id",
+          element: (
+            <RequireAuth user={user}>
+              <HistoryLeagueTeamplay user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
         {
           path: "/tournament/:id",
           element: (
@@ -133,10 +153,34 @@ function Router(): JSX.Element {
           ),
         },
         {
+          path: "/play-tournament-team/:id",
+          element: (
+            <RequireAuth user={user}>
+              <Teamplay user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
           path: "/results/:id",
           element: (
             <RequireAuth user={user}>
               <TournamentResults user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/team-board/:id",
+          element: (
+            <RequireAuth user={user}>
+              <TeamBoard user={userViewModel} />
+            </RequireAuth>
+          ),
+        },
+        {
+          path: "/player-board/:id",
+          element: (
+            <RequireAuth user={user}>
+              <PlayerBoard user={userViewModel} />
             </RequireAuth>
           ),
         },

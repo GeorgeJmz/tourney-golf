@@ -33,6 +33,7 @@ import HorizontalScoreCard from "../Play/components/HorizontalScoreCard";
 import MatchViewModel from "../../viewModels/MatchViewModel";
 import { set, toJS } from "mobx";
 import Matriz from "../../components/Matriz";
+import { IMatch } from "../../models/Match";
 
 interface ITournamentStatsProps {
   user: UserViewModel;
@@ -49,7 +50,9 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   );
   const { id } = useParams();
   const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
+    () =>
+      user.activeTournaments.find((t) => t.id === id) ||
+      user.historyTournaments.find((t) => t.id === id),
     []
   );
 
@@ -115,9 +118,19 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
   const styleTable = {
     width: isMobile() ? "100%" : "48%",
   };
+  const isTeamPlay = tournamentType === "teamplay";
   const hideTeam = tournamentType === "league";
-  const hideMatch = playType === "strokePlay";
+  const hideMatch = playType === "strokePlay" || isTeamPlay;
   const hideMedal = playType === "matchPlay";
+
+  const getLink = (match: IMatch) => {
+    const scoresId = match.scoresId.join("-");
+    return `/match/${scoresId}-match-${!hideMatch ? "true" : "false"}-team-${
+      !hideTeam ? "true" : "false"
+    }-medal-${!hideMedal ? "true" : "false"}-winner-${
+      isTeamPlay ? "false" : "true"
+    }`;
+  };
 
   // const matrizValues = {
   //   leagueName: "League Name",
@@ -257,7 +270,9 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                         {" "}
                         {convertMomentDate(match.date)}{" "}
                       </TableCell>
-                      <TableCell sx={headerStyles}>Match</TableCell>
+                      {!isTeamPlay && (
+                        <TableCell sx={headerStyles}>Match</TableCell>
+                      )}
                       <TableCell sx={headerStyles}>Gross</TableCell>
                       <TableCell sx={headerStyles}>HDCP</TableCell>
                       <TableCell sx={headerStyles}>Net</TableCell>
@@ -275,25 +290,27 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                           <TableCell sx={nameStyles}>
                             {players.playerName}
                           </TableCell>
-                          <TableCell sx={cellStyles}>
-                            {!isLMEDAL &&
-                              !isLTMEDAL &&
-                              (match.matchResults[0].isWinnerMatch &&
-                              match.matchResults[1].isWinnerMatch
-                                ? "Tie Match"
-                                : players.isWinnerMatch
-                                ? "Winner Match"
-                                : "")}
-                            <br />
-                            {!isLTMATCH &&
-                              !isLMATCH &&
-                              (match.matchResults[0].isWinnerMedalPlay &&
-                              match.matchResults[1].isWinnerMedalPlay
-                                ? "Tie Medal"
-                                : players.isWinnerMedalPlay
-                                ? "Winner Medal"
-                                : "")}
-                          </TableCell>
+                          {!isTeamPlay && (
+                            <TableCell sx={cellStyles}>
+                              {!isLMEDAL &&
+                                !isLTMEDAL &&
+                                (match.matchResults[0].isWinnerMatch &&
+                                match.matchResults[1].isWinnerMatch
+                                  ? "Tie Match"
+                                  : players.isWinnerMatch
+                                  ? "Winner Match"
+                                  : "")}
+                              <br />
+                              {!isLTMATCH &&
+                                !isLMATCH &&
+                                (match.matchResults[0].isWinnerMedalPlay &&
+                                match.matchResults[1].isWinnerMedalPlay
+                                  ? "Tie Medal"
+                                  : players.isWinnerMedalPlay
+                                  ? "Winner Medal"
+                                  : "")}
+                            </TableCell>
+                          )}
                           <TableCell sx={cellStyles}>{players.gross}</TableCell>
                           <TableCell sx={cellStyles}>{players.hcp}</TableCell>
                           <TableCell sx={cellStyles}>{players.score}</TableCell>
@@ -308,13 +325,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                         <TableCell sx={{ textAlign: "center" }}></TableCell>
                         <TableCell sx={{ textAlign: "center" }}>{}</TableCell>
                         <TableCell sx={{ textAlign: "center" }} colSpan={3}>
-                          <Link
-                            to={`/match/${match.scoresId[0]}-${
-                              match.scoresId[1]
-                            }-match-${!hideMatch ? "true" : "false"}-team-${
-                              !hideTeam ? "true" : "false"
-                            }-medal-${!hideMedal ? "true" : "false"}`}
-                          >
+                          <Link to={getLink(match)}>
                             <Button variant="text" color="primary">
                               View Scorecard
                             </Button>
@@ -426,13 +437,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                           <TableCell sx={{ textAlign: "center" }}></TableCell>
                           <TableCell sx={{ textAlign: "center" }}>{}</TableCell>
                           <TableCell sx={{ textAlign: "center" }} colSpan={3}>
-                            <Link
-                              to={`/match/${match.scoresId[0]}-${
-                                match.scoresId[1]
-                              }-match-${!hideMatch ? "true" : "false"}-team-${
-                                !hideTeam ? "true" : "false"
-                              }-medal-${!hideMedal ? "true" : "false"}`}
-                            >
+                            <Link to={getLink(match)}>
                               <Button variant="text" color="primary">
                                 View Scorecard
                               </Button>
