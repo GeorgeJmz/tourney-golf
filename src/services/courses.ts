@@ -498,6 +498,19 @@ export const getCourses = (): GolfCoursesResponse => ({
         },
       ],
     },
+    {
+      id: "TheVineyard",
+      name: "The Vineyard",
+      address: "925 San Pasqual Rd, Escondido, CA 92025, Estados Unidos",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueTheVineyard",
+          color: "Blue",
+          length: "6247",
+        },
+      ],
+    },
   ],
 });
 
@@ -1120,6 +1133,17 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [2924, 36],
       out: [2591, 35],
       total: [5515, 71],
+    },
+    BlueTheVineyard: {
+      distance: [
+        396, 346, 121, 387, 377, 149, 276, 398, 488, 371, 435, 152, 454, 386,
+        531, 432, 154, 394,
+      ],
+      hcp: [2, 6, 16, 10, 12, 14, 18, 4, 8, 7, 3, 15, 5, 11, 13, 1, 17, 9],
+      par: [4, 4, 3, 4, 4, 3, 4, 4, 5, 4, 4, 3, 4, 4, 5, 4, 3, 4],
+      in: [3309, 35],
+      out: [2938, 35],
+      total: [6247, 70],
     },
   };
   const course = details[id];

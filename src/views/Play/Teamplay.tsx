@@ -17,15 +17,18 @@ import { ScoreTable } from "./components/ScoreTable";
 import HorizontalScoreCard from "./components/HorizontalScoreCard";
 import { useNavigate, useParams } from "react-router-dom";
 import type { IUser } from "../../models/User";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { getPlayersByTournamentId } from "../../services/firebase";
 import { ITournamentPlayer } from "../../models/Player";
 import { ScoreBeforeLeave } from "./components/ScoreBeforeLeave";
 import { LeaveModal } from "./components/LeaveModal";
 import { useBlocker } from "react-router-dom";
 import { toJS } from "mobx";
+import { convertDate } from "../../helpers/convertDate";
+import { DateInput } from "../../components/DateInput";
+import dayjs from "dayjs";
 
-interface IPlayProps {
+interface IPlayTeamProps {
   user: UserViewModel;
 }
 
@@ -51,7 +54,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const Play: React.FC<IPlayProps> = ({ user }) => {
+const Teamplay: React.FC<IPlayTeamProps> = ({ user }) => {
   const playViewModel = React.useMemo(() => new PlayViewModel(), []);
   const [currentPlayer, setCurrentPlayer] = React.useState<ITournamentPlayer>();
   const navigate = useNavigate();
@@ -61,6 +64,79 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     []
   );
 
+  const currentDate = convertDate(
+    new Date().toDateString() || "",
+    "MM/DD/YYYY"
+  );
+
+  const [fakeDate, setFakeDate] = React.useState(currentDate);
+
+  /////////////////////////////  TEAMPLAY
+
+  let isInStage = false;
+  currentTournament?.stagesDates?.forEach((date) => {
+    const dateConvertedStart = convertDate(date.start, "MM/DD/YYYY");
+    const dateConvertedEnd = convertDate(date.end, "MM/DD/YYYY");
+    const dateConvertedFake = convertDate(fakeDate || "", "MM/DD/YYYY");
+    if (
+      dateConvertedFake >= dateConvertedStart &&
+      dateConvertedFake <= dateConvertedEnd
+    ) {
+      isInStage = true;
+    }
+  });
+
+  const stagesDates = currentTournament?.stagesDates?.map(
+    (date) =>
+      `${convertDate(date.start, "MM/DD/YYYY")} - ${convertDate(
+        date.end,
+        "MM/DD/YYYY"
+      )}`
+  );
+
+  let isChampionshipRound = false;
+  currentTournament?.championshipRound &&
+    currentTournament?.championshipDate &&
+    (isChampionshipRound =
+      convertDate(currentTournament?.championshipDate, "MM/DD/YYYY") ===
+      convertDate(fakeDate || "", "MM/DD/YYYY"));
+
+  const canPlayToday = playViewModel.emailListPlayedRound.includes(
+    user.user.email
+  );
+  console.log("canPlayToday -", canPlayToday);
+
+  const displayGame = (isInStage || isChampionshipRound) && !canPlayToday;
+
+  console.log("displayGame", displayGame);
+
+  /////////////////////////////
+
+  const roundDates = currentTournament?.roundDates?.map((date) =>
+    convertDate(date, "MM/DD/YYYY")
+  );
+  const champDate = currentTournament?.championshipRound
+    ? [convertDate(currentTournament?.championshipDate || "", "MM/DD/YYYY")]
+    : [];
+
+  const currentRound = roundDates?.includes(
+    convertDate(fakeDate || "", "MM/DD/YYYY")
+  )
+    ? roundDates?.indexOf(convertDate(fakeDate || "", "MM/DD/YYYY")) + 1
+    : 0;
+
+  const isChampionship =
+    champDate?.includes(convertDate(fakeDate || "", "MM/DD/YYYY")) &&
+    playViewModel.emailListPlayedRound.includes(user.user.email);
+
+  useEffect(() => {
+    playViewModel.checkIfCanPlayToday(
+      fakeDate || "",
+      currentPlayer?.email || ""
+    );
+    //playViewModel.checkIfRoundPlayed(currentRound, currentPlayer?.email || "");
+  }, [fakeDate, currentPlayer]);
+  console.log("emailListPlayedRound", toJS(playViewModel.emailListPlayedRound));
   const lastCourses = React.useMemo(() => user.user.lastCourses, []);
 
   const blocker = useBlocker(
@@ -114,60 +190,9 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   const hideTeam = tournamentType === "league";
   const hideMatch = playType === "strokePlay";
   const hideMedal = playType === "matchPlay";
-  const findConferenceByEmail = (email: string) => {
-    const player = currentTournament?.playersList.find(
-      (player) => player.email === email
-    );
-    return player?.conference;
-  };
-
-  const getPlayersByConference = (conferenceId: string) => {
-    //console.log("currentTournament", toJS(currentTournament));
-    const playOffsDetail = currentTournament?.playOffsDetail;
-    let a;
-    if (playOffsDetail && playOffsDetail.players > 0) {
-      const currentMatch = Object.keys(playOffsDetail.matches).reverse();
-      //console.log("currentMatch", currentMatch);
-      let founded = false;
-      currentMatch.forEach((m, i) => {
-        const match = playOffsDetail.matches[currentMatch[i]];
-        if (match && match.includes(user.user.email) && !founded) {
-          const players = currentTournament?.playersList.filter((player) =>
-            match.includes(player.email || "")
-          );
-          a = players;
-          founded = true;
-          //console.log("a - ",i,  a);
-          return players;
-        }
-      });
-      //console.log("a", a);
-      return a;
-      // let founded = false;
-      // let i = 0;
-
-      // while (!founded || i < currentMatch.length) {
-      //   const match = playOffsDetail.matches[currentMatch[i]];
-      //   if (match && match.includes(user.user.email)) {
-      //     founded = true;
-      //     const players = currentTournament?.playersList.filter((player) =>
-      //       match.includes(player.email || "")
-      //     );
-      //     return players;
-      //   }
-      //   i++;
-      // }
-    }
-    const players = currentTournament?.playersList.filter(
-      (player) =>
-        player.conference === conferenceId &&
-        !currentPlayer?.opponent?.includes(player.email || "")
-    );
-    return players;
-  };
 
   const playersToInvite = React.useMemo(
-    () => getPlayersByConference(findConferenceByEmail(user.user.email) || ""),
+    () => currentTournament?.playersList,
     [currentPlayer]
   );
 
@@ -189,17 +214,8 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       return true;
     }
 
-    if (playViewModel.currentStep === 1) {
-      return !numberOfPlayers.includes(playViewModel.emailList.length);
-    }
-
     return false;
-  }, [
-    numberOfPlayers,
-    playViewModel.emailList.length,
-    playViewModel.currentTeeBox,
-    playViewModel.currentStep,
-  ]);
+  }, [numberOfPlayers, playViewModel.currentTeeBox, playViewModel.currentStep]);
 
   const [openFinishModal, setOpenFinishModal] = React.useState(false);
 
@@ -208,12 +224,20 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
       setOpenFinishModal(true);
     } else {
       playViewModel.setCurrentStep(playViewModel.currentStep + 1);
+      console.log(toJS(playViewModel));
     }
   };
   const validationSchema = invitationsFieldsValidations;
   const emailList = playViewModel.emailList;
   const onSubmitHandler = (email: string, name: string, handicap: number) => {
-    playViewModel.addEmailToList(email, name, handicap);
+    console.log(toJS(playViewModel.allPlayers));
+    if (
+      !playViewModel.allPlayers.find(
+        (player) => player.score.idPlayer === email
+      )
+    ) {
+      playViewModel.addEmailToList(email, name, handicap);
+    }
   };
   const onUpdateHandler = (
     email: string,
@@ -249,7 +273,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
   const onSelectTeeBox = (course: GolfCourse, id: string) =>
     playViewModel.selectTeeBox(course, id);
-  const submitButtonText = ["Choose course", "Start Match", "End Match"];
+  const submitButtonText = ["Choose course", "Start Round", "End Round"];
 
   const [value, setValue] = React.useState(1);
 
@@ -258,13 +282,13 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   };
 
   const handleSubmit = (message: string) => {
-    const playOffsDetail = currentTournament?.playOffsDetail;
-    if (playOffsDetail && playOffsDetail.players > 0) {
-      playViewModel.createMatchPlayoffs(message, () => navigate("/dashboard"));
-    } else {
-      playViewModel.createMatch(message, () => navigate("/dashboard"));
-    }
-    // console.log("Finished");
+    console.log("Finished");
+    const round = roundDates?.includes(
+      convertDate(fakeDate || "", "MM/DD/YYYY")
+    )
+      ? roundDates?.indexOf(convertDate(fakeDate || "", "MM/DD/YYYY")) + 1
+      : 0;
+    playViewModel.createRound(message, round, () => navigate("/dashboard"));
     // setTimeout(() => navigate("/dashboard"), 5000);
   };
 
@@ -281,7 +305,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
-
+  const isDevelopment = !window.location.href.includes("teeboxleague.com");
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [playViewModel.currentStep]);
@@ -300,7 +324,23 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
           },
         }}
       >
-        {playViewModel.currentStep === 0 && (
+        {isDevelopment && (
+          <DateInput
+            inputElement={{
+              input: "date",
+              name: "date",
+              placeholder: "Date",
+              size: { xs: 12, md: 12, lg: 12 },
+            }}
+            isError={false}
+            onChange={(value: string | null) => {
+              setFakeDate(dayjs(value).format());
+            }}
+            value={fakeDate as unknown as string}
+            error={undefined}
+          />
+        )}
+        {playViewModel.currentStep === 0 && displayGame && (
           <CourseList
             lastCourse={lastCourses}
             courses={playViewModel.courses}
@@ -309,12 +349,20 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             onSelectTeeBox={onSelectTeeBox}
           />
         )}
-        {playViewModel.currentStep === 1 && (
+        {playViewModel.currentStep === 1 && displayGame && (
           <Invitations
             showAll={false}
             playersToInvite={
-              (playersToInvite?.filter(
-                (player) => player?.email !== user.user.email
+              (playersToInvite?.filter((player) =>
+                isChampionship
+                  ? player?.email !== user.user.email &&
+                    playViewModel.emailListPlayedRound.includes(
+                      player?.email || ""
+                    )
+                  : player?.email !== user.user.email &&
+                    !playViewModel.emailListPlayedRound.includes(
+                      player?.email || ""
+                    )
               ) || []) as IUser[]
             }
             fields={invitationsMatch}
@@ -325,22 +373,22 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             onDelete={onRemoveHandler}
           />
         )}
-        {playViewModel.currentStep === 2 && (
+        {playViewModel.currentStep === 2 && displayGame && (
           <React.Fragment>
             <Tabs value={value} onChange={handleChange} centered>
-              <Tab label="Match" />
+              <Tab label="Round" />
               <Tab label="Score" />
-              {/* <Tab label="Stakes" /> */}
             </Tabs>
             <TabPanel value={value} index={0}>
               <React.Fragment>
                 {playViewModel.matches.map((match) => (
                   <HorizontalScoreCard
                     match={match}
-                    hideMatch={hideMatch}
+                    hideMatch
                     hideTeam={hideTeam}
-                    hideMedal={hideMedal}
+                    hideMedal
                     isSmall={false}
+                    hideWinner
                   />
                 ))}
               </React.Fragment>
@@ -365,13 +413,18 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                   playViewModel.matches[0].players[0].score.player
                 }
                 onOpenModal={handleOpenModal}
-                opponents={playViewModel.matches.map((match) => ({
-                  displayName: match.players[1].score.player,
-                  currentTotal: match.players[1].score.totalGross,
-                  currentIn: match.players[1].score.in,
-                  currentOut: match.players[1].score.out,
-                  scores: match.players[1].score.scoreHoles,
-                }))}
+                opponents={playViewModel.matches.flatMap((match) =>
+                  match.players
+                    .filter((val, index) => index !== 0)
+                    .reverse()
+                    .map((player) => ({
+                      displayName: player.score.player,
+                      currentTotal: player.score.totalGross,
+                      currentIn: player.score.in,
+                      currentOut: player.score.out,
+                      scores: player.score.scoreHoles,
+                    }))
+                )}
               />
 
               <MatchModal
@@ -417,6 +470,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                       hideTeam={hideTeam}
                       hideMedal={hideMedal}
                       isSmall={true}
+                      hideWinner
                     />
                   ))}
                 </React.Fragment>
@@ -441,6 +495,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
                         hideTeam={hideTeam}
                         hideMedal={hideMedal}
                         isSmall={true}
+                        hideWinner
                       />
                     ))}
                   </React.Fragment>
@@ -449,8 +504,7 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             </TabPanel>
           </React.Fragment>
         )}
-
-        {showButton && (
+        {showButton && displayGame && (
           <Button
             sx={{ marginTop: "20px", minWidth: "250px" }}
             color="primary"
@@ -462,7 +516,18 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
             {submitButtonText[playViewModel.currentStep]}
           </Button>
         )}
-
+        {!displayGame && (
+          <Box>
+            <h1>There are no rounds for today</h1>
+            <Box>{convertDate(fakeDate)} - Today</Box>
+            {stagesDates?.map((date, index) => (
+              <Typography>
+                Stage {index + 1} - {date}
+              </Typography>
+            ))}
+            <Typography>Championship Round {champDate}</Typography>
+          </Box>
+        )}
         {/* <Fab
           color="primary"
           variant="extended"
@@ -498,4 +563,4 @@ const Play: React.FC<IPlayProps> = ({ user }) => {
   );
 };
 
-export default observer(Play);
+export default observer(Teamplay);

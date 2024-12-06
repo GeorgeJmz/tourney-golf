@@ -288,7 +288,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
     onSubmit: async (values) => {
       await userViewModel.createUser({
         id: "",
-        name: values.name,
+        name: values.name.trim(),
         lastName: values.lastName,
         email: values?.email.toLowerCase() || "",
         password: values.password,

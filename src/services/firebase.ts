@@ -30,7 +30,12 @@ import "firebase/storage";
 import { IPlayOffsDetail, IPlayer, ITournament } from "../models/Tournament";
 import { IMatch } from "../models/Match";
 import { IScore } from "../models/Score";
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  uploadBytesResumable,
+} from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { ITournamentPlayer } from "../models/Player";
 import "firebase/firestore";
@@ -78,14 +83,14 @@ export const confirmThePasswordReset = async (
 };
 
 export const sendCustomEmail = async (
-  email: string,
+  email: string | string[],
   subject: string,
   body: string
 ): Promise<void> => {
   try {
     const collectionRef = collection(db, "mail");
     const emailContent = {
-      to: email.toLowerCase(),
+      to: email,
       message: {
         from: "TEEBOX League <teeboxleague@gmail.com>",
         subject: subject,
@@ -112,7 +117,7 @@ export const createUser = async (
     const firebaseUser = {
       email: user?.email?.toLowerCase(),
       id: credentials.user?.uid,
-      name: user.name,
+      name: user.name?.trim(),
       lastName: user.lastName,
       ghinNumber: user.ghinNumber || "",
     } as IUser;
@@ -165,7 +170,7 @@ export const updateUser = async (
     const firebaseUser = {
       email: user?.email?.toLowerCase(),
       id: user.id,
-      name: user.name,
+      name: user.name?.trim(),
       lastName: user.lastName,
       ghinNumber: user.ghinNumber || "",
     } as IUser;
@@ -401,6 +406,44 @@ export const assignNewActiveTourneyByEmail = async (
   }
 };
 
+export const updateHistoryLeagues = async (
+  emails: Array<string>,
+  tournamentId: string
+) => {
+  const userQuery = query(
+    collection(db, "users"),
+    where("email", "in", emails)
+  );
+  const querySnapshot = await getDocs(userQuery);
+
+  await querySnapshot.forEach(async (doc) => {
+    const activeTournaments = doc.data()?.activeTournaments || [];
+    const historyTournaments = doc.data()?.historyTournaments || [];
+    const newAdded = {
+      activeTournaments: activeTournaments.filter(
+        (tournament: string) => tournament !== tournamentId
+      ),
+      historyTournaments: [...new Set([...historyTournaments, tournamentId])],
+    };
+
+    await setDoc(doc.ref, newAdded, { merge: true });
+  });
+};
+
+export const updateLeagueNameAndChampion = async (
+  tournamentId: string,
+  leagueName: string,
+  champion: string
+) => {
+  const documentRefTournament = doc(db, "tournament", tournamentId);
+
+  await setDoc(
+    documentRefTournament,
+    { name: leagueName, champion, status: "closed" },
+    { merge: true }
+  );
+};
+
 export const deleteActiveTourneyById = async (tournamentId: string) => {
   const updateUser = async (email: string) => {
     const userId = await getUserIdByEmail(email.toLowerCase());
@@ -525,6 +568,7 @@ export const updatePlayer = async (player: {
   gross: number;
   handicap: number;
   net: number;
+  date: string;
 }): Promise<void> => {
   try {
     const userCollection = collection(db, "player");
@@ -551,6 +595,9 @@ export const updatePlayer = async (player: {
       gross: [...playerDoc.data().gross, player.gross],
       handicap: [...playerDoc.data().handicap, player.handicap],
       net: [...playerDoc.data().net, player.net],
+      date: playerDoc.data().date
+        ? [...playerDoc.data().date, player.date]
+        : [player.date],
     };
 
     await updateDoc(doc(db, "player", playerDoc.id), updateData);
@@ -559,6 +606,28 @@ export const updatePlayer = async (player: {
     const code = error as FirebaseError;
     throw code;
   }
+};
+
+export const removePlayerFromTournament = async (
+  email: string,
+  tournamentId: string
+): Promise<void> => {
+  console.log(tournamentId, "tournamentId");
+  console.log(email, "email");
+  const userCollection = collection(db, "player");
+  const userQuery = query(
+    userCollection,
+    where("email", "==", email.toLowerCase()),
+    where("tournamentId", "==", tournamentId)
+  );
+
+  const querySnapshot = await getDocs(userQuery);
+
+  querySnapshot.forEach(async (dc) => {
+    console.log(dc.id, "dc.id");
+    console.log(dc.data(), "dc.data()");
+    await deleteDoc(doc(db, "player", dc.id));
+  });
 };
 
 export const updatePlayOffPlayer = async (player: {
@@ -572,6 +641,7 @@ export const updatePlayOffPlayer = async (player: {
   gross: number;
   handicap: number;
   net: number;
+  date: string;
 }): Promise<void> => {
   try {
     const userCollection = collection(db, "playerPlayoff");
@@ -595,6 +665,7 @@ export const updatePlayOffPlayer = async (player: {
         gross: [player.gross],
         handicap: [player.handicap],
         net: [player.net],
+        date: [player.date],
       };
       await addDoc(collection(db, "playerPlayoff"), playerData);
       // No player document found, handle the case (e.g., create a new document)
@@ -611,6 +682,9 @@ export const updatePlayOffPlayer = async (player: {
       gross: [...playerDoc.data().gross, player.gross],
       handicap: [...playerDoc.data().handicap, player.handicap],
       net: [...playerDoc.data().net, player.net],
+      date: playerDoc.data().date
+        ? [...playerDoc.data().date, player.date]
+        : [player.date],
     };
 
     await updateDoc(doc(db, "playerPlayoff", playerDoc.id), updateData);
@@ -762,13 +836,21 @@ export const getTournamentsByAuthorID = async (
 export const getTournamentsById = async (
   ids: Array<string>
 ): Promise<Array<ITournament> | null> => {
+  console.log(ids, "ids");
   const tournamentCollection = collection(db, "tournament");
   const userQuery = query(tournamentCollection, where("id", "in", ids));
   const querySnapshot = await getDocs(userQuery);
   const tournaments = [] as Array<ITournament>;
+  const mapTournaments = new Map<string, ITournament>();
   querySnapshot.forEach((doc) => {
+    console.log(doc.id, "doc.id()");
+    mapTournaments.set(doc.id, {
+      ...doc.data(),
+      id: doc.id,
+    } as unknown as ITournament);
     tournaments.push({ ...doc.data(), id: doc.id } as unknown as ITournament);
   });
+  console.log(mapTournaments, "tournaments");
   return tournaments as Array<ITournament>;
 };
 
@@ -983,6 +1065,52 @@ export const getPdfUrl = async (name: string): Promise<string> => {
   } catch (error) {
     const code = error as FirebaseError;
     return "";
+  }
+};
+
+export const uploadIMGData = async (
+  dataURL: Blob | Uint8Array | ArrayBuffer,
+  name: string,
+  emails: string[]
+): Promise<void> => {
+  try {
+    const storageRef = ref(storage, `brackets/${name}.png`);
+    const uploadTask = uploadBytesResumable(storageRef, dataURL);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // Observe state change events such as progress, pause, and resume
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is in progress");
+            break;
+        }
+      },
+      (error) => {
+        // Handle upload errors
+        console.error("Error uploading image:", error);
+      },
+      async () => {
+        // Get download URL after successful upload
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        const emailBody = `
+          <html>
+            <body>
+              <h3>Here is the latest playoff bracket:</h3>
+              <img src="${downloadURL}" width="300px" alt="Bracket Image">
+            </body>
+          </html>
+        `;
+
+        sendCustomEmail(emails, `Playoffs ${name}`, emailBody);
+      }
+    );
+  } catch (error) {
+    console.error("Error capturing image:", error);
   }
 };
 

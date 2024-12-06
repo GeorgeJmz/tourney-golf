@@ -21,6 +21,7 @@ class UserViewModel {
   user: UserModel = new UserModel();
   tournaments: Array<ITournament> = [];
   activeTournaments: Array<ITournament> = [];
+  historyTournaments: Array<ITournament> = [];
   matches: Array<IMatch> = [];
 
   constructor() {
@@ -166,6 +167,32 @@ class UserViewModel {
       const actives = await getTournamentsById(this.user.activeTournaments);
 
       this.activeTournaments = actives || [];
+      // toast.update(cuToast, {
+      //   render: displayMessage,
+      //   type: toast.TYPE.SUCCESS,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    } catch (error) {
+      const codeError = (error as FirebaseError).code;
+      const displayError = getMessages(codeError);
+      // toast.update(cuToast, {
+      //   render: displayError,
+      //   type: toast.TYPE.ERROR,
+      //   isLoading: false,
+      //   autoClose: 800,
+      // });
+    }
+  }
+
+  async getHistoryTournaments(): Promise<void> {
+    //const displayLoading = getMessages(Messages.LOADING);
+    //const cuToast = toast.loading(displayLoading);
+    try {
+      console.log("this.user.historyTournaments", this.user.historyTournaments);
+      const history = await getTournamentsById(this.user.historyTournaments);
+
+      this.historyTournaments = history || [];
       // toast.update(cuToast, {
       //   render: displayMessage,
       //   type: toast.TYPE.SUCCESS,

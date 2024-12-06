@@ -14,6 +14,7 @@ export interface ITournamentPlayer {
   net: Array<number>;
   tournamentId: string;
   scoreId: Array<string>;
+  date?: Array<string>;
 }
 
 export default class PlayerModel implements ITournamentPlayer {
@@ -32,6 +33,7 @@ export default class PlayerModel implements ITournamentPlayer {
   handicap = [];
   net = [];
   tournamentId = "";
+  date = [];
 
   constructor(init?: Partial<ITournamentPlayer>) {
     Object.assign(this, init);

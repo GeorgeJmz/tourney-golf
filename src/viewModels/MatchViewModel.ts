@@ -16,6 +16,7 @@ import UserViewModel from "./UserViewModel";
 import moment from "moment-timezone";
 import TournamentModel from "../models/Tournament";
 import { getBodyMail } from "../helpers/getMatchMail";
+import { convertMomentDate } from "../helpers/convertDate";
 
 class MatchViewModel {
   match: MatchModel = new MatchModel();
@@ -272,6 +273,16 @@ class MatchViewModel {
           ? [pointsPerWin, 0]
           : [0, pointsPerWin];
 
+      const getCurrentMoment = () => {
+        const currentMoment = moment();
+        return {
+          eventDate: currentMoment.valueOf(),
+          eventTimezone: moment.tz.guess(),
+        };
+      };
+      const { eventDate, eventTimezone } = getCurrentMoment();
+      const saveDate = [String(eventDate), eventTimezone];
+      const dateFormatted = convertMomentDate(saveDate);
       for (const playerMail of playersMail) {
         const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
         const playerUpdated = {
@@ -285,6 +296,7 @@ class MatchViewModel {
           gross: this.players[index].score.totalGross,
           net: this.players[index].score.totalNet,
           handicap: this.players[index].score.handicap,
+          date: dateFormatted,
           // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
           // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
           // ties: winnerMatch.includes(playerMail) ? [] : [],
@@ -292,15 +304,6 @@ class MatchViewModel {
         await updatePlayer({ ...playerUpdated });
       }
 
-      const getCurrentMoment = () => {
-        const currentMoment = moment();
-        return {
-          eventDate: currentMoment.valueOf(),
-          eventTimezone: moment.tz.guess(),
-        };
-      };
-      const { eventDate, eventTimezone } = getCurrentMoment();
-      const saveDate = [String(eventDate), eventTimezone];
       await createMatch({
         ...this.match,
         author: this.author.getUserId(),
@@ -328,11 +331,11 @@ class MatchViewModel {
       const player2 = this.players[1].score.player;
       const title = `${player1} vs ${player2}`;
       const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
-      this.currentTournament.playersList.forEach(async (mail) => {
-        if (mail.email) {
-          await sendCustomEmail(mail.email, title, bodyMail);
-        }
-      });
+      await sendCustomEmail(
+        this.currentTournament.playersList.map((mail) => mail.email || ""),
+        title,
+        bodyMail
+      );
 
       console.log("Match created - Email sent to players");
       //const displayMessage = getMessages(Messages.MATCH_CREATED);
@@ -405,6 +408,16 @@ class MatchViewModel {
           ? [pointsPerWin, 0]
           : [0, pointsPerWin];
 
+      const getCurrentMoment = () => {
+        const currentMoment = moment();
+        return {
+          eventDate: currentMoment.valueOf(),
+          eventTimezone: moment.tz.guess(),
+        };
+      };
+      const { eventDate, eventTimezone } = getCurrentMoment();
+      const saveDate = [String(eventDate), eventTimezone];
+      const dateFormatted = convertMomentDate(saveDate);
       for (const playerMail of playersMail) {
         const index = playersMail.indexOf(playerMail); // Get the index of the current playerMail
         const playerUpdated = {
@@ -418,6 +431,7 @@ class MatchViewModel {
           gross: this.players[index].score.totalGross,
           net: this.players[index].score.totalNet,
           handicap: this.players[index].score.handicap,
+          date: dateFormatted,
           // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
           // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
           // ties: winnerMatch.includes(playerMail) ? [] : [],
@@ -425,15 +439,6 @@ class MatchViewModel {
         await updatePlayOffPlayer({ ...playerUpdated });
       }
 
-      const getCurrentMoment = () => {
-        const currentMoment = moment();
-        return {
-          eventDate: currentMoment.valueOf(),
-          eventTimezone: moment.tz.guess(),
-        };
-      };
-      const { eventDate, eventTimezone } = getCurrentMoment();
-      const saveDate = [String(eventDate), eventTimezone];
       await createPlayoffMatch({
         ...this.match,
         author: this.author.getUserId(),
@@ -461,11 +466,12 @@ class MatchViewModel {
       const player2 = this.players[1].score.player;
       const title = `${player1} vs ${player2}`;
       const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
-      this.currentTournament.playersList.forEach(async (mail) => {
-        if (mail.email) {
-          await sendCustomEmail(mail.email, title, bodyMail);
-        }
-      });
+
+      await sendCustomEmail(
+        this.currentTournament.playersList.map((mail) => mail.email || ""),
+        title,
+        bodyMail
+      );
 
       console.log("Match created - Email sent to players");
       //const displayMessage = getMessages(Messages.MATCH_CREATED);
@@ -525,12 +531,27 @@ class MatchViewModel {
       //   this.players[0].score.teamPoints.reduce((a, b) => a + b, 0),
       //   this.players[1].score.teamPoints.reduce((a, b) => a + b, 0),
       // ] as Array<number>;
+
+      const teamPoints = this.players.map((player) => {
+        return player.score.teamPoints.reduce((a, b) => a + b, 0);
+      });
       const matchsPoints =
         winnerMatch.length > 1
           ? [pointsPerTie, pointsPerTie]
           : this.winnerMatch.includes(playersMail[0])
           ? [pointsPerWin, 0]
           : [0, pointsPerWin];
+
+      const getCurrentMoment = () => {
+        const currentMoment = moment();
+        return {
+          eventDate: currentMoment.valueOf(),
+          eventTimezone: moment.tz.guess(),
+        };
+      };
+      const { eventDate, eventTimezone } = getCurrentMoment();
+      const saveDate = [String(eventDate), eventTimezone];
+      const dateFormatted = convertMomentDate(saveDate);
 
       for (const indPlayer of this.players) {
         console.log(indPlayer, "indPlayer");
@@ -539,12 +560,16 @@ class MatchViewModel {
           opponent: "", //playersMail[index === 0 ? 1 : 0],
           pointsMatch: matchsPoints[this.players.indexOf(indPlayer)] || 0,
           pointsStroke: 0,
-          pointsTeam: 0, //teamPoints[index],
+          pointsTeam:
+            tournamentType === "teamplay"
+              ? teamPoints[this.players.indexOf(indPlayer)]
+              : 0, //teamPoints[index],
           tournamentId: this.tournamentId,
           scoreId: this.match.scoresId[this.players.indexOf(indPlayer)],
           gross: indPlayer.score.totalGross,
           net: indPlayer.score.totalNet,
           handicap: indPlayer.score.handicap,
+          date: dateFormatted,
           // wins: winnerMatch.includes(playerMail) ? [winnerStrokePlay] : [],
           // losses: winnerMatch.includes(playerMail) ? [] : [winnerStrokePlay],
           // ties: winnerMatch.includes(playerMail) ? [] : [],
@@ -575,15 +600,6 @@ class MatchViewModel {
       //   await updatePlayer({ ...playerUpdated });
       // }
 
-      const getCurrentMoment = () => {
-        const currentMoment = moment();
-        return {
-          eventDate: currentMoment.valueOf(),
-          eventTimezone: moment.tz.guess(),
-        };
-      };
-      const { eventDate, eventTimezone } = getCurrentMoment();
-      const saveDate = [String(eventDate), eventTimezone];
       await createMatch({
         ...this.match,
         round: round,
@@ -614,11 +630,12 @@ class MatchViewModel {
       const player2 = this.players[1].score.player;
       const title = `${leagueName} Scorecard`;
       const bodyMail = `<p>We just posted this result:</p> <p style="margin:0;">${this.currentTournament.name}</p><p style="margin:0;">${this.match.courseDisplayName}</p><div></div><p></p>${result}<div>${messageModal}</div>`;
-      this.currentTournament.playersList.forEach(async (mail) => {
-        if (mail.email) {
-          await sendCustomEmail(mail.email, title, bodyMail);
-        }
-      });
+
+      await sendCustomEmail(
+        this.currentTournament.playersList.map((mail) => mail.email || ""),
+        title,
+        bodyMail
+      );
 
       //const displayMessage = getMessages(Messages.MATCH_CREATED);
       // toast.update(cuToast, {

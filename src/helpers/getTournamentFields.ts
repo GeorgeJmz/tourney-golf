@@ -9,6 +9,7 @@ export interface ITournamentElement {
     | "number"
     | "date"
     | "multipleDates"
+    | "multipleDatesStages"
     | "switch"
     | "multiple"
     | "password";
@@ -46,7 +47,7 @@ export const step1: Array<ITournamentElement> = [
     options: [
       // { displayName: "Tourney", value: "tourney" },
       { displayName: "League", value: "league" },
-      { displayName: "League + Team Play", value: "leagueteamplay" },
+      // { displayName: "League + Team Play", value: "leagueteamplay" },
       { displayName: "Team Play", value: "teamplay" },
       // { displayName: "Team 3 Stage", value: "3stage" },
       { displayName: "Dogfight", value: "dogfight" },
@@ -305,6 +306,50 @@ export const getRules = (type: string, tournamentType: string) => {
       },
     },
   ];
+  if (tournamentType === "teamplay") {
+    return [
+      {
+        name: "numberOfStages",
+        placeholder: "Number of Stages",
+        input: "number",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "stagesDates",
+        placeholder: "Stages",
+        input: "multipleDatesStages",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "championshipRound",
+        placeholder: "Championship Round",
+        input: "switch",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+      },
+      {
+        name: "championshipDate",
+        placeholder: "Championship Date",
+        input: "date",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+      },
+    ] as ITournamentElement[];
+  }
   if (tournamentType === "dogfight") {
     return [
       {
@@ -399,7 +444,13 @@ export interface IRulesInputElement {
   pointsPerWinMedal: number | "";
   matchesPerRound: Array<string>;
   playoffs: boolean;
-  [key: string]: boolean | string | number | null | Array<string>;
+  [key: string]:
+    | boolean
+    | string
+    | number
+    | null
+    | Array<string>
+    | Array<{ start: string; end: string }>;
 }
 
 export const rulesFields: IRulesInputElement = {
@@ -410,6 +461,7 @@ export const rulesFields: IRulesInputElement = {
   pointsPerTieMedal: 1,
   pointsPerWinMedal: 3,
   matchesPerRound: [],
+  multipleDatesStages: [],
   playoffs: false,
 };
 

@@ -17,6 +17,7 @@ interface HorizontalScoreCardProps {
   hideTeam?: boolean;
   hideMedal?: boolean;
   isSmall?: boolean;
+  hideWinner?: boolean;
 }
 
 const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
@@ -25,6 +26,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   hideTeam,
   hideMedal,
   isSmall,
+  hideWinner = false,
 }) => {
   const stylesByIndex = (index: number, isHeader = false) => {
     if (index === 0) {
@@ -37,6 +39,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
         fontWeight: "bold",
         border: "none",
         width: 80,
+        padding: "16px",
       };
     }
     if (index === 10 || index === 20) {
@@ -46,6 +49,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
         backgroundColor: "rgb(118, 118, 118);",
         color: "white",
         fontWeight: "bold",
+        padding: "16px",
       };
     }
     if (index > 20 && isHeader) {
@@ -55,9 +59,15 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
         backgroundColor: "Green",
         color: "white",
         fontWeight: "bold",
+        padding: "16px",
       };
     }
-    return { border: 1, color: "rgb(118, 118, 118);", width: 80 };
+    return {
+      border: 1,
+      color: "rgb(118, 118, 118);",
+      width: isSmall ? 60 : 80,
+      padding: isSmall ? 0 : "16px",
+    };
   };
 
   const renderHoleHeaders = () => {
@@ -265,7 +275,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
         <TableHead>{renderHoleHeaders()}</TableHead>
         <TableBody>{renderPlayerRows()}</TableBody>
         {!hideMatch && !isSmall && <TableBody>{renderResultsRows()}</TableBody>}
-        {match.match.winner !== "" && (
+        {match.match.winner !== "" && !hideWinner && (
           <TableFooter>
             <TableRow>
               <TableCell

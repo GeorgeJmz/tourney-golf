@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import moment from "moment-timezone";
 
+export const getYearDayJS = (date: string): number => dayjs(date).year();
 export const convertDate = (date: string, format?: string): string =>
   dayjs(date).format(format || "DD/MM/YYYY");
 

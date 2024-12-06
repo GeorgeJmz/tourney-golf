@@ -16,6 +16,8 @@ import dayjs from "dayjs";
 import { TextInput } from "../../../../components/TextInput";
 import { toJS } from "mobx";
 import { MultipleDateInput } from "../../../../components/MultipleDateInput";
+import { MultipleRangesInput } from "../../../../components/MultipleRangesInput";
+import { number } from "yup";
 
 interface RulesSetupFormProps {
   tournamentViewModel: TournamentViewModel;
@@ -45,9 +47,12 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
         pointsPerTieMedal: values.pointsPerTieMedal || 1,
         numberOfRounds:
           parseInt(values?.numberOfRounds?.toString() || "") || "1",
+        numberOfStages:
+          parseInt(values?.numberOfStages?.toString() || "") || "1",
         roundDates: toJS(values.roundDates) || [],
         championshipRound: values.championshipRound || false,
         championshipDate: values.championshipDate?.toString() || "",
+        stagesDates: toJS(values.stagesDates) || [],
         minRounds: values.minRounds || 1,
       };
       console.log("newValues", newValues);
@@ -57,6 +62,12 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
         championshipRound: newValues.championshipRound as boolean,
         minRounds: parseInt(newValues.minRounds.toString()),
         roundDates: (toJS(values.roundDates) as string[]) || [], // Fix: Ensure roundDates is always an array
+        numberOfStages: parseInt(newValues.numberOfStages.toString()),
+        stagesDates:
+          (toJS(values.stagesDates) as {
+            start: string;
+            end: string;
+          }[]) || [],
       });
       handleNext();
     },
@@ -66,6 +77,21 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
   const prevValues = Array.from({ length: nOR }, (_, i) => {
     return (formik.values.roundDates as string[])?.[i] || dayjs().format();
   });
+
+  const nOS = Number(formik.values.numberOfStages); // Convert nOS to a number
+  const prevValuesStages = Array.from({ length: nOS }, (_, i) => {
+    return (
+      (
+        formik.values.stagesDates as {
+          start: string;
+          end: string;
+        }[]
+      )?.[i] || { start: dayjs().format(), end: dayjs().format() }
+    );
+  });
+
+  console.log("prevValuesStages ---", prevValuesStages);
+
   return (
     <form onSubmit={formik.handleSubmit}>
       <Grid container spacing={2}>
@@ -136,6 +162,43 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
                     : ""
                 }
                 values={prevValues}
+                key={key}
+              />
+            );
+          }
+          if (inputElement.input === "multipleDatesStages") {
+            return (
+              <MultipleRangesInput
+                inputElement={inputElement}
+                isError={isError}
+                onChange={(
+                  value: {
+                    start: string;
+                    end: string;
+                  } | null,
+                  index: number
+                ) => {
+                  console.log("value", value);
+                  console.log("index", index);
+                  console.log("inputElement", inputElement);
+
+                  const newArray = formik.values[inputElement.name] as {
+                    start: string;
+                    end: string;
+                  }[];
+                  newArray[index] = {
+                    start: dayjs(value?.start).format(),
+                    end: dayjs(value?.end).format(),
+                  };
+                  console.log("newArray", newArray);
+                  formik.setFieldValue(inputElement.name, newArray);
+                }}
+                error={
+                  formik.touched[inputElement.name]
+                    ? formik.errors[inputElement.name]
+                    : ""
+                }
+                values={prevValuesStages}
                 key={key}
               />
             );

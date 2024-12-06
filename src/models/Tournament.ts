@@ -25,10 +25,16 @@ export interface ITournament {
   pointsPerTieMedal: number;
   numberOfRounds?: number;
   roundDates?: string[];
+  numberOfStages?: number;
+  stagesDates?: {
+    start: string;
+    end: string;
+  }[];
   championshipRound?: boolean;
   championshipDate?: string;
   minRounds?: number;
   playOffsDetail: IPlayOffsDetail;
+  champion?: string;
 }
 
 export interface IPlayOffsDetail {
@@ -105,6 +111,14 @@ export default class TournamentModel implements ITournament {
     brackets: {},
     matches: {},
   };
+  numberOfStages = 1;
+  stagesDates = [
+    {
+      start: new Date().toISOString(),
+      end: new Date().toISOString(),
+    },
+  ];
+  champion? = "";
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

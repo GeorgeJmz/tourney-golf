@@ -38,7 +38,9 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
   );
   const { id } = useParams();
   const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
+    () =>
+      user.activeTournaments.find((t) => t.id === id) ||
+      user.historyTournaments.find((t) => t.id === id),
     []
   );
 

@@ -19,6 +19,8 @@ import {
   getMatchesByTournamentIdAndRound,
   addPlayOffsToTournament,
   getPlayoffsMatchesByTournamentId,
+  updateLeagueNameAndChampion,
+  removePlayerFromTournament,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -72,8 +74,12 @@ class TournamentViewModel {
     name: string;
     playersNames: string;
     roundsPlayed: number;
+    pointsPerPlayer?: string;
     points: number;
   }> = [];
+  fullStatsTeams: {
+    [key: string]: ITournamentPlayer[];
+  } = {};
   conferencesOptions: Array<{ value: string; label: string }> = [];
   groupsOptions: Array<{ value: string; label: string }> = [];
   leagueResults: Array<IMatch> = [];
@@ -132,6 +138,7 @@ class TournamentViewModel {
       statsPlayers: observable,
       dogfightStats: observable,
       statsTeams: observable,
+      fullStatsTeams: observable,
       conferencesOptions: observable,
       groupsOptions: observable,
       getAllMatchesResultsByTournament: action,
@@ -142,6 +149,7 @@ class TournamentViewModel {
       deleteLeague: action,
       deleteMatch: action,
       switchPlayer: action,
+      removePlayerFromTournament: action,
     });
     this.statsPlayers = [];
     this.dogfightStats = [];
@@ -191,6 +199,8 @@ class TournamentViewModel {
       championshipRound: this.tournament.championshipRound || false,
       championshipDate: this.tournament.champoinshipDate,
       minRounds: this.tournament.minRounds || 1,
+      numberOfStages: this.tournament.numberOfStages || 1,
+      stagesDates: toJS(this.tournament.stagesDates) || [],
     };
   }
 
@@ -370,16 +380,30 @@ class TournamentViewModel {
     const playOffsMatches = await getPlayoffsMatchesByTournamentId(
       this.idTournament
     );
-    console.log(toJS(playOffsMatches), "playOffsMatches");
-    const getPointsPerMatch = (idPlayer: string, idOpponent: string) => {
+    console.log(toJS(matches), "matches");
+    const getPointsPerMatch = (
+      idPlayer: string,
+      idOpponent: string,
+      result: IMatchResults
+    ) => {
       const player = players.find((p) => p.email === idPlayer);
+
+      const isTeamPlay = this.tournament.tournamentType === "teamplay";
+      if (isTeamPlay) {
+        const matchPoints = result.matchPoints || 0;
+        const medalPoints = result.medalPoints || 0;
+        const teamPoints = result.teamPoints || 0;
+        return { matchPoints, medalPoints, teamPoints };
+      }
       const opponentIndex =
         player?.opponent.findIndex((id) => id === idOpponent) || 0;
+
       const matchPoints = player?.pointsMatch[opponentIndex] || 0;
       const medalPoints = player?.pointsStroke[opponentIndex] || 0;
       const teamPoints = player?.pointsTeam[opponentIndex] || 0;
       return { matchPoints, medalPoints, teamPoints };
     };
+
     this.leagueResults = matches.map((match) => ({
       ...match,
       matchResults: match.matchResults.map((result) => ({
@@ -387,7 +411,8 @@ class TournamentViewModel {
         ...getPointsPerMatch(
           result.idPlayer,
           match.matchResults.find((r) => r.idPlayer !== result.idPlayer)
-            ?.idPlayer || ""
+            ?.idPlayer || "",
+          result
         ),
         playerName: listEmails
           ? listEmails[result.idPlayer]
@@ -402,7 +427,8 @@ class TournamentViewModel {
         ...getPointsPerMatch(
           result.idPlayer,
           match.matchResults.find((r) => r.idPlayer !== result.idPlayer)
-            ?.idPlayer || ""
+            ?.idPlayer || "",
+          result
         ),
         playerName: listEmails
           ? listEmails[result.idPlayer]
@@ -441,60 +467,65 @@ class TournamentViewModel {
     console.log(toJS(this.matrizValues), "matrizValues");
     console.log(toJS(this.leagueResults), "this.leagueResults");
 
-    // Iterar sobre leagueResults para llenar this.matrizValues
-    this.leagueResults.forEach((match) => {
-      const playerEmail = match.matchResults[0];
-      const opponentEmail = match.matchResults[1];
+    const isTeamPlay = this.tournament.tournamentType === "teamplay";
+    if (!isTeamPlay) {
+      // Iterar sobre leagueResults para llenar this.matrizValues
+      this.leagueResults.forEach((match) => {
+        const playerEmail = match.matchResults[0];
+        const opponentEmail = match.matchResults[1];
 
-      if (!this.matrizValues.data[playerEmail.idPlayer]) {
-        this.matrizValues.data[playerEmail.idPlayer] = {};
-      }
+        if (!this.matrizValues.data[playerEmail.idPlayer]) {
+          this.matrizValues.data[playerEmail.idPlayer] = {};
+        }
 
-      if (!this.matrizValues.data[opponentEmail.idPlayer]) {
-        this.matrizValues.data[opponentEmail.idPlayer] = {};
-      }
+        if (!this.matrizValues.data[opponentEmail.idPlayer]) {
+          this.matrizValues.data[opponentEmail.idPlayer] = {};
+        }
 
-      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer] = [];
-      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer] = [];
+        this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer] =
+          [];
+        this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer] =
+          [];
 
-      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer].push(
-        {
+        this.matrizValues.data[playerEmail.idPlayer][
+          opponentEmail.idPlayer
+        ].push({
           gross: opponentEmail.gross || 0,
           hcp: parseInt(opponentEmail.hcp) || 0,
           score: opponentEmail.score,
           date: convertMomentDate(match.date),
           net: opponentEmail.medalPoints || 0,
-        }
-      );
-      this.matrizValues.data[playerEmail.idPlayer][opponentEmail.idPlayer].push(
-        {
+        });
+        this.matrizValues.data[playerEmail.idPlayer][
+          opponentEmail.idPlayer
+        ].push({
           gross: playerEmail.gross || 0,
           hcp: parseInt(playerEmail.hcp) || 0,
           score: playerEmail.score,
           date: convertMomentDate(match.date),
           net: playerEmail.medalPoints || 0,
-        }
-      );
+        });
 
-      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer].push(
-        {
+        this.matrizValues.data[opponentEmail.idPlayer][
+          playerEmail.idPlayer
+        ].push({
           gross: playerEmail.gross || 0,
           hcp: parseInt(playerEmail.hcp) || 0,
           score: playerEmail.score,
           date: convertMomentDate(match.date),
           net: playerEmail.medalPoints || 0,
-        }
-      );
-      this.matrizValues.data[opponentEmail.idPlayer][playerEmail.idPlayer].push(
-        {
+        });
+        this.matrizValues.data[opponentEmail.idPlayer][
+          playerEmail.idPlayer
+        ].push({
           gross: opponentEmail.gross || 0,
           hcp: parseInt(opponentEmail.hcp) || 0,
           score: opponentEmail.score,
           date: convertMomentDate(match.date),
           net: opponentEmail.medalPoints || 0,
-        }
-      );
-    });
+        });
+      });
+    }
   }
 
   async deleteMatch(matchId: string): Promise<void> {
@@ -583,6 +614,21 @@ class TournamentViewModel {
     }
 
     const displayMessage = getMessages(Messages.ROUND_DELETED);
+    toast.update(cuToast, {
+      render: displayMessage,
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+  }
+
+  async removePlayerFromTournament(playerId: string): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+
+    await removePlayerFromTournament(playerId, this.idTournament);
+
+    const displayMessage = "Player Removed";
     toast.update(cuToast, {
       render: displayMessage,
       type: toast.TYPE.SUCCESS,
@@ -1048,6 +1094,246 @@ class TournamentViewModel {
     console.log("Call to NEW took" + (t2 - t1) + "milliseconds.");
   }
 
+  async getTeamStatsPlayersByTournament(): Promise<void> {
+    const t1 = performance.now();
+
+    console.log(
+      "getTeamStatsPlayersByTournament",
+      "this.tournament",
+      toJS(this.tournament)
+    );
+
+    const tournamentType = this.tournament.tournamentType;
+
+    const playType = this.tournament.playType;
+    const pointsPerTie = this.tournament.pointsPerTie;
+    const pointsPerWin = this.tournament.pointsPerWin;
+    const pointsPerTieMedal = this.tournament.pointsPerTieMedal;
+    const pointsPerWinMedal = this.tournament.pointsPerWinMedal;
+
+    const isLTMATCH =
+      tournamentType === "leagueteamplay" && playType === "matchPlay";
+    const isLTMEDAL =
+      tournamentType === "leagueteamplay" && playType === "strokePlay";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+
+    const isDogFight = tournamentType === "dogfight";
+
+    // Fetch players and optimize data fetching
+    const fullPlayers = await getPlayersByTournamentId(this.idTournament);
+    console.log("fullPlayers", fullPlayers);
+    const emails = fullPlayers.map((player) => player.email);
+
+    // Use a more efficient approach for large datasets:
+    const names = (await getNamesByEmails(emails)) || []; // Optimized name fetching
+    const nameMap = new Map(
+      names.map((player) => [player.email, player.name + " " + player.lastName])
+    );
+
+    const players = fullPlayers.map((player) => ({
+      ...player,
+      name: nameMap.get(player.email) || player.name,
+    }));
+
+    // Fetch scores in batches for improved performance
+    const newPlayers = await Promise.all(
+      players.map(async (player) => {
+        const getAverage = (values: Array<number>) => {
+          const average = values.reduce((acc, curr) => acc + curr, 0);
+          return average > 0 ? (average / values.length).toFixed(1) : "0";
+        };
+
+        const getWins = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerWinMedal ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerWin ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerWinMedal ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getDraws = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerTie ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerTieMedal ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === pointsPerTie ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === pointsPerTieMedal ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getLoss = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            );
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            );
+          }
+          return (
+            player.pointsMatch.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            ) +
+            player.pointsStroke.reduce(
+              (acc, curr) => (curr === 0 ? acc + 1 : acc),
+              0
+            )
+          );
+        };
+
+        const getTotalPoints = () => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch.reduce((acc, curr) => acc + curr, 0);
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke.reduce((acc, curr) => acc + curr, 0);
+          }
+          return (
+            player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
+            player.pointsStroke.reduce((acc, curr) => acc + curr, 0)
+          );
+        };
+
+        return {
+          id: Number(player.id),
+          position: 0, // Add position property
+          tourneyName: player.name, // Add tourneyName property
+          matchesPlayed:
+            playType !== "matchstrokePlay"
+              ? player.opponent.length
+              : player.opponent.length * 2,
+          wins: getWins(),
+          draws: getDraws(),
+          losses: getLoss(),
+          matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
+          medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
+          totalPoints: getTotalPoints(),
+          grossAverage: getAverage(
+            player.gross.map((value) => parseInt(value.toString()))
+          ),
+          handicapAverage: getAverage(
+            player.handicap.map((value) => parseInt(value.toString()))
+          ),
+          netAverage: getAverage(
+            player.net.map((value) => parseInt(value.toString()))
+          ),
+          teamPoints: player.pointsTeam.reduce((acc, curr) => acc + curr, 0),
+          conference: player.conference,
+          group: player.group,
+        };
+      })
+    );
+
+    // Sort players by total points
+    this.statsPlayers = !isDogFight
+      ? newPlayers.sort((a, b) => b.totalPoints - a.totalPoints)
+      : newPlayers
+          .sort((a, b) => {
+            if (parseInt(a.netAverage) > 0 && parseInt(b.netAverage) > 0) {
+              return parseInt(b.netAverage) - parseInt(a.netAverage);
+            } else if (
+              parseInt(a.netAverage) <= 0 &&
+              parseInt(b.netAverage) <= 0
+            ) {
+              return 0;
+            } else {
+              return parseInt(a.netAverage) - parseInt(b.netAverage);
+            }
+          })
+          .reverse();
+
+    // ... rest of the function logic (with potential optimizations for data structure usage and caching)
+    if (players) {
+      const teams: { [key: string]: Array<ITournamentPlayer> } =
+        players?.reduce((acc, curr) => {
+          const team = curr.team;
+          if (!acc[team]) {
+            acc[team] = [];
+          }
+          acc[team].push(curr);
+          return acc;
+        }, {} as { [key: string]: Array<ITournamentPlayer> });
+
+      const finalTeams = [];
+      for (const team in teams) {
+        const teamName =
+          this.tournament.teamsList.find((t) => t.id === team)?.name || "";
+        const roundsPlayed = teams[team].reduce(
+          (acc, curr) => acc + curr.pointsTeam.length,
+          0
+        );
+        const points = teams[team].reduce(
+          (acc, curr) =>
+            acc + curr.pointsTeam.reduce((acc, curr) => acc + curr, 0),
+          0
+        );
+        console.log(toJS(teams[team]), "teams[team]");
+        const newTeam = {
+          name: teamName,
+          playersNames: teams[team].map((player) => player.name).join(", "),
+          pointsPerPlayer: teams[team]
+            .map((player) => player.pointsTeam)
+            .join(", "),
+          roundsPlayed,
+          points,
+        };
+        finalTeams.push(newTeam);
+      }
+      this.fullStatsTeams = teams;
+      this.statsTeams = finalTeams.sort((a, b) => b.points - a.points);
+      this.conferencesOptions = this.tournament.conferencesList.map(
+        (conference) => ({
+          value: conference.id,
+          label: conference.name,
+        })
+      );
+      this.groupsOptions = this.tournament.groupsList.map((group) => ({
+        value: group.id,
+        label: group.name,
+      }));
+    }
+    const t2 = performance.now();
+    console.log("Call to NEW took" + (t2 - t1) + "milliseconds.");
+  }
+
   async sendEmail(): Promise<void> {
     sendCustomEmail(
       "jeckox@gmail.com",
@@ -1124,6 +1410,60 @@ class TournamentViewModel {
   async deleteLeague(): Promise<void> {
     await deleteActiveTourneyById(this.idTournament);
     location.reload();
+  }
+
+  async finishLeague(leagueName: string, championName: string): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    const emails = this.tournament.playersList.map((e) => e.email || "");
+    const isTeamPlay = this.tournament.tournamentType === "teamplay";
+    const title = isTeamPlay
+      ? `${leagueName} comes to an end`
+      : `${leagueName} season wrap up`;
+    const body = isTeamPlay
+      ? `
+    <p>Dear Golfers,</p>
+    <p>Thank you all for an amazing season! With several stages behind us and countless impressive performances, we're thrilled to announce Team <b>${championName}</b> as this year’s champions! Your dedication and skill have earned you a well-deserved victory.</p>
+    <p>To all our players, thanks for bringing the fun (and sometimes frustration) to every round. Whether you were crushing drives or just making sure the golf carts stayed in one piece, you made this season unforgettable. We’re thrilled to have been along for the ride—fore-sure!
+    </p>
+    <p>As a bonus, you can now access the Team & Player Championship Leaderboards under the <b>TeeBox League History</b> tab to relive the highlights (and perhaps a few near-misses).</p>
+    <p>We look forward to many more rounds and a new season filled with great golf and even greater company.</p>
+    <p>Best,</p>
+    <p>The TeeBox League Team</p>
+    `
+      : `
+    <p>Fore!</p>
+    <p>The ${leagueName} season has officially come to a close, and what a season it’s been! Huge thanks to everyone who participated, whether you were sinking birdies or stuck in the rough, you all made this league a hole-in-one.</p>
+    <p>A special shout-out to <b>${championName}</b>, who swung their way to the top and claimed the champion’s crown. Time to update that trophy shelf!</p>
+    <p>For those looking to relive the glory (or, ahem, some of those "almost" shots), head over to your <b>History</b> tab and under the champ's name you can find:</p>
+    <ul>
+    <li>All <b>Match Results</b></li>
+    <li>The <b>Full Leaderboard</b></li>
+    <li>The <b>Playoff Bracket</b></li>
+    </ul>
+    <p>Thanks again for bringing your A-game this season. We’ll see you back on the green next time—because every round is just one swing away from greatness (or the bunker)!</p>
+    <p>Keep it on the fairway,</p>
+    <p>The Tee Box League Team</p>
+    `;
+    await updateLeagueNameAndChampion(
+      this.idTournament,
+      leagueName,
+      championName
+    );
+
+    //await updateHistoryLeagues(emails, this.idTournament);
+
+    await sendCustomEmail(emails, title, body);
+    toast.update(cuToast, {
+      render: "League Finished",
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+    setTimeout(() => {
+      location.reload();
+    }, 3000);
+    //location.reload();
   }
 }
 
