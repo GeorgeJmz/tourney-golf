@@ -7,22 +7,21 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import { onRequest } from "firebase-functions/v2/https";
+import {onRequest} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
+
+import * as express from "express";
+
+
 /* eslint-disable */
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+
+
+
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
 
-import {
-  onDocumentWritten,
-  onDocumentCreated,
-  onDocumentUpdated,
-  onDocumentDeleted,
-  Change,
-  FirestoreEvent,
-} from "firebase-functions/v2/firestore";
 
 admin.initializeApp();
 
@@ -37,127 +36,14 @@ export const addUser = onRequest((request, response) => {
   response.send("<p>Hello from Firebase! is Working</p>");
 });
 
-exports.onFinishLeague = onDocumentUpdated(
-  "tournament/{tournamentId}",
-  async (event) => {
-    const previousValue = event.data?.before.data();
-    const newValue = event.data?.after.data();
-    const isFinished =
-      previousValue?.status !== "closed" && newValue?.status === "closed";
-    if (isFinished) {
-      logger.info(`Tournament finished - ${previousValue?.name}`, {
-        structuredData: true,
-      });
 
-      const emails = newValue?.playersList.map((player: any) => player.email);
-      const tournamentId = event.data?.before.id;
-      const maxEmails = 10;
-      const emailsSeparated = emails.reduce(
-        (acc: any, email: any, index: any) => {
-          const lastPositon = acc.length - 1;
-          if (acc[lastPositon] && acc[lastPositon].length < maxEmails) {
-            acc[lastPositon].push(email);
-            return acc;
-          }
-          acc.push([email]);
-          return acc;
-        },
-        []
-      );
+exports.onFinishLeague = require("./events/onFinishLeague").onFinishLeague;
+exports.onCreateMatch = require("./events/onCreateMatch").onCreateMatch;
 
-      emailsSeparated.forEach(async (mails: any) => {
-        await admin
-          .firestore()
-          .collection("users")
-          .where("email", "in", mails)
-          .get()
-          .then((querySnapshot: any) => {
-            querySnapshot.forEach((doc: any) => {
-              const userData = doc.data();
-              const historyTournaments = new Set(
-                userData.historyTournaments || []
-              );
-              const activeTournaments = userData.activeTournaments || [];
-              const newAdded = {
-                activeTournaments: activeTournaments.filter(
-                  (tournament: string) => tournament !== tournamentId
-                ),
-                historyTournaments: [
-                  ...new Set([...historyTournaments, tournamentId]),
-                ],
-              };
 
-              logger.info(newAdded, { structuredData: true });
-              doc.ref.update(newAdded);
-            });
-          });
-      });
-    }
-
-    // const userQuery = query(
-    //   collection(db, "users"),
-    //   where("email", "in", emails)
-    // );
-    // const querySnapshot = await getDocs(userQuery);
-
-    // await querySnapshot.forEach(async (doc) => {
-    //   const activeTournaments = doc.data()?.activeTournaments || [];
-    //   const historyTournaments = doc.data()?.historyTournaments || [];
-    //   const newAdded = {
-    //     activeTournaments: activeTournaments.filter(
-    //       (tournament: string) => tournament !== tournamentId
-    //     ),
-    //     historyTournaments: [...new Set([...historyTournaments, tournamentId])],
-    //   };
-
-    //   await setDoc(doc.ref, newAdded, { merge: true });
-    // });
-  }
-);
-
-export const onCreateMatch = functions.firestore
-  .document("match/{matchId}")
-  .onCreate((snapshot) => {
-    const matchData = snapshot.data();
-    const matchResults = matchData.matchResults;
-
-    matchResults.forEach(async (matchResult) => {
-      const userId = matchResult.idPlayer;
-      //   logger.info("MatchResults ---", { structuredData: true });
-      //   logger.info(userId, { structuredData: true });
-      await admin
-        .firestore()
-        .collection("users")
-        .where("email", "==", userId)
-        .get()
-        .then((querySnapshot) => {
-          //   logger.info("QuerySnapshot ---", { structuredData: true });
-          //   logger.info(querySnapshot, { structuredData: true });
-          querySnapshot.forEach((doc) => {
-            // logger.info("Doc ---", { structuredData: true });
-            // logger.info(doc, { structuredData: true });
-
-            const userData = doc.data();
-            // logger.info("UserData ---", { structuredData: true });
-            // logger.info(userData, { structuredData: true });
-            const lastCourses = new Set(userData.lastCourses || []);
-            lastCourses.add(matchData.course);
-            const updatedUserData = {
-              ...userData,
-              lastCourses:
-                lastCourses.size > 5
-                  ? Array.from(lastCourses).slice(1)
-                  : Array.from(lastCourses),
-            };
-
-            doc.ref.update(updatedUserData);
-
-            // logger.info("UpdatedUserData ---", { structuredData: true });
-            logger.info(updatedUserData, { structuredData: true });
-          });
-        });
-    });
-  });
+const api = express();
+api.get('/', (req, res) => res.status(200).send('Hey there!'));
+exports.app = functions.https.onRequest(api);
 
 // export const createMultipleMockAccounts = onRequest(
 //   async (request, response) => {
