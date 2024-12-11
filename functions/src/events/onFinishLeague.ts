@@ -1,9 +1,6 @@
-import {
-  onDocumentUpdated,
-} from "firebase-functions/v2/firestore";
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import admin = require("firebase-admin");
-
 
 exports.onFinishLeague = onDocumentUpdated(
   "tournament/{tournamentId}",
@@ -55,7 +52,7 @@ exports.onFinishLeague = onDocumentUpdated(
                 ],
               };
 
-              logger.info(newAdded, {structuredData: true});
+              logger.info(newAdded, { structuredData: true });
               doc.ref.update(newAdded);
             });
           });
