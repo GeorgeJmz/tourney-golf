@@ -105,6 +105,23 @@ export const sendCustomEmail = async (
   }
 };
 
+export const getAllUsers = async (): Promise<void> => {
+  const authToken = await auth.currentUser?.getIdToken();
+  await fetch(
+    "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api/getUsers",
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${authToken}` },
+      mode: "cors",
+    }
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => console.log(error));
+};
+
 export const createUser = async (
   user: Partial<IUser>
 ): Promise<Partial<IUser>> => {

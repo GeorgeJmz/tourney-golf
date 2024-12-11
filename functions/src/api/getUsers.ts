@@ -1,36 +1,23 @@
 import { Response } from "express";
 import admin = require("firebase-admin");
+import type { RequestGetUsers, UserType } from "../types/User";
+import * as DOMPurify from "isomorphic-dompurify";
 
-type EntryType = {
-  name: string;
-  lastname: string;
-  email: string;
-  id: string;
-  activeTournaments: { tournamentId: string; tournamentName: string }[];
-  historyTournaments: {
-    tournamentId: string;
-    tournamentName: string;
-    result: string;
-  }[];
-  uuid?: string;
-};
-
-type Request = {
-  body: EntryType;
-  params: { entryId: string };
-};
-
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (req: RequestGetUsers, res: Response) => {
   const db = admin.firestore();
+  const sanitizedEmail = DOMPurify.sanitize(req.query.email);
+
   try {
-    const allUsers = await db.collection("users").get();
-    const users: EntryType[] = [];
+    const allUsers = sanitizedEmail
+      ? await db.collection("users").where("email", "==", sanitizedEmail).get()
+      : await db.collection("users").get();
+    const users: UserType[] = [];
     allUsers.forEach((doc) => {
       const user = {
         ...doc.data(),
         uuid: doc.id,
       };
-      users.push(user as EntryType);
+      users.push(user as UserType);
     });
     return res.status(200).json({
       status: "success",
