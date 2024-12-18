@@ -9,7 +9,7 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
   const db = admin.firestore();
   const {
     name,
-    lastname,
+    lastName,
     email,
     id,
     activeTournaments,
@@ -17,7 +17,14 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
     ghinNumber,
   } = req.body;
 
-  if (!name || !lastname || !email || !id) {
+  logger.info("Request body", { structuredData: true });
+  logger.info(req.body, { structuredData: true });
+  logger.info(name, { structuredData: true });
+  logger.info(lastName, { structuredData: true });
+  logger.info(email, { structuredData: true });
+  logger.info(id, { structuredData: true });
+
+  if (!name || !lastName || !email || !id) {
     res.status(400).send({
       status: "error",
       message: "Missing required fields",
@@ -37,7 +44,7 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
   const sanitizedEmail = DOMPurify.sanitize(email);
   const sanitizedId = DOMPurify.sanitize(id);
   const sanitizedName = DOMPurify.sanitize(name);
-  const sanitizedLastname = DOMPurify.sanitize(lastname);
+  const sanitizedLastname = DOMPurify.sanitize(lastName);
   const sanitizedGhinNumber = DOMPurify.sanitize(ghinNumber);
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
@@ -50,7 +57,7 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
 
   const user = {
     name: sanitizedName,
-    lastname: sanitizedLastname,
+    lastName: sanitizedLastname,
     email: sanitizedEmail,
     id: sanitizedId,
     ghinNumber: sanitizedGhinNumber,

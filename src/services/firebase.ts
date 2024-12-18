@@ -53,7 +53,8 @@ export const firebase = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
-if (process.env.REACT_APP_ENV === "LOCAL") {
+const isLocal = process.env.REACT_APP_ENV === "LOCAL";
+if (isLocal) {
   connectFirestoreEmulator(db, "127.0.0.1", 8081);
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
 }
@@ -107,14 +108,14 @@ export const sendCustomEmail = async (
 
 export const getAllUsers = async (): Promise<void> => {
   const authToken = await auth.currentUser?.getIdToken();
-  await fetch(
-    "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api/getUsers",
-    {
-      method: "GET",
-      headers: { Authorization: `Bearer ${authToken}` },
-      mode: "cors",
-    }
-  )
+  const url = isLocal
+    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+  await fetch(`${url}/getUsers`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${authToken}` },
+    mode: "cors",
+  })
     .then((response) => response.json())
     .then((data) => {
       console.log(data);
@@ -130,51 +131,96 @@ export const createUser = async (
       auth,
       user?.email?.toLowerCase() || "",
       user.password || ""
-    );
+    ).then((user) => {
+      console.log(user, "user");
+      return user;
+    });
+
+    const authToken = await auth.currentUser?.getIdToken();
     const firebaseUser = {
       email: user?.email?.toLowerCase(),
       id: credentials.user?.uid,
       name: user.name?.trim(),
       lastName: user.lastName,
       ghinNumber: user.ghinNumber || "",
+      activeTournaments: [],
+      historyTournaments: [],
     } as IUser;
-    const idUser = await getUserIdByEmail(user?.email?.toLowerCase() || "");
-    if (!idUser) {
-      await addDoc(collection(db, "users"), firebaseUser);
-    } else {
-      const userCollection = collection(db, "users");
-      const playersCollection = collection(db, "player");
-      const userQuery = query(
-        userCollection,
-        where("email", "==", user?.email?.toLowerCase())
-      );
-      const playersQuery = query(
-        playersCollection,
-        where("email", "==", user?.email?.toLowerCase())
-      );
-      const querySnapshot = await getDocs(userQuery);
-      const querySnapshot2 = await getDocs(playersQuery);
-
-      querySnapshot.forEach(async (dc) => {
-        const documentRef = doc(db, "users", dc.id);
-        await setDoc(documentRef, firebaseUser, { merge: true });
+     const url = isLocal
+      ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+      : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+    await fetch(`${url}/addUser`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`, 
+        "Content-Type": "application/json", 
+      },
+      body: JSON.stringify(firebaseUser),
+      mode: "cors",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data, "data");
+        return firebaseUser;
       });
 
-      querySnapshot2.forEach(async (dc) => {
-        const documentRef = doc(db, "player", dc.id);
-        await setDoc(
-          documentRef,
-          { ...dc.data(), id: credentials.user?.uid },
-          { merge: true }
-        );
-      });
-    }
-    await sendCustomEmail(
-      user.email || "",
-      "Welcome to TEE BOX League",
-      "<p>Now you're ready to practice with purpose, play with an edge and become a league legend.</p><p><a href='https://teeboxleague.com/'>Login</a> to create a new league or accept a league invitation.</p>"
-    );
-    return user;
+    return firebaseUser;
+
+    
+
+    // const authToken = await auth.currentUser?.getIdToken();
+    // const url = isLocal
+    //   ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+    //   : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+    // await fetch(`${url}/addUser`, {
+    //   method: "POST",
+    //   headers: { Authorization: `Bearer ${authToken}` },
+    //   body: JSON.stringify(firebaseUser),
+    //   mode: "cors",
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log(data, "data");
+    //     return firebaseUser;
+    //   });
+
+    // const idUser = await getUserIdByEmail(user?.email?.toLowerCase() || "");
+    // if (!idUser) {
+    //   await addDoc(collection(db, "users"), firebaseUser);
+    // } else {
+    //   const userCollection = collection(db, "users");
+    //   const playersCollection = collection(db, "player");
+    //   const userQuery = query(
+    //     userCollection,
+    //     where("email", "==", user?.email?.toLowerCase())
+    //   );
+    //   const playersQuery = query(
+    //     playersCollection,
+    //     where("email", "==", user?.email?.toLowerCase())
+    //   );
+    //   const querySnapshot = await getDocs(userQuery);
+    //   const querySnapshot2 = await getDocs(playersQuery);
+
+    //   querySnapshot.forEach(async (dc) => {
+    //     const documentRef = doc(db, "users", dc.id);
+    //     await setDoc(documentRef, firebaseUser, { merge: true });
+    //   });
+
+    //   querySnapshot2.forEach(async (dc) => {
+    //     const documentRef = doc(db, "player", dc.id);
+    //     await setDoc(
+    //       documentRef,
+    //       { ...dc.data(), id: credentials.user?.uid },
+    //       { merge: true }
+    //     );
+    //   });
+    // }
+    // await sendCustomEmail(
+    //   user.email || "",
+    //   "Welcome to TEE BOX League",
+    //   "<p>Now you're ready to practice with purpose, play with an edge and become a league legend.</p><p><a href='https://teeboxleague.com/'>Login</a> to create a new league or accept a league invitation.</p>"
+    // );
+    // return user;
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
