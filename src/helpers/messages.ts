@@ -54,6 +54,8 @@ export const messages: MessagesType = {
   "tournaments-loaded": "Leagues Loaded Successfully",
   "courses-loaded": "Courses Loaded Successfully",
   "matches-loaded": "Matches Loaded Successfully",
+  "date-changed": "Date Changed Successfully",
+  "player-removed": "Player Removed Successfully",
 };
 
 export enum Messages {
@@ -70,5 +72,7 @@ export enum Messages {
   "SCORE_CREATED" = "score-created",
   "MATCH_DELETED" = "match-deleted",
   "ROUND_DELETED" = "round-deleted",
+  "PLAYER_REMOVED" = "player-removed",
+  "DATE_CHANGED" = "date-changed",
   "INVALID_LOGIN_CREDENTIALS" = "auth/invalid-login-credentials",
 }
