@@ -44,6 +44,7 @@ import { Messages } from "../../helpers/messages";
 import RoundReviewDogfight from "../../components/RoundReviewDogfight";
 import PLayOffs from "../PlayOffs/PlayOffs";
 import { TextInput } from "../../components/TextInput";
+import RoundReviewTeamPlay from "../../components/RoundReviewTeamPlay";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -199,9 +200,17 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     setOpenDeleteModal(true);
   };
 
+  const onChangeDate = (idRound: string, newDate: string) => {
+    tournamentViewModel.changeMatchDate(idRound, newDate);
+  };
   const onDeleteMatchConfirm = () => {
     !isDogfight
-      ? tournamentViewModel.deleteMatch(matchToDelete)
+      ? isTeamPlay
+        ? tournamentViewModel.removePlayerFromMatch(
+            matchToDelete.split("-")[0],
+            matchToDelete.split("-")[1]
+          )
+        : tournamentViewModel.deleteMatch(matchToDelete)
       : tournamentViewModel.deleteRound(
           matchToDelete.split("-")[0],
           matchToDelete.split("-")[1]
@@ -243,11 +252,41 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   };
 
   const isTeamPlay = tournamentType === "teamplay";
-
+  const displayPlayoffs = isDogfight || isDraft || isTeamPlay;
   const fieldText = isTeamPlay ? "Champion Team Name" : "Champion's Name";
   const finishLeagueText = isTeamPlay
     ? "All players will see the league taken off from League Action and find Results and Leaderboards in their League History as view only."
     : "All players will see the league taken off from League Action and find Results, Leaderboard and Playoff Bracket in their League History as view only.";
+
+  const modalText = isTeamPlay
+    ? "Remove Score ?"
+    : !isDogfight
+    ? tournamentViewModel.leagueResults
+        .find((m) => m.id === matchToDelete)
+        ?.matchResults.map((p) => p.playerName)
+        .join(" vs ") || ""
+    : `Round ${
+        tournamentViewModel.leagueResults.find(
+          (m) => m.id === matchToDelete.split("-")[0]
+        )?.round || ""
+      } - ${
+        tournamentViewModel.leagueResults
+          .find((m) => m.id === matchToDelete.split("-")[0])
+          ?.matchResults.find((p) => p.idPlayer === matchToDelete.split("-")[1])
+          ?.playerName || ""
+      }`;
+  const modalTitle = isTeamPlay
+    ? tournamentViewModel.leagueResults
+        .find((m) => m.id === matchToDelete.split("-")[0])
+        ?.matchResults.find((i) => i.idPlayer === matchToDelete.split("-")[1])
+        ?.playerName
+    : `Delete ${!isDogfight ? "match" : "round"} ?`;
+
+  const isTeamPlayResults = isTeamPlay
+    ? [...tournamentViewModel.leagueResults].sort((a, b) =>
+        differenceDate(a.date, b.date)
+      )
+    : [];
 
   return (
     <div>
@@ -274,7 +313,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             {isDogfight || isDraft ? null : (
               <Tab label="Switch Players " value={2} />
             )}
-            {isDogfight || isDraft ? null : (
+            {displayPlayoffs ? null : (
               <Tab label="Playoff Picture " value={3} />
             )}
             <Tab label="Finish League" value={4} />
@@ -292,6 +331,12 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                 playersResultsOptions={
                   tournamentViewModel.playersResultsOptions
                 }
+              />
+            ) : isTeamPlay ? (
+              <RoundReviewTeamPlay
+                leagueResults={isTeamPlayResults}
+                onChangeDate={onChangeDate}
+                onRemovePlayer={onDeleteRound}
               />
             ) : (
               // <Box alignContent="center">
@@ -769,26 +814,11 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             onClose={() => setOpenDeleteModal(false)}
             aria-describedby="alert-dialog-slide-description"
           >
-            <DialogTitle>Delete {!isDogfight ? "match" : "round"}?</DialogTitle>
+            <DialogTitle>{modalTitle}</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-slide-description">
                 <Typography variant="h6" textAlign="center">
-                  {!isDogfight
-                    ? tournamentViewModel.leagueResults
-                        .find((m) => m.id === matchToDelete)
-                        ?.matchResults.map((p) => p.playerName)
-                        .join(" vs ") || ""
-                    : `Round ${
-                        tournamentViewModel.leagueResults.find(
-                          (m) => m.id === matchToDelete.split("-")[0]
-                        )?.round || ""
-                      } - ${
-                        tournamentViewModel.leagueResults
-                          .find((m) => m.id === matchToDelete.split("-")[0])
-                          ?.matchResults.find(
-                            (p) => p.idPlayer === matchToDelete.split("-")[1]
-                          )?.playerName || ""
-                      }`}
+                  {modalText}
                 </Typography>
               </DialogContentText>
             </DialogContent>

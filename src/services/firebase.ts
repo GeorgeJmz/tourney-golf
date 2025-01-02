@@ -997,6 +997,33 @@ export const updateMatch = async (
   }
 };
 
+export const updateDateFromPlayer = async (
+  previousDate: string,
+  newDate: string,
+  emailLists: Array<string>,
+  tournamentId: string
+) => {
+  const playerCollection = collection(db, "player");
+  const userQuery = query(
+    playerCollection,
+    where("email", "in", emailLists),
+    where("tournamentId", "==", tournamentId)
+  );
+
+  const querySnapshot = await getDocs(userQuery);
+  querySnapshot.forEach(async (dc) => {
+    const playerData = dc.data() as ITournamentPlayer;
+    const newPlayer = {
+      ...playerData,
+      date: playerData.date?.map((d) => (d === previousDate ? newDate : d)),
+    };
+    console.log(playerData, "prevPlayer");
+    console.log(newPlayer, "newPlayer");
+    const documentRef = doc(db, "player", dc.id);
+    await setDoc(documentRef, newPlayer, { merge: true });
+  });
+};
+
 export const createScore = async (score: IScore): Promise<string> => {
   try {
     const doc = await addDoc(collection(db, "score"), score);

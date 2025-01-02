@@ -21,6 +21,7 @@ import {
   getPlayoffsMatchesByTournamentId,
   updateLeagueNameAndChampion,
   removePlayerFromTournament,
+  updateDateFromPlayer,
 } from "../services/firebase";
 import { Messages } from "../helpers/messages";
 import { toast } from "react-toastify";
@@ -39,7 +40,7 @@ import type {
 } from "../models/Tournament";
 import PlayerModel, { ITournamentPlayer } from "../models/Player";
 import { IMatch, IMatchResults } from "../models/Match";
-import { convertMomentDate } from "../helpers/convertDate";
+import { convertDateToMoment, convertMomentDate } from "../helpers/convertDate";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -528,6 +529,58 @@ class TournamentViewModel {
     }
   }
 
+  async changeMatchDate(matchId: string, newDate: string): Promise<void> {
+    const dates = convertDateToMoment(newDate);
+    const dateFormatted = convertMomentDate(dates);
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    const match = this.leagueResults.find((m) => m.id === matchId);
+    if (match) {
+      console.log(toJS(match), "match");
+      const newMatch = { ...match, date: dates };
+      const previousDate = convertMomentDate(match.date);
+      console.log(newMatch, "newMatch");
+      console.log(dateFormatted, "dateFormatted");
+      console.log(previousDate, "previousDate");
+      const emailLists = match.matchResults.map((m) => m.idPlayer);
+      console.log(emailLists, "emailLists");
+      await updateMatch(matchId, newMatch);
+
+      await updateDateFromPlayer(
+        previousDate,
+        dateFormatted,
+        emailLists,
+        this.idTournament
+      );
+
+      // const players = (await getPlayersByTournamentId(match.tournamentId)) || [];
+      // for (const player of match.matchResults) {
+      //   const playerData = players.find((p) => p.email === player.idPlayer);
+      //   if (playerData) {
+      //     const index = playerData.date?.findIndex(
+      //       (d) => d === previousDate
+      //     );
+      //     const newScore = {
+      //       ...playerData,
+      //       date: playerData.date?.map((d, i) =>
+      //         i === index ? dateFormatted : d
+      //       ),
+      //     };
+      //     console.log(playerData, "playerData");
+      //     console.log(newScore, "newScore");
+      //     //await updateScore(player.scoresId, newScore);
+      //   }
+      //}
+    }
+    const displayMessage = getMessages(Messages.DATE_CHANGED);
+    toast.update(cuToast, {
+      render: displayMessage,
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+  }
+
   async deleteMatch(matchId: string): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
@@ -614,6 +667,45 @@ class TournamentViewModel {
     }
 
     const displayMessage = getMessages(Messages.ROUND_DELETED);
+    toast.update(cuToast, {
+      render: displayMessage,
+      type: toast.TYPE.SUCCESS,
+      isLoading: false,
+      autoClose: 800,
+    });
+  }
+
+  async removePlayerFromMatch(
+    matchId: string,
+    playerId: string
+  ): Promise<void> {
+    const displayLoading = getMessages(Messages.LOADING);
+    const cuToast = toast.loading(displayLoading);
+    const match = this.leagueResults.find((m) => m.id === matchId);
+
+    const playerIndexToRemove = match?.matchResults.findIndex(
+      (m) => m.idPlayer === playerId
+    );
+
+    const scoreID = playerIndexToRemove
+      ? match?.scoresId[playerIndexToRemove]
+      : "";
+    const newMatch = {
+      ...match,
+      matchResults: match?.matchResults.filter((m) => m.idPlayer !== playerId),
+      scoresId: match?.scoresId.filter((s, i) => i !== playerIndexToRemove),
+    };
+    console.log(toJS(newMatch), "newMatch");
+    console.log(scoreID, "scoreID");
+
+    if (scoreID && scoreID !== "") {
+      await deleteScore(scoreID);
+    }
+    if (matchId && newMatch) {
+      await updateMatch(matchId, newMatch);
+    }
+
+    const displayMessage = getMessages(Messages.PLAYER_REMOVED);
     toast.update(cuToast, {
       render: displayMessage,
       type: toast.TYPE.SUCCESS,
