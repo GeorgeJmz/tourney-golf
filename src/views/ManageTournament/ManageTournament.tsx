@@ -88,7 +88,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
       ),
     },
     {
-      label: "Groups Setup",
+      label: "Division Setup",
       component: (
         <GroupsSetup
           tournamentViewModel={tournamentViewModel}
@@ -136,13 +136,13 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
     }
     if (type === "teamplay" || type === "3stage") {
       return steps.filter(
-        (s) => s.label !== "Groups Setup" && s.label !== "Conference Setup"
+        (s) => s.label !== "Division Setup" && s.label !== "Conference Setup"
       );
     }
     if (type === "dogfight") {
       return steps.filter(
         (s) =>
-          s.label !== "Groups Setup" &&
+          s.label !== "Division Setup" &&
           s.label !== "Conference Setup" &&
           s.label !== "Teams Setup"
       );

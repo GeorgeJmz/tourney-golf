@@ -72,10 +72,10 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
         replace: "conference",
       },
       [DragDropType.Groups]: {
-        name: "Groups",
-        placeholder: "Number of Groups",
-        destination: "group0",
-        replace: "group",
+        name: "Divisions",
+        placeholder: "Number of Divisions",
+        destination: "division0",
+        replace: "division",
       },
       [DragDropType.Teams]: {
         name: "Teams",
@@ -147,7 +147,7 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
     ) {
       return listOfDraggable?.filter((player) => {
         const playerGroupOrTeam =
-          texts.replace === "group" ? player.group : player.team;
+          texts.replace === "division" ? player.group : player.team;
         if (playerGroupOrTeam) {
           return playerGroupOrTeam === id;
         }

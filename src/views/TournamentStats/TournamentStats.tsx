@@ -165,7 +165,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
           </Button>
           <MenuItems
             options={tournamentViewModel.conferencesOptions}
-            placeholder="Conferences"
+            placeholder="Conference"
             onChange={setStats}
             isActive={tournamentViewModel.conferencesOptions.some(
               (g) => g.value === stats
@@ -173,7 +173,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
           />
           <MenuItems
             options={tournamentViewModel.groupsOptions}
-            placeholder="Groups"
+            placeholder="Division"
             onChange={setStats}
             isActive={tournamentViewModel.groupsOptions.some(
               (g) => g.value === stats
