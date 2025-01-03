@@ -108,9 +108,24 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
               <MultipleInput
                 inputElement={inputElement}
                 isError={isError}
-                onChangeHandler={(e) =>
-                  formik.setFieldValue(inputElement.name, e.target.value)
-                }
+                onChangeHandler={(e) => {
+                  let valueToSet = [...e.target.value];
+                  if (inputElement.name === "matchesPerRound") {
+                    const cuadruple = "cuadruple";
+                    const triple = "triple";
+                    const double = "double";
+                    if (e.target.value.includes(double)) {
+                      valueToSet = ["double"];
+                    }
+                    if (e.target.value.includes(triple)) {
+                      valueToSet = ["triple", "double"];
+                    }
+                    if (e.target.value.includes(cuadruple)) {
+                      valueToSet = ["cuadruple", "triple", "double"];
+                    }
+                  }
+                  formik.setFieldValue(inputElement.name, valueToSet);
+                }}
                 value={formik.values[inputElement.name] as unknown as string}
                 error={formik.errors[inputElement.name]}
                 key={key}
