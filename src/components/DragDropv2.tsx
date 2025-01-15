@@ -16,7 +16,6 @@ import Grid from "@mui/material/Grid";
 import { ITournamentElement } from "../helpers/getTournamentFields";
 import type { IPlayer, ITournamentGroup } from "../models/Tournament";
 import { GroupTitle } from "./GroupTitle";
-import { json } from "stream/consumers";
 
 export enum DragDropType {
   Groups = "Groups",
@@ -70,18 +69,21 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
         placeholder: "Number of Conferences",
         destination: "conference0",
         replace: "conference",
+        onUpdateText: "conference",
       },
       [DragDropType.Groups]: {
         name: "Divisions",
         placeholder: "Number of Divisions",
         destination: "division0",
         replace: "division",
+        onUpdateText: "group",
       },
       [DragDropType.Teams]: {
         name: "Teams",
         placeholder: "Number of Teams",
         destination: "team0",
         replace: "team",
+        onUpdateText: "team",
       },
     };
     return mapTypes[type];
@@ -90,16 +92,24 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
   const texts = textByType(typeOfDraggable);
 
   useEffect(() => {
-    if (listOfGroups.length === 0) {
-      const newGroups = Array.from(Array(parseInt(numberOfGroups)).keys()).map(
-        (i) => ({
-          id: `${texts.replace}${i + 1}`,
-          name: `${texts.replace} ${i + 1}`,
-        })
-      );
+    //if (listOfGroups.length === 0) {
+    const newGroups = Array.from(Array(parseInt(numberOfGroups)).keys()).map(
+      (i) => ({
+        id: `${texts.replace}${i + 1}`,
+        name: `${texts.replace} ${i + 1}`,
+      })
+    );
 
-      onUpdateGroups(newGroups);
-    }
+    onUpdateGroups(newGroups);
+    listOfDraggable.forEach((player) => {
+      const allGroups = newGroups.map((group) => group.id);
+      const textToReplace = player[texts.onUpdateText as keyof IPlayer];
+      if (!allGroups.includes((textToReplace as string) || "0initial")) {
+        onUpdateGroupPlayers("0initial", player.id || "");
+      }
+    });
+
+    // }
   }, [numberOfGroups]);
 
   const inputElement: ITournamentElement = {
@@ -206,41 +216,72 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
   };
   return (
     <div>
-      {!showElements && (
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={2} md={2}></Grid>
-          <SelectInput
-            inputElement={inputElement}
-            isError={false}
-            onChangeHandler={(e) => {
-              const value = e.target.value;
-              setNumberOfGroups(value);
+      {/* {!showElements && ( */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={2} md={2}></Grid>
+        <SelectInput
+          inputElement={inputElement}
+          isError={false}
+          onChangeHandler={(e) => {
+            const value = e.target.value;
+            setNumberOfGroups(value);
+          }}
+          value={numberOfGroups}
+          error={""}
+          key={0}
+        />
+        {/* <Grid item xs={12} sm={2} md={2} sx={{ marginTop: "20px" }}>
+          <IconButton
+            aria-label="delete"
+            size="large"
+            color="primary"
+            onClick={() => {
+              setShowElements(true);
             }}
-            value={numberOfGroups}
-            error={""}
-            key={0}
-          />
-          <Grid item xs={12} sm={2} md={2} sx={{ marginTop: "20px" }}>
-            <IconButton
-              aria-label="delete"
-              size="large"
-              color="primary"
-              onClick={() => {
-                setShowElements(true);
-              }}
-            >
-              <ArrowForwardIosIcon />
-            </IconButton>
+          >
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </Grid> */}
+      </Grid>
+      {/* )} */}
+      {/* {showElements && ( */}
+      <Grid container spacing={2}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Grid item key={"0initial"} xs={12} sm={12} md={12}>
+            <Card>
+              <CardContent>
+                <Droppable droppableId={"0initial"}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      style={{
+                        backgroundColor: snapshot.isDraggingOver
+                          ? "lightblue"
+                          : "inherit",
+                        padding: 4,
+                        minHeight: 100,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        overflowY: "scroll",
+                      }}
+                    >
+                      {getDragabbleList("0initial")}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </CardContent>
+            </Card>
           </Grid>
-        </Grid>
-      )}
-      {showElements && (
-        <Grid container spacing={2}>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Grid item key={"0initial"} xs={12} sm={12} md={12}>
+          {listOfGroups.map((group) => (
+            <Grid item key={group.id} xs={12} sm={6} md={4}>
               <Card>
                 <CardContent>
-                  <Droppable droppableId={"0initial"}>
+                  <GroupTitle
+                    group={group}
+                    onUpdateTitleGroup={onUpdateTitleGroupHandler}
+                  />
+                  <Droppable droppableId={group.id}>
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
@@ -255,7 +296,7 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
                           overflowY: "scroll",
                         }}
                       >
-                        {getDragabbleList("0initial")}
+                        {getDragabbleList(group.id)}
                         {provided.placeholder}
                       </div>
                     )}
@@ -263,41 +304,10 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
                 </CardContent>
               </Card>
             </Grid>
-            {listOfGroups.map((group) => (
-              <Grid item key={group.id} xs={12} sm={6} md={4}>
-                <Card>
-                  <CardContent>
-                    <GroupTitle
-                      group={group}
-                      onUpdateTitleGroup={onUpdateTitleGroupHandler}
-                    />
-                    <Droppable droppableId={group.id}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          style={{
-                            backgroundColor: snapshot.isDraggingOver
-                              ? "lightblue"
-                              : "inherit",
-                            padding: 4,
-                            minHeight: 100,
-                            display: "flex",
-                            flexWrap: "wrap",
-                            overflowY: "scroll",
-                          }}
-                        >
-                          {getDragabbleList(group.id)}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </DragDropContext>
-        </Grid>
-      )}
+          ))}
+        </DragDropContext>
+      </Grid>
+      {/* )} */}
     </div>
   );
 };
