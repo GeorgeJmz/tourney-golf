@@ -9,6 +9,7 @@ export interface ITournamentPlayer {
   pointsStroke: Array<number>;
   pointsMatch: Array<number>;
   pointsTeam: Array<number>;
+  bonusPoints: Array<number>;
   gross: Array<number>;
   handicap: Array<number>;
   net: Array<number>;
@@ -28,6 +29,7 @@ export default class PlayerModel implements ITournamentPlayer {
   pointsStroke = [];
   pointsTeam = [];
   pointsMatch = [];
+  bonusPoints = [];
   scoreId = [];
   gross = [];
   handicap = [];

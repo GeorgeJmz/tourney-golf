@@ -123,7 +123,7 @@ export const MatchModal: React.FC<IMatchModalProps> = ({
         </ListItem>
       </React.Fragment>
     ));
-    return playerListRender.reverse();
+    return playerListRender;
   };
   return (
     <Modal

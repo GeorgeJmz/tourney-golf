@@ -454,6 +454,24 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
                   )
                 )}
             </TableRow>
+            <TableRow>
+              <TableCell align="center" sx={cellStyle("60px", true)}>
+                {authorDisplayName}
+              </TableCell>
+              {Array(21)
+                .fill(0)
+                .map((value, key) =>
+                  key != 9 && key !== 19 && key !== 20 ? (
+                    <TableCell align="center" sx={cellStyle()}>
+                      {getAuthorCell(key)}
+                    </TableCell>
+                  ) : (
+                    <StyledTableCellSpecial>
+                      {getAuthorCell(key)}
+                    </StyledTableCellSpecial>
+                  )
+                )}
+            </TableRow>
             {opponents.map((opponent) => (
               <TableRow>
                 <TableCell align="center" sx={cellStyle("60px", true)}>
@@ -486,24 +504,6 @@ export const ScoreTable: React.FC<IScoreTableProps> = ({
                   )}
               </TableRow>
             ))}
-            <TableRow>
-              <TableCell align="center" sx={cellStyle("60px", true)}>
-                {authorDisplayName}
-              </TableCell>
-              {Array(21)
-                .fill(0)
-                .map((value, key) =>
-                  key != 9 && key !== 19 && key !== 20 ? (
-                    <TableCell align="center" sx={cellStyle()}>
-                      {getAuthorCell(key)}
-                    </TableCell>
-                  ) : (
-                    <StyledTableCellSpecial>
-                      {getAuthorCell(key)}
-                    </StyledTableCellSpecial>
-                  )
-                )}
-            </TableRow>
           </TableBody>
         </StyledTable>
       </TableContainer>

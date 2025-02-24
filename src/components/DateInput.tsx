@@ -13,6 +13,7 @@ interface DateInputProps {
   error: string | undefined;
   value: string | null;
   onChange: ((value: string | null) => void) | undefined;
+  disabledPast?: boolean;
 }
 
 export const DateInput: React.FC<DateInputProps> = ({
@@ -20,6 +21,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   isError,
   onChange,
   value,
+  disabledPast,
 }) => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Grid
@@ -33,6 +35,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           value={dayjs(value) as unknown as string}
           onChange={onChange}
           label={inputElement.placeholder}
+          disablePast={disabledPast}
         />
       </FormControl>
     </Grid>

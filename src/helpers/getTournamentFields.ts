@@ -47,7 +47,7 @@ export const step1: Array<ITournamentElement> = [
     options: [
       // { displayName: "Tourney", value: "tourney" },
       { displayName: "League", value: "league" },
-      // { displayName: "League + Team Play", value: "leagueteamplay" },
+      { displayName: "League + Team Play", value: "leagueteamplay" },
       { displayName: "Team Play", value: "teamplay" },
       // { displayName: "Team 3 Stage", value: "3stage" },
       { displayName: "Dogfight", value: "dogfight" },
@@ -85,6 +85,36 @@ export const getStep1 = (type: string) => {
           lg: 6,
         },
         options: [{ displayName: "Stableford", value: "stableford" }],
+      },
+    ] as ITournamentElement[];
+  }
+  if (type === "leagueteamplay") {
+    return [
+      step1[0],
+      step1[1],
+      {
+        name: "playType",
+        placeholder: "Type of Play",
+        input: "select",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+        options: [
+          {
+            displayName: "Match Play + Stableford",
+            value: "matchplaystableford",
+          },
+          {
+            displayName: "Medal Play + Stableford",
+            value: "medalplaystableford",
+          },
+          {
+            displayName: "Match Play + Medal Play + Stableford",
+            value: "matchmedalplaystableford",
+          },
+        ],
       },
     ] as ITournamentElement[];
   }
@@ -216,7 +246,7 @@ export const invitationsFieldsValidations: yup.ObjectSchema<IInvitationsInputEle
 export const rules: Array<ITournamentElement> = [
   {
     name: "startDate",
-    placeholder: "League Start Date",
+    placeholder: "Individual Player League Start Date",
     input: "date",
     size: {
       xs: 12,
@@ -261,6 +291,48 @@ export const rules: Array<ITournamentElement> = [
   },
 ];
 
+export const rulesTeamPlay: Array<ITournamentElement> = [
+  {
+    name: "numberOfStages",
+    placeholder: "Number of Team Stages",
+    input: "number",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 12,
+    },
+  },
+  {
+    name: "stagesDates",
+    placeholder: "Stages",
+    input: "multipleDatesStages",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 12,
+    },
+  },
+  {
+    name: "championshipRound",
+    placeholder: "Championship Round",
+    input: "switch",
+    size: {
+      xs: 12,
+      md: 6,
+      lg: 6,
+    },
+  },
+  {
+    name: "championshipDate",
+    placeholder: "Championship Date",
+    input: "date",
+    size: {
+      xs: 12,
+      md: 6,
+      lg: 6,
+    },
+  },
+];
 export const getRules = (type: string, tournamentType: string) => {
   const matchPoints = [
     {
@@ -307,48 +379,7 @@ export const getRules = (type: string, tournamentType: string) => {
     },
   ];
   if (tournamentType === "teamplay") {
-    return [
-      {
-        name: "numberOfStages",
-        placeholder: "Number of Stages",
-        input: "number",
-        size: {
-          xs: 12,
-          md: 12,
-          lg: 12,
-        },
-      },
-      {
-        name: "stagesDates",
-        placeholder: "Stages",
-        input: "multipleDatesStages",
-        size: {
-          xs: 12,
-          md: 12,
-          lg: 12,
-        },
-      },
-      {
-        name: "championshipRound",
-        placeholder: "Championship Round",
-        input: "switch",
-        size: {
-          xs: 12,
-          md: 6,
-          lg: 6,
-        },
-      },
-      {
-        name: "championshipDate",
-        placeholder: "Championship Date",
-        input: "date",
-        size: {
-          xs: 12,
-          md: 6,
-          lg: 6,
-        },
-      },
-    ] as ITournamentElement[];
+    return rulesTeamPlay as ITournamentElement[];
   }
   if (tournamentType === "dogfight") {
     return [
@@ -402,6 +433,42 @@ export const getRules = (type: string, tournamentType: string) => {
           lg: 12,
         },
       },
+    ] as ITournamentElement[];
+  }
+  console.log("type", type);
+  console.log("tournamentType", tournamentType);
+  if (tournamentType === "leagueteamplay" && type === "matchplaystableford") {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...matchPoints,
+      rules[3],
+      ...rulesTeamPlay,
+    ] as ITournamentElement[];
+  }
+  if (tournamentType === "leagueteamplay" && type === "medalplaystableford") {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...medalPoints,
+      rules[3],
+      ...rulesTeamPlay,
+    ] as ITournamentElement[];
+  }
+  if (
+    tournamentType === "leagueteamplay" &&
+    type === "matchmedalplaystableford"
+  ) {
+    return [
+      rules[0],
+      rules[1],
+      rules[2],
+      ...matchPoints,
+      ...medalPoints,
+      rules[3],
+      ...rulesTeamPlay,
     ] as ITournamentElement[];
   }
   if (type === "matchPlay") {

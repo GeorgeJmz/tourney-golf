@@ -58,7 +58,7 @@ export const MultipleRangesInput: React.FC<MultipleRangesInputProps> = ({
                       )
                     : null;
                 }}
-                label={`Stage ${index + 1}`}
+                label={`Team Stage ${index + 1} Start`}
               />
             </FormControl>
           </Grid>
@@ -82,7 +82,7 @@ export const MultipleRangesInput: React.FC<MultipleRangesInputProps> = ({
                       )
                     : null;
                 }}
-                label={`Stage ${index + 1}`}
+                label={`Team Stage ${index + 1} Start`}
               />
             </FormControl>
           </Grid>

@@ -374,7 +374,6 @@ const Dogfight: React.FC<IPlayDogfightProps> = ({ user }) => {
                 onOpenModal={handleOpenModal}
                 opponents={playViewModel.matches[0].players
                   .filter((val, index) => index !== 0)
-                  .reverse()
                   .map((player) => ({
                     displayName: player.score.player,
                     currentTotal: player.score.totalGross,

@@ -178,11 +178,17 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
 
   const hideTeam =
     tournamentType !== "leagueteamplay" && tournamentType !== "teamplay";
-  const hideMatch = playType !== "matchPlay" && playType !== "matchstrokePlay";
+  const hideMatch =
+    playType !== "matchPlay" &&
+    playType !== "matchstrokePlay" &&
+    playType !== "matchplaystableford" &&
+    playType !== "matchmedalplaystableford";
   const hideMedal =
     playType !== "strokePlay" &&
     playType !== "matchstrokePlay" &&
-    playType !== "stableford";
+    playType !== "stableford" &&
+    playType !== "medalplaystableford" &&
+    playType !== "matchmedalplaystableford";
 
   const [openDeleteModal, setOpenDeleteModal] = React.useState(false);
   const [openSwitchModal, setOpenSwitchModal] = React.useState(false);
@@ -242,7 +248,6 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
 
   const isDogfight = tournamentType === "dogfight";
   const isDraft = tournamentType === undefined;
-  console.log("tournamentType", tournamentType);
   const getCurrentPlayer = () => {
     return tournamentViewModel.leagueResults
       .filter((result) =>
@@ -473,6 +478,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                         {!hideTeam && (
                           <TableCell sx={headerStyles}>Team Points</TableCell>
                         )}
+                        <TableCell sx={headerStyles}>Bonus +/-</TableCell>
                         <TableCell sx={headerStyles}>Gross</TableCell>
                         <TableCell sx={headerStyles}>HDCP</TableCell>
                         <TableCell sx={headerStyles}>Net</TableCell>
@@ -622,6 +628,41 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
                                 />{" "}
                               </TableCell>
                             )}
+                            <TableCell
+                              sx={{ textAlign: "center", minWidth: "80px" }}
+                            >
+                              <TextField
+                                size="small"
+                                type="text"
+                                name="bonuspoints1"
+                                defaultValue={
+                                  match.matchResults[0]?.bonusPoints
+                                }
+                                onChange={() =>
+                                  handleUpdateRow(
+                                    match.matchResults[0]?.idPlayer +
+                                      "-" +
+                                      match.matchResults[1]?.idPlayer
+                                  )
+                                }
+                              />{" "}
+                              <br />{" "}
+                              <TextField
+                                size="small"
+                                type="text"
+                                name="bonuspoints2"
+                                defaultValue={
+                                  match.matchResults[1]?.bonusPoints
+                                }
+                                onChange={() =>
+                                  handleUpdateRow(
+                                    match.matchResults[0]?.idPlayer +
+                                      "-" +
+                                      match.matchResults[1]?.idPlayer
+                                  )
+                                }
+                              />{" "}
+                            </TableCell>
                             <TableCell
                               sx={{ textAlign: "center", minWidth: "80px" }}
                             >

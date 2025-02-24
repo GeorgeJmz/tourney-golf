@@ -416,7 +416,6 @@ const Teamplay: React.FC<IPlayTeamProps> = ({ user }) => {
                 opponents={playViewModel.matches.flatMap((match) =>
                   match.players
                     .filter((val, index) => index !== 0)
-                    .reverse()
                     .map((player) => ({
                       displayName: player.score.player,
                       currentTotal: player.score.totalGross,

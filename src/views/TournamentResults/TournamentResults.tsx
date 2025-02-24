@@ -119,7 +119,8 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
     width: isMobile() ? "100%" : "48%",
   };
   const isTeamPlay = tournamentType === "teamplay";
-  const hideTeam = tournamentType === "league";
+  const hideTeam =
+    tournamentType === "league" || tournamentType === "leagueteamplay";
   const hideMatch = playType === "strokePlay" || isTeamPlay;
   const hideMedal = playType === "matchPlay";
 

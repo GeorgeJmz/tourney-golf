@@ -95,8 +95,9 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
     //if (listOfGroups.length === 0) {
     const newGroups = Array.from(Array(parseInt(numberOfGroups)).keys()).map(
       (i) => ({
-        id: `${texts.replace}${i + 1}`,
-        name: `${texts.replace} ${i + 1}`,
+        id: listOfGroups[i]?.id || `${texts.replace}${i + 1}`,
+        name: listOfGroups[i]?.name || `${texts.replace} ${i + 1}`,
+        conference: listOfGroups[i]?.conference || "0initial",
       })
     );
 

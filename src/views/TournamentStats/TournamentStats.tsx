@@ -59,11 +59,11 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
 
   const tournamentType = tournamentViewModel.tournament.tournamentType;
   const playType = tournamentViewModel.tournament.playType;
-
-  const showTeams =
-    tournamentType === "leagueteamplay" || tournamentType === "teamplay";
-  const showMatch = playType !== "strokePlay";
-  const showMedal = playType !== "matchPlay";
+  const showTeams = tournamentType === "teamplay";
+  const showMatch =
+    playType !== "strokePlay" && playType !== "medalplaystableford";
+  const showMedal =
+    playType !== "matchPlay" && playType !== "matchplaystableford";
 
   const tableRows = () => {
     const p =
@@ -110,6 +110,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
         {showMedal && (
           <TableCell sx={{ textAlign: "center" }}>{t.medalPoints}</TableCell>
         )}
+        <TableCell sx={{ textAlign: "center" }}>{t.bonusPoints}</TableCell>
         {showTeams && (
           <TableCell sx={{ textAlign: "center" }}>
             {t.teamPoints || "-"}
@@ -207,6 +208,7 @@ const TournamentStats: React.FC<ITournamentStatsProps> = ({ user }) => {
                 <TableCell>Losses</TableCell>
                 {showMatch && <TableCell>Match Points</TableCell>}
                 {showMedal && <TableCell>Medal Points</TableCell>}
+                <TableCell>Bonus +/-</TableCell>
                 {showTeams && <TableCell>Team Points</TableCell>}
               </TableRow>
             </TableHead>
