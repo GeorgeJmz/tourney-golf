@@ -9,6 +9,7 @@ export interface IMatchResults {
   isWinnerMedalPlay: boolean;
   medalPoints?: number;
   matchPoints?: number;
+  bonusPoints?: number;
 }
 export interface IMatch {
   author: string;

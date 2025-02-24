@@ -35,7 +35,7 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
     initialValues: tournamentViewModel.getRulesValues(),
     validationSchema: validationSchema,
     onSubmit: async (values) => {
-      console.log("values", values);
+      console.log("values ----", values);
       const newValues = {
         playOffs: values.playoffs,
         startDate: values.startDate?.toString(),
@@ -222,7 +222,16 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
             <DateInput
               inputElement={inputElement}
               isError={isError}
+              disabledPast={
+                inputElement.name === "championshipDate" ? true : false
+              }
               onChange={(value: string | null) => {
+                if (inputElement.name === "cutOffDate") {
+                  formik.setFieldValue(
+                    "championshipDate",
+                    dayjs(value).format()
+                  );
+                }
                 formik.setFieldValue(inputElement.name, dayjs(value).format());
               }}
               error={

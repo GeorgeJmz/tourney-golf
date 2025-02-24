@@ -61,6 +61,7 @@ class TournamentViewModel {
     wins: number;
     draws: number;
     losses: number;
+    bonusPoints: number;
     matchPoints: number;
     medalPoints: number;
     totalPoints: number;
@@ -198,7 +199,7 @@ class TournamentViewModel {
       numberOfRounds: this.tournament.numberOfRounds || 1,
       roundDates: toJS(this.tournament.roundDates) || [],
       championshipRound: this.tournament.championshipRound || false,
-      championshipDate: this.tournament.champoinshipDate,
+      championshipDate: this.tournament.championshipDate,
       minRounds: this.tournament.minRounds || 1,
       numberOfStages: this.tournament.numberOfStages || 1,
       stagesDates: toJS(this.tournament.stagesDates) || [],
@@ -402,7 +403,11 @@ class TournamentViewModel {
       const matchPoints = player?.pointsMatch[opponentIndex] || 0;
       const medalPoints = player?.pointsStroke[opponentIndex] || 0;
       const teamPoints = player?.pointsTeam[opponentIndex] || 0;
-      return { matchPoints, medalPoints, teamPoints };
+      const bonusPoints =
+        player?.bonusPoints !== undefined
+          ? player?.bonusPoints[opponentIndex] || 0
+          : 0;
+      return { matchPoints, medalPoints, teamPoints, bonusPoints };
     };
 
     this.leagueResults = matches.map((match) => ({
@@ -826,14 +831,37 @@ class TournamentViewModel {
       matches.push(i.split("-"));
       const index1 = newPlayers[p1].opponent.findIndex((o) => o === p2);
       const index2 = newPlayers[p2].opponent.findIndex((o) => o === p1);
-      newPlayers[p1].pointsMatch[index1] = parseInt(changes[i].matchpoints1);
-      newPlayers[p2].pointsMatch[index2] = parseInt(changes[i].matchpoints2);
-      newPlayers[p1].pointsStroke[index1] = parseInt(changes[i].medalPoints1);
-      newPlayers[p2].pointsStroke[index2] = parseInt(changes[i].medalPoints2);
+
+      if (newPlayers[p1].bonusPoints === undefined) {
+        newPlayers[p1].bonusPoints = newPlayers[p1].pointsMatch.map(() => 0);
+      }
+      if (newPlayers[p2].bonusPoints === undefined) {
+        newPlayers[p2].bonusPoints = newPlayers[p2].pointsMatch.map(() => 0);
+      }
+
+      // console.log("matchpoints1", changes[i].matchpoints1);
+      // console.log("medalPoints1", changes[i].medalPoints1);
+
+      if (changes[i].matchpoints1 !== undefined) {
+        newPlayers[p1].pointsMatch[index1] = parseInt(changes[i].matchpoints1);
+        newPlayers[p2].pointsMatch[index2] = parseInt(changes[i].matchpoints2);
+      }
+      if (changes[i].medalPoints1 !== undefined) {
+        newPlayers[p1].pointsStroke[index1] = parseInt(changes[i].medalPoints1);
+        newPlayers[p2].pointsStroke[index2] = parseInt(changes[i].medalPoints2);
+      }
       newPlayers[p1].pointsTeam[index1] = parseInt(changes[i].teampoints1);
       newPlayers[p2].pointsTeam[index2] = parseInt(changes[i].teampoints2);
+      newPlayers[p1].bonusPoints[index1] = parseInt(changes[i].bonuspoints1);
+      // console.log(parseInt(changes[i].bonuspoints1));
+      // console.log(
+      //   newPlayers[p1].bonusPoints[index1],
+      //   "newPlayers[p1].bonusPoints[index1]"
+      // );
+      newPlayers[p2].bonusPoints[index2] = parseInt(changes[i].bonuspoints2);
     }
 
+    console.log(newPlayers, "newPlayers");
     for (const np in newPlayers) {
       await updatePlayerAllFields(newPlayers[np]);
     }
@@ -968,11 +996,11 @@ class TournamentViewModel {
     const pointsPerWin = this.tournament.pointsPerWin;
     const pointsPerTieMedal = this.tournament.pointsPerTieMedal;
     const pointsPerWinMedal = this.tournament.pointsPerWinMedal;
-
+    
     const isLTMATCH =
-      tournamentType === "leagueteamplay" && playType === "matchPlay";
+      tournamentType === "leagueteamplay" && playType === "matchplaystableford";
     const isLTMEDAL =
-      tournamentType === "leagueteamplay" && playType === "strokePlay";
+      tournamentType === "leagueteamplay" && playType === "medalplaystableford";
     const isLMATCH = tournamentType === "league" && playType === "matchPlay";
     const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
 
@@ -1076,16 +1104,26 @@ class TournamentViewModel {
           );
         };
 
+        const getBonusPoints = () =>
+          player.bonusPoints ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0) : 0;
+
         const getTotalPoints = () => {
           if (isLTMATCH || isLMATCH) {
-            return player.pointsMatch.reduce((acc, curr) => acc + curr, 0);
+            return (
+              player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
+              getBonusPoints()
+            );
           }
           if (isLTMEDAL || isLMEDAL) {
-            return player.pointsStroke.reduce((acc, curr) => acc + curr, 0);
+            return (
+              player.pointsStroke.reduce((acc, curr) => acc + curr, 0) +
+              getBonusPoints()
+            );
           }
           return (
             player.pointsMatch.reduce((acc, curr) => acc + curr, 0) +
-            player.pointsStroke.reduce((acc, curr) => acc + curr, 0)
+            player.pointsStroke.reduce((acc, curr) => acc + curr, 0) +
+            getBonusPoints()
           );
         };
 
@@ -1100,6 +1138,7 @@ class TournamentViewModel {
           wins: getWins(),
           draws: getDraws(),
           losses: getLoss(),
+          bonusPoints: getBonusPoints(),
           matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
           medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
           totalPoints: getTotalPoints(),
@@ -1324,6 +1363,9 @@ class TournamentViewModel {
           );
         };
 
+        const getBonusPoints = () =>
+          player.bonusPoints ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0) : 0;
+
         return {
           id: Number(player.id),
           position: 0, // Add position property
@@ -1335,6 +1377,7 @@ class TournamentViewModel {
           wins: getWins(),
           draws: getDraws(),
           losses: getLoss(),
+          bonusPoints: getBonusPoints(),
           matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
           medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
           totalPoints: getTotalPoints(),

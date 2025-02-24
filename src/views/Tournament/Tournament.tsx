@@ -19,16 +19,12 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import LooksOneIcon from "@mui/icons-material/LooksOne";
 import LooksTwoIcon from "@mui/icons-material/LooksTwo";
 import Looks3Icon from "@mui/icons-material/Looks3";
-import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
 import { Link } from "react-router-dom";
-import { DownloadButton } from "../../components/DownloadButton";
 import { NavbarTitleContext } from "../../hooks/useNavContext";
-import { toJS } from "mobx";
-import { object } from "yup";
 import TeamBoard from "../TournamentStats/TeamBoard";
 
 interface ITournamentPageProps {
@@ -61,6 +57,8 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
 
   const isDogfight = () => currentTournament?.tournamentType === "dogfight";
   const isTeamPlay = () => currentTournament?.tournamentType === "teamplay";
+  const isLeagueTeamPlay = () =>
+    currentTournament?.tournamentType === "leagueteamplay";
 
   if (currentTournament && id && tournamentViewModel.author === "") {
     tournamentViewModel.setTournament(currentTournament);
@@ -234,7 +232,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
               color="primary"
               onClick={() => console.log("Ver estadísticas")}
             >
-              Board & Stats
+              {isLeagueTeamPlay() ? "Board" : "Board & Stats"}
             </Button>
           </Link>
         </Box>
@@ -255,7 +253,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
             </Link>
           </Box>
         )}
-      {isTeamPlay() && (
+      {(isTeamPlay() || isLeagueTeamPlay()) && (
         <>
           <Box flexBasis={isMobile() ? "50%" : "10%"}>
             <Link to={`/team-board/${id}`}>
@@ -264,14 +262,14 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
                 color="primary"
                 onClick={() => console.log("Ver estadísticas")}
               >
-                Team Board
+                {isLeagueTeamPlay() ? "Team" : "Team Board"}
               </Button>
             </Link>
           </Box>
           <Box flexBasis={isMobile() ? "50%" : "10%"}>
             <Link to={`/player-board/${id}`}>
               <Button variant="text" color="primary">
-                Player Board
+                {isLeagueTeamPlay() ? "Player" : "Player Board"}
               </Button>
             </Link>
           </Box>

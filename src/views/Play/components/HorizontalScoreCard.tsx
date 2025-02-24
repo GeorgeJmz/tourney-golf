@@ -95,7 +95,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   };
 
   const renderScore = (index: number, rowIndex: number) => {
-    const copyOfPlayers = [...match.players].reverse();
+    const copyOfPlayers = [...match.players];
     const currentPlayer = copyOfPlayers[rowIndex];
     //Out
     if (index === 9) {
@@ -221,7 +221,7 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   };
 
   const renderPlayerRows = () => {
-    const copyOfPlayers = [...match.players].reverse();
+    const copyOfPlayers = [...match.players];
     return copyOfPlayers.map((player, index) =>
       renderPlayerRow(player.score.player, index)
     );

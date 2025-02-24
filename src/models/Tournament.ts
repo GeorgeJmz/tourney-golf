@@ -77,6 +77,8 @@ export interface IGroup {
 }
 const endDate = new Date();
 endDate.setDate(endDate.getDate() + 180);
+const championshipDate = new Date();
+championshipDate.setDate(championshipDate.getDate() + 181);
 export default class TournamentModel implements ITournament {
   id? = "";
   author = "";
@@ -104,7 +106,7 @@ export default class TournamentModel implements ITournament {
   numberOfRounds = 1;
   roundDates = [new Date().toISOString()];
   championshipRound = false;
-  champoinshipDate = new Date().toISOString();
+  championshipDate = championshipDate.toISOString();
   minRounds = 1;
   playOffsDetail = {
     players: 0,
