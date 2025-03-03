@@ -253,6 +253,24 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "MtWoodson",
+      name: "Mt. Woodson",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "MtWoodsonBlue",
+          color: "Blue",
+          length: "5764",
+        },
+        {
+          id: "MtWoodsonWhite",
+          color: "White",
+          length: "5399",
+        },
+      ],
+    },
+    {
       id: "nativeOaks",
       name: "Native Oaks",
       address: "14616 Woods Valley Road Valley Center, CA 92082",
@@ -1144,6 +1162,28 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3309, 35],
       out: [2938, 35],
       total: [6247, 70],
+    },
+    MtWoodsonBlue: {
+      distance: [
+        334, 304, 182, 491, 405, 162, 312, 322, 191, 303, 135, 401, 515, 498,
+        317, 150, 335, 407,
+      ],
+      hcp: [18, 8, 6, 4, 2, 16, 14, 12, 10, 11, 17, 5, 1, 9, 13, 15, 7, 3],
+      par: [4, 4, 3, 5, 4, 3, 4, 4, 3, 4, 3, 4, 5, 5, 4, 3, 4, 4],
+      in: [3061, 36],
+      out: [2703, 34],
+      total: [5764, 70],
+    },
+    MtWoodsonWhite: {
+      distance: [
+        307, 297, 160, 476, 390, 136, 277, 294, 174, 283, 115, 388, 500, 488,
+        284, 130, 320, 380,
+      ],
+      hcp: [18, 8, 6, 4, 2, 16, 14, 12, 10, 11, 17, 5, 1, 9, 13, 15, 7, 3],
+      par: [4, 4, 3, 5, 4, 3, 4, 4, 3, 4, 3, 4, 5, 5, 4, 3, 4, 4],
+      in: [2888, 36],
+      out: [2511, 34],
+      total: [5399, 70],
     },
   };
   const course = details[id];

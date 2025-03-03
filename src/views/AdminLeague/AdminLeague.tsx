@@ -117,10 +117,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     setValue(newValue);
   };
 
-  const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
-    []
-  );
+  const currentTournament = React.useMemo(() => {
+    const current = user.activeTournaments.find((t) => t.id === id);
+    if (current) {
+      return current;
+    }
+    return user.tournaments.find((t) => t.id === id);
+  }, []);
   if (id) {
     tournamentViewModel.setTournamentId(id);
   }

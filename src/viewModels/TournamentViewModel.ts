@@ -996,7 +996,7 @@ class TournamentViewModel {
     const pointsPerWin = this.tournament.pointsPerWin;
     const pointsPerTieMedal = this.tournament.pointsPerTieMedal;
     const pointsPerWinMedal = this.tournament.pointsPerWinMedal;
-    
+
     const isLTMATCH =
       tournamentType === "leagueteamplay" && playType === "matchplaystableford";
     const isLTMEDAL =
@@ -1105,7 +1105,9 @@ class TournamentViewModel {
         };
 
         const getBonusPoints = () =>
-          player.bonusPoints ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0) : 0;
+          player.bonusPoints
+            ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0)
+            : 0;
 
         const getTotalPoints = () => {
           if (isLTMATCH || isLMATCH) {
@@ -1364,7 +1366,9 @@ class TournamentViewModel {
         };
 
         const getBonusPoints = () =>
-          player.bonusPoints ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0) : 0;
+          player.bonusPoints
+            ? player.bonusPoints.reduce((acc, curr) => acc + curr, 0)
+            : 0;
 
         return {
           id: Number(player.id),
