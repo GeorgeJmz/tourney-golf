@@ -45,6 +45,7 @@ import RoundReviewDogfight from "../../components/RoundReviewDogfight";
 import PLayOffs from "../PlayOffs/PlayOffs";
 import { TextInput } from "../../components/TextInput";
 import RoundReviewTeamPlay from "../../components/RoundReviewTeamPlay";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface IAdminLeagueProps {
   user: UserViewModel;
@@ -107,6 +108,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   const [userStats, setUserStats] = React.useState("");
   const [rowChanged, setRowChanged] = React.useState<Array<string>>([]);
   const navigate = useNavigate();
+  const queryClient = useQueryClient(); // Accede al QueryClient
 
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
@@ -830,9 +832,10 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
             <Button
               variant="contained"
               type="button"
-              onClick={() =>
-                tournamentViewModel.finishLeague(newLeagueName, newChampion)
-              }
+              onClick={() => {
+                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+                tournamentViewModel.finishLeague(newLeagueName, newChampion);
+              }}
             >
               Save & Finish League
             </Button>

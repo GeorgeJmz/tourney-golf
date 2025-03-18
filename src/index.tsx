@@ -21,6 +21,7 @@ import "./App.css";
 import { RequireAuth } from "./views/Welcome/components/ProtectedRoutes";
 import Router from "./Router";
 import { ToastContainer } from "react-toastify";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const theme = createTheme({
   typography: {
@@ -35,30 +36,33 @@ const theme = createTheme({
     },
   },
 });
+const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
-  <AuthProvider>
-    <NavbarTitleProvider>
-      <ThemeProvider theme={theme}>
-        <div className="App">
-          <Router />
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={true}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="dark"
-          />
-        </div>
-      </ThemeProvider>
-    </NavbarTitleProvider>
-  </AuthProvider>
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <NavbarTitleProvider>
+        <ThemeProvider theme={theme}>
+          <div className="App">
+            <Router />
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar={true}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="dark"
+            />
+          </div>
+        </ThemeProvider>
+      </NavbarTitleProvider>
+    </AuthProvider>
+  </QueryClientProvider>
 );
