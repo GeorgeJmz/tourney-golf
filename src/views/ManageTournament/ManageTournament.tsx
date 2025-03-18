@@ -19,6 +19,7 @@ import ConferenceSetup from "./../CreateTournament/components/CreateTournament/C
 import TeamSetup from "./../CreateTournament/components/CreateTournament/TeamSetup";
 import CalendarsSetup from "./../CreateTournament/components/CreateTournament/CalendarsSetup";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface IManageTournamentProps {
   user: UserViewModel;
@@ -28,6 +29,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const navigate = useNavigate();
   const userId = React.useMemo(() => user.getUserId(), []);
+  const queryClient = useQueryClient(); // Accede al QueryClient
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
     []
@@ -54,6 +56,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
   };
   const handleReset = () => {
     tournamentViewModel.startTournament();
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     setTimeout(() => navigate("/dashboard"), 1000);
   };
 

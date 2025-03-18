@@ -19,6 +19,8 @@ import { observer } from "mobx-react";
 import UserViewModel from "../../viewModels/UserViewModel";
 import CalendarsSetup from "./components/CreateTournament/CalendarsSetup";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { toJS } from "mobx";
 
 interface ICreateTournamentProps {
@@ -29,6 +31,8 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
   const [activeStep, setActiveStep] = React.useState(0);
   const navigate = useNavigate();
   const userId = React.useMemo(() => user.getUserId(), []);
+  const queryClient = useQueryClient(); // Accede al QueryClient
+
   const tournamentViewModel = React.useMemo(
     () => new TournamentViewModel(),
     []
@@ -50,6 +54,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
 
   const handleReset = () => {
     tournamentViewModel.startTournament();
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     setTimeout(() => navigate("/dashboard"), 1000);
   };
   const steps = [

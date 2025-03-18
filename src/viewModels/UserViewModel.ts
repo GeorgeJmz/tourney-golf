@@ -2,9 +2,7 @@ import { action, makeObservable, observable } from "mobx";
 import {
   createUser,
   login,
-  getTournamentsByAuthorID,
   getMatchesByID,
-  getTournamentsById,
   createDBUser,
   updateUser,
 } from "../services/firebase";
@@ -31,6 +29,7 @@ class UserViewModel {
       setUser: action,
       createUser: action,
       getUserId: action,
+      setTournaments: action,
     });
   }
 
@@ -119,6 +118,16 @@ class UserViewModel {
     }
   }
 
+  setTournaments(
+    active: ITournament[],
+    history: ITournament[],
+    admin: ITournament[]
+  ): void {
+    this.activeTournaments = active;
+    this.historyTournaments = history;
+    this.tournaments = admin;
+  }
+
   async loginUser(email: string, password: string): Promise<void> {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
@@ -140,75 +149,6 @@ class UserViewModel {
         isLoading: false,
         autoClose: 1200,
       });
-    }
-  }
-
-  async getTournaments(): Promise<void> {
-    try {
-      this.tournaments = (await getTournamentsByAuthorID(this.user.id)) || [];
-      console.log("this.tournaments", this.tournaments);
-    } catch (error) {
-      const displayLoading = getMessages(Messages.LOADING);
-      const cuToast = toast.loading(displayLoading);
-      const codeError = (error as FirebaseError).code;
-      const displayError = getMessages(codeError);
-      toast.update(cuToast, {
-        render: displayError,
-        type: toast.TYPE.ERROR,
-        isLoading: false,
-        autoClose: 800,
-      });
-    }
-  }
-
-  async getActiveTournaments(): Promise<void> {
-    //const displayLoading = getMessages(Messages.LOADING);
-    //const cuToast = toast.loading(displayLoading);
-    try {
-      const actives = await getTournamentsById(this.user.activeTournaments);
-
-      this.activeTournaments = actives || [];
-      // toast.update(cuToast, {
-      //   render: displayMessage,
-      //   type: toast.TYPE.SUCCESS,
-      //   isLoading: false,
-      //   autoClose: 800,
-      // });
-    } catch (error) {
-      const codeError = (error as FirebaseError).code;
-      const displayError = getMessages(codeError);
-      // toast.update(cuToast, {
-      //   render: displayError,
-      //   type: toast.TYPE.ERROR,
-      //   isLoading: false,
-      //   autoClose: 800,
-      // });
-    }
-  }
-
-  async getHistoryTournaments(): Promise<void> {
-    //const displayLoading = getMessages(Messages.LOADING);
-    //const cuToast = toast.loading(displayLoading);
-    try {
-      console.log("this.user.historyTournaments", this.user.historyTournaments);
-      const history = await getTournamentsById(this.user.historyTournaments);
-
-      this.historyTournaments = history || [];
-      // toast.update(cuToast, {
-      //   render: displayMessage,
-      //   type: toast.TYPE.SUCCESS,
-      //   isLoading: false,
-      //   autoClose: 800,
-      // });
-    } catch (error) {
-      const codeError = (error as FirebaseError).code;
-      const displayError = getMessages(codeError);
-      // toast.update(cuToast, {
-      //   render: displayError,
-      //   type: toast.TYPE.ERROR,
-      //   isLoading: false,
-      //   autoClose: 800,
-      // });
     }
   }
 

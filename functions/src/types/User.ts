@@ -20,6 +20,5 @@ export type RequestAddUser = {
 };
 
 export type RequestGetUsers = {
-  body: UserType;
   query: { email: string };
 };

@@ -53,7 +53,7 @@ export const firebase = initializeApp(firebaseConfig);
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
-const isLocal = process.env.REACT_APP_ENV === "LOCAL";
+export const isLocal = process.env.REACT_APP_ENV === "LOCAL";
 if (isLocal) {
   connectFirestoreEmulator(db, "127.0.0.1", 8081);
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
@@ -123,6 +123,31 @@ export const getAllUsers = async (): Promise<void> => {
     .catch((error) => console.log(error));
 };
 
+export const getAllLeagues = async (userId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const url = isLocal
+    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+
+  const response = await fetch(`${url}/getDashboardLeagues`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const createUser = async (
   user: Partial<IUser>
 ): Promise<Partial<IUser>> => {
@@ -146,14 +171,14 @@ export const createUser = async (
       activeTournaments: [],
       historyTournaments: [],
     } as IUser;
-     const url = isLocal
+    const url = isLocal
       ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
       : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
     await fetch(`${url}/addUser`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${authToken}`, 
-        "Content-Type": "application/json", 
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(firebaseUser),
       mode: "cors",
@@ -165,8 +190,6 @@ export const createUser = async (
       });
 
     return firebaseUser;
-
-    
 
     // const authToken = await auth.currentUser?.getIdToken();
     // const url = isLocal
@@ -881,19 +904,6 @@ export const updateTournament = async (
     const code = error as FirebaseError;
     throw code;
   }
-};
-
-export const getTournamentsByAuthorID = async (
-  id: string
-): Promise<Array<ITournament> | null> => {
-  const tournamentCollection = collection(db, "tournament");
-  const userQuery = query(tournamentCollection, where("author", "==", id));
-  const querySnapshot = await getDocs(userQuery);
-  const tournaments = [] as Array<ITournament>;
-  querySnapshot.forEach((doc) => {
-    tournaments.push({ ...doc.data(), id: doc.id } as unknown as ITournament);
-  });
-  return tournaments as Array<ITournament>;
 };
 
 export const getTournamentsById = async (
