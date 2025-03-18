@@ -41,6 +41,7 @@ import type {
 import PlayerModel, { ITournamentPlayer } from "../models/Player";
 import { IMatch, IMatchResults } from "../models/Match";
 import { convertDateToMoment, convertMomentDate } from "../helpers/convertDate";
+import { getCourseDetail } from "../services/courses";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -53,6 +54,20 @@ class TournamentViewModel {
     handicap: number;
     net: string;
   }> = [];
+  newStats: {
+    [key: string]: {
+      [key: string]: Array<{
+        player: string;
+        date: string;
+        hdc: string;
+        net: number;
+        score: string;
+        course: number;
+        points: string;
+        opponent: string;
+      }>;
+    };
+  } = {};
   statsPlayers: Array<{
     id: number;
     position: number;
@@ -114,6 +129,7 @@ class TournamentViewModel {
     makeObservable(this, {
       tournament: observable,
       author: observable,
+      newStats: observable,
       idTournament: observable,
       setTournament: action,
       createTournament: action,
@@ -152,6 +168,7 @@ class TournamentViewModel {
       deleteMatch: action,
       switchPlayer: action,
       removePlayerFromTournament: action,
+      getNewStats: action,
     });
     this.statsPlayers = [];
     this.dogfightStats = [];
@@ -1471,6 +1488,130 @@ class TournamentViewModel {
     }
     const t2 = performance.now();
     console.log("Call to NEW took" + (t2 - t1) + "milliseconds.");
+  }
+
+  async getNewStats(): Promise<void> {
+    const tournamentType = this.tournament.tournamentType;
+
+    const playType = this.tournament.playType;
+    const pointsPerTie = this.tournament.pointsPerTie;
+    const pointsPerWin = this.tournament.pointsPerWin;
+    const pointsPerTieMedal = this.tournament.pointsPerTieMedal;
+    const pointsPerWinMedal = this.tournament.pointsPerWinMedal;
+
+    const isLTMATCH =
+      tournamentType === "leagueteamplay" && playType === "matchplaystableford";
+    const isLTMEDAL =
+      tournamentType === "leagueteamplay" && playType === "medalplaystableford";
+    const isLMATCH = tournamentType === "league" && playType === "matchPlay";
+    const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+
+    const isDogFight = tournamentType === "dogfight";
+
+    // Fetch players and optimize data fetching
+    const fullPlayers = await getPlayersByTournamentId(this.idTournament);
+    console.log("fullPlayers", fullPlayers);
+    const emails = fullPlayers.map((player) => player.email);
+
+    // Use a more efficient approach for large datasets:
+    const names = (await getNamesByEmails(emails)) || []; // Optimized name fetching
+    const nameMap = new Map(
+      names.map((player) => [player.email, player.name + " " + player.lastName])
+    );
+
+    const matches = await getMatchesByTournamentId(this.idTournament);
+
+    const players = fullPlayers.map((player) => ({
+      ...player,
+      name: nameMap.get(player.email) || player.name,
+    }));
+
+    const pl: {
+      [key: string]: {
+        [key: string]: Array<{
+          player: string;
+          date: string;
+          hdc: string;
+          net: number;
+          score: string;
+          course: number;
+          points: string;
+          opponent: string;
+        }>;
+      };
+    } = {};
+
+    matches.forEach((match) => {
+      match.matchResults.forEach((player, i) => {
+        const id = player.idPlayer;
+        const moreData = players.find((p) => p.email === id);
+        console.log(moreData, "moreData");
+        const currentPosition = moreData?.scoreId.findIndex(
+          (s) => s === match.scoresId[i]
+        );
+        const currentConference = moreData?.conference || "";
+
+        const getTotalPoints = (player: {
+          pointsMatch: number;
+          pointsStroke: number;
+          bonusPoints: number;
+        }) => {
+          if (isLTMATCH || isLMATCH) {
+            return player.pointsMatch + player.bonusPoints;
+          }
+          if (isLTMEDAL || isLMEDAL) {
+            return player.pointsStroke + player.bonusPoints;
+          }
+          return player.pointsMatch + player.pointsStroke + player.bonusPoints;
+        };
+        const values = {
+          player: moreData?.name || "",
+          date: moreData?.date ? moreData?.date[currentPosition || 0] : "",
+          hdc: player.hcp,
+          net:
+            player.score -
+            getCourseDetail(match.teeBox).par.reduce(
+              (acc, curr) => acc + curr,
+              0
+            ),
+          score: match.scoresId[i],
+          points: getTotalPoints({
+            pointsMatch: moreData?.pointsMatch[currentPosition || 0] || 0,
+            pointsStroke: moreData?.pointsStroke[currentPosition || 0] || 0,
+            bonusPoints:
+              moreData?.bonusPoints !== undefined
+                ? moreData?.bonusPoints[currentPosition || 0] || 0
+                : 0,
+          }).toString(),
+          course: getCourseDetail(match.teeBox).par.reduce(
+            (acc, curr) => acc + curr,
+            0
+          ),
+          opponent:
+            nameMap.get(moreData?.opponent[currentPosition || 0] || "") || "",
+        };
+        if (!pl[currentConference]) {
+          pl[currentConference] = {} as {
+            [key: string]: Array<{
+              player: string;
+              date: string;
+              hdc: string;
+              net: number;
+              score: string;
+              course: number;
+              points: string;
+              opponent: string;
+            }>;
+          };
+        }
+        if (pl[currentConference][id]) {
+          pl[currentConference][id].push(values);
+        } else {
+          pl[currentConference][id] = [values];
+        }
+      });
+    });
+    this.newStats = pl;
   }
 
   async sendEmail(): Promise<void> {

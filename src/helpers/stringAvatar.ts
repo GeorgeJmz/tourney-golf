@@ -25,3 +25,10 @@ export const stringAvatar = (name: string) => {
     children: `${name.split(" ")[0][0]}${name.split(" ")[1][0]}`,
   };
 };
+
+export const stringInitials = (name: string) => {
+  const nameArray = name.split(" ");
+  const InitialOne = nameArray[0][0];
+  const InitialTwo = nameArray[1][0] || nameArray[0][1];
+  return `${InitialOne}${InitialTwo}`;
+};

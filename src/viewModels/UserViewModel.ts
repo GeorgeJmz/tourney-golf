@@ -146,6 +146,7 @@ class UserViewModel {
   async getTournaments(): Promise<void> {
     try {
       this.tournaments = (await getTournamentsByAuthorID(this.user.id)) || [];
+      console.log("this.tournaments", this.tournaments);
     } catch (error) {
       const displayLoading = getMessages(Messages.LOADING);
       const cuToast = toast.loading(displayLoading);
