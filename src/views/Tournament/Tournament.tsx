@@ -1,148 +1,205 @@
-import * as React from "react";
+import React, { useMemo, useContext, memo } from "react";
 import { observer } from "mobx-react";
 import UserViewModel from "../../viewModels/UserViewModel";
 import TournamentViewModel from "../../viewModels/TournamentViewModel";
 import {
   Box,
-  Card,
-  CardContent,
-  CardActions,
   Button,
-  Menu,
-  MenuItem,
-  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Typography,
 } from "@mui/material";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
+import { useParams, Link } from "react-router-dom";
+import { convertDate } from "../../helpers/convertDate";
+import { NavbarTitleContext } from "../../hooks/useNavContext";
+import TeamBoard from "../TournamentStats/TeamBoard";
 import LooksOneIcon from "@mui/icons-material/LooksOne";
 import LooksTwoIcon from "@mui/icons-material/LooksTwo";
 import Looks3Icon from "@mui/icons-material/Looks3";
-import Avatar from "@mui/material/Avatar";
-import Typography from "@mui/material/Typography";
-import { useParams } from "react-router-dom";
-import { convertDate } from "../../helpers/convertDate";
-import { Link } from "react-router-dom";
-import { NavbarTitleContext } from "../../hooks/useNavContext";
-import TeamBoard from "../TournamentStats/TeamBoard";
 
 interface ITournamentPageProps {
   user: UserViewModel;
 }
 
-const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
-  const userId = React.useMemo(() => user.getUserId(), []);
-  const { setTitle } = React.useContext(NavbarTitleContext);
+// Subcomponente para el Menú
+export const TournamentMenu = memo(
+  ({
+    isMobile,
+    isActiveTournament,
+    isDogfight,
+    isTeamPlay,
+    isLeagueTeamPlay,
+    id,
+  }: {
+    isMobile: boolean;
+    isActiveTournament: boolean;
+    isDogfight: boolean;
+    isTeamPlay: boolean;
+    isLeagueTeamPlay: boolean;
+    id: string;
+  }) => {
+    const getLinkPath = (basePath: string) => {
+      return isDogfight
+        ? `${basePath}-dogfight/${id}`
+        : isTeamPlay
+        ? `${basePath}-team/${id}`
+        : `${basePath}/${id}`;
+    };
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const tournamentViewModel = React.useMemo(
-    () => new TournamentViewModel(),
-    []
-  );
-  const { id } = useParams();
-
-  const currentTournament = React.useMemo(
-    () => user.activeTournaments.find((t) => t.id === id),
-    []
-  );
-
-  const isDogfight = () => currentTournament?.tournamentType === "dogfight";
-  const isTeamPlay = () => currentTournament?.tournamentType === "teamplay";
-  const isLeagueTeamPlay = () =>
-    currentTournament?.tournamentType === "leagueteamplay";
-
-  if (currentTournament && id && tournamentViewModel.author === "") {
-    tournamentViewModel.setTournament(currentTournament);
-    tournamentViewModel.setTournamentId(id);
-    tournamentViewModel.setAuthor(userId);
-    tournamentViewModel.getStatsPlayersByTournament();
-    console.log("TournamentPage currentTournament", currentTournament);
+    return (
+      <Box
+        justifyContent="center"
+        alignItems="center"
+        gap="32px"
+        display="flex"
+        flexWrap="wrap"
+        sx={{ p: 2 }}
+      >
+        <Box flexBasis={isMobile ? "50%" : "10%"}>
+          <Link to={isActiveTournament ? getLinkPath("/play-tournament") : "#"}>
+            <Button
+              variant="text"
+              color="primary"
+              disabled={!isActiveTournament}
+            >
+              Play
+            </Button>
+          </Link>
+        </Box>
+        {!isDogfight && !isTeamPlay && (
+          <Box flexBasis={isMobile ? "50%" : "10%"}>
+            <Link to={`/stats/${id}`}>
+              <Button variant="text" color="primary">
+                Stats
+              </Button>
+            </Link>
+          </Box>
+        )}
+        {!isTeamPlay && (
+          <Box flexBasis={isMobile ? "50%" : "15%"}>
+            <Link to={getLinkPath("/stats-tournament")}>
+              <Button variant="text" color="primary">
+                Board
+              </Button>
+            </Link>
+          </Box>
+        )}
+        <Box flexBasis={isMobile ? "50%" : "10%"}>
+          <Link to={getLinkPath("/results")}>
+            <Button variant="text" color="primary">
+              Results
+            </Button>
+          </Link>
+        </Box>
+        {(isTeamPlay || isLeagueTeamPlay) && (
+          <>
+            <Box flexBasis={isMobile ? "50%" : "10%"}>
+              <Link to={`/team-board/${id}`}>
+                <Button variant="text" color="primary">
+                  {isLeagueTeamPlay ? "Team" : "Team Board"}
+                </Button>
+              </Link>
+            </Box>
+            <Box flexBasis={isMobile ? "50%" : "10%"}>
+              <Link to={`/player-board/${id}`}>
+                <Button variant="text" color="primary">
+                  {isLeagueTeamPlay ? "Player" : "Player Board"}
+                </Button>
+              </Link>
+            </Box>
+          </>
+        )}
+        <Box flexBasis={isMobile ? "50%" : "10%"}>
+          <Link to={`/rules-tournament/${id}`}>
+            <Button variant="text" color="primary">
+              Rules
+            </Button>
+          </Link>
+        </Box>
+      </Box>
+    );
   }
+);
+
+const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
+  const { id } = useParams<{ id: string }>();
+  const userId = useMemo(() => user.getUserId(), [user]);
+  const { setTitle } = useContext(NavbarTitleContext);
+  const tournamentViewModel = useMemo(() => new TournamentViewModel(), []);
+  const currentTournament = useMemo(
+    () => user.activeTournaments.find((t) => t.id === id),
+    [user.activeTournaments, id]
+  );
+
+  const tournamentType = currentTournament?.tournamentType;
+  const isDogfight = tournamentType === "dogfight";
+  const isTeamPlay = tournamentType === "teamplay";
+  const isLeagueTeamPlay = tournamentType === "leagueteamplay";
+  useMemo(() => {
+    if (currentTournament && id && tournamentViewModel.author === "") {
+      tournamentViewModel.setTournament(currentTournament);
+      tournamentViewModel.setTournamentId(id);
+      tournamentViewModel.setAuthor(userId);
+      tournamentViewModel.getStatsPlayersByTournament();
+    }
+  }, [currentTournament, id, tournamentViewModel, userId]);
 
   React.useEffect(() => {
     setTitle(currentTournament?.name || "");
-  }, [currentTournament?.name]);
+  }, [currentTournament?.name, setTitle]);
 
-  const isActiveTournament = React.useMemo(() => {
+  const isActiveTournament = useMemo(() => {
+    if (!currentTournament) {
+      return false;
+    }
     const endDate = convertDate(
-      currentTournament?.cutOffDate || "",
+      currentTournament.cutOffDate || "",
       "MM/DD/YYYY"
     );
     const today = convertDate(new Date().toISOString(), "MM/DD/YYYY");
-
-    const compareDates = (d1: string, d2: string) => {
-      const date1 = new Date(d1).getTime();
-      const date2 = new Date(d2).getTime();
-      if (date1 < date2) {
-        if (
-          !isDogfight() &&
-          currentTournament?.playOffsDetail &&
-          currentTournament?.playOffsDetail?.players !== 0
-        ) {
-          const matchesOfPlayOffs = Object.keys(
-            currentTournament?.playOffsDetail?.brackets
-          );
-          const playersOfPlayOffs = matchesOfPlayOffs.map(
-            (match) => currentTournament?.playOffsDetail?.brackets[match]
-          );
-          return playersOfPlayOffs.includes(user.user.email);
-        }
-        return false;
-        //console.log(`${d1} is less than ${d2}`);
-      } else if (date1 > date2) {
-        return true;
-        //console.log(`${d1} is greater than ${d2}`);
-      } else {
-        return true;
-      }
-    };
-
+    const compareDates = (d1: string, d2: string) =>
+      new Date(d1) >= new Date(d2);
     return compareDates(endDate, today);
-  }, [currentTournament?.cutOffDate]);
+  }, [currentTournament]);
 
-  const standings = [
-    tournamentViewModel.statsPlayers[0] ?? [],
-    tournamentViewModel.statsPlayers[1] ?? [],
-    tournamentViewModel.statsPlayers[2] ?? [],
-  ];
+  const standings = useMemo(() => {
+    return [
+      tournamentViewModel.statsPlayers[0] ?? [],
+      tournamentViewModel.statsPlayers[1] ?? [],
+      tournamentViewModel.statsPlayers[2] ?? [],
+    ];
+  }, [tournamentViewModel.statsPlayers]);
+
   const icons = [<LooksOneIcon />, <LooksTwoIcon />, <Looks3Icon />];
 
-  const isMobile = () =>
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+  const isMobile = useMemo(() => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
+  }, []);
 
   const getStandings = () => (
     <Box>
-      <Typography
-        variant="h6"
-        sx={{
-          fontWeight: "bold",
-          pt: 2,
-        }}
-      >
+      <Typography variant="h6" sx={{ fontWeight: "bold", pt: 2 }}>
         STANDINGS
       </Typography>
       <Box
         justifyContent="center"
         alignItems="center"
         display="flex"
-        flexDirection={isMobile() ? "column" : "row"}
+        flexDirection={isMobile ? "column" : "row"}
       >
-        {isTeamPlay() && <TeamBoard user={user} isSmall />}
-        {!isTeamPlay() &&
+        {isTeamPlay && <TeamBoard user={user} isSmall />}
+        {!isTeamPlay &&
           standings.map((player, index) => (
-            <List sx={{ minWidth: "200px", bgcolor: "background.paper" }}>
-              <ListItem key={player.tourneyName}>
+            <List
+              key={player.tourneyName}
+              sx={{ minWidth: "200px", bgcolor: "background.paper" }}
+            >
+              <ListItem>
                 <ListItemAvatar>
                   <Avatar
                     sx={(theme) => ({
@@ -154,16 +211,10 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
                 </ListItemAvatar>
                 <ListItemText
                   primary={
-                    <p
-                      style={{
-                        fontSize: "1.5em",
-                        margin: 0,
-                        padding: 0,
-                      }}
-                    >
+                    <p style={{ fontSize: "1.5em", margin: 0, padding: 0 }}>
                       {player.tourneyName} -{" "}
                       <strong>
-                        {isDogfight() ? player.netAverage : player.totalPoints}
+                        {isDogfight ? player.netAverage : player.totalPoints}
                       </strong>
                     </p>
                   }
@@ -175,123 +226,37 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     </Box>
   );
 
-  const getMenu = () => (
-    <Box
-      justifyContent="center"
-      alignItems="center"
-      gap="32px"
-      display="flex"
-      flexWrap="wrap"
-      sx={{
-        p: 2,
-      }}
-    >
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        {isActiveTournament ? (
-          <Link
-            to={
-              isDogfight()
-                ? `/play-tournament-dogfight/${id}`
-                : isTeamPlay()
-                ? `/play-tournament-team/${id}`
-                : `/play-tournament/${id}`
-            }
-          >
-            <Button variant="text" color="primary">
-              Play
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="text" disabled color="primary">
-            Play
-          </Button>
-        )}
-      </Box>
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Link to={isDogfight() ? `/results-dogfight/${id}` : `/results/${id}`}>
-          <Button
-            variant="text"
-            color="primary"
-            onClick={() => console.log("Ver Resultados")}
-          >
-            Results
-          </Button>
-        </Link>
-      </Box>
-      {!isTeamPlay() && (
-        <Box flexBasis={isMobile() ? "50%" : "15%"}>
-          <Link
-            to={
-              isDogfight()
-                ? `/stats-tournament-dogfight/${id}`
-                : `/stats-tournament/${id}`
-            }
-          >
-            <Button
-              variant="text"
-              color="primary"
-              onClick={() => console.log("Ver estadísticas")}
-            >
-              {isLeagueTeamPlay() ? "Board" : "Board & Stats"}
-            </Button>
-          </Link>
-        </Box>
-      )}
-      {!isDogfight() &&
-        !isTeamPlay() &&
-        currentTournament?.playOffsDetail &&
-        currentTournament?.playOffsDetail?.players !== 0 && (
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/playoffs-tournament/${id}`}>
-              <Button
-                variant="text"
-                color="primary"
-                onClick={() => console.log("Ver estadísticas")}
-              >
-                Playoffs
-              </Button>
-            </Link>
-          </Box>
-        )}
-      {(isTeamPlay() || isLeagueTeamPlay()) && (
-        <>
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/team-board/${id}`}>
-              <Button
-                variant="text"
-                color="primary"
-                onClick={() => console.log("Ver estadísticas")}
-              >
-                {isLeagueTeamPlay() ? "Team" : "Team Board"}
-              </Button>
-            </Link>
-          </Box>
-          <Box flexBasis={isMobile() ? "50%" : "10%"}>
-            <Link to={`/player-board/${id}`}>
-              <Button variant="text" color="primary">
-                {isLeagueTeamPlay() ? "Player" : "Player Board"}
-              </Button>
-            </Link>
-          </Box>
-        </>
-      )}
-      <Box flexBasis={isMobile() ? "50%" : "10%"}>
-        <Link to={`/rules-tournament/${id}`}>
-          <Button
-            variant="text"
-            color="primary"
-            onClick={() => console.log("Ver estadísticas")}
-          >
-            Rules
-          </Button>
-        </Link>
-      </Box>
-    </Box>
-  );
-
   return (
     <Box sx={{ height: "100vh", background: "white" }}>
-      {isMobile() ? [getStandings(), getMenu()] : [getMenu(), getStandings()]}
+      {isMobile
+        ? [
+            getStandings(),
+            <TournamentMenu
+              key="menu"
+              {...{
+                isMobile,
+                isActiveTournament,
+                isDogfight,
+                isTeamPlay,
+                isLeagueTeamPlay,
+                id: id || "",
+              }}
+            />,
+          ]
+        : [
+            <TournamentMenu
+              key="menu"
+              {...{
+                isMobile,
+                isActiveTournament,
+                isDogfight,
+                isTeamPlay,
+                isLeagueTeamPlay,
+                id: id || "",
+              }}
+            />,
+            getStandings(),
+          ]}
     </Box>
   );
 };
