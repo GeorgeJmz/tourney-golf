@@ -28,6 +28,7 @@ export const helloWorld = onRequest((request, response) => {
 //Events
 exports.onFinishLeague = require("./events/onFinishLeague").onFinishLeague;
 exports.onCreateMatch = require("./events/onCreateMatch").onCreateMatch;
+exports.onUpdatePlayer = require("./events/onUpdatePlayer").onUpdatePlayer;
 
 //API
 exports.api = functions.https.onRequest(routes);
