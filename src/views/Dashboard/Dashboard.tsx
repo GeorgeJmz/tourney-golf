@@ -20,6 +20,7 @@ import {
   IconButton,
   Collapse,
   Box,
+  Skeleton,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
@@ -31,7 +32,7 @@ interface IDashboardProps {
 
 const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   const [showHistory, setShowHistory] = useState(false);
-  useGetLeagues(user);
+  const leaguesData = useGetLeagues(user);
 
   const { historyLeague } = useHistoryLeague(
     user.tournaments,
@@ -75,6 +76,22 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             League Action
           </Typography>
         </Grid>
+        {leaguesData.isFetching && (
+          <>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+          </>
+        )}
         {user.activeTournaments.map((tournament) => (
           <Grid item xs={6} md={4} lg={2} key={tournament.name}>
             <Link to={`/tournament/${tournament.id}`}>
@@ -172,6 +189,22 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
             </Button>
           </Link>
         </Grid>
+        {leaguesData.isFetching && (
+          <>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+            <Grid item xs={6} md={4} lg={2}>
+              <Skeleton variant="rounded" animation="wave" height={80} />
+            </Grid>
+          </>
+        )}
         {user.tournaments.map((tournament) => (
           <Grid item xs={6} md={4} lg={2} key={tournament.name}>
             <Link to={`/manage-tournament/${tournament.id}`}>

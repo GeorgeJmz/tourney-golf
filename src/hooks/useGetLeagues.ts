@@ -4,7 +4,7 @@ import type { ITournament } from "../models/Tournament";
 import type UserViewModel from "../viewModels/UserViewModel";
 
 export const useGetLeagues = (user: UserViewModel) => {
-  useQuery({
+  return useQuery({
     queryKey: ["dashboard"], // Una clave única para tu consulta
     queryFn: async () => {
       const leagues = await getAllLeagues(user.user.id!);
@@ -19,5 +19,4 @@ export const useGetLeagues = (user: UserViewModel) => {
     },
     staleTime: Infinity, // Asegura que los datos en caché nunca se consideren obsoletos en esta configuración.
   });
-  return {};
 };
