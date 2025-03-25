@@ -11,6 +11,7 @@ import {
   ListItemAvatar,
   Avatar,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import { useParams, Link } from "react-router-dom";
 import { convertDate } from "../../helpers/convertDate";
@@ -19,6 +20,8 @@ import TeamBoard from "../TournamentStats/TeamBoard";
 import LooksOneIcon from "@mui/icons-material/LooksOne";
 import LooksTwoIcon from "@mui/icons-material/LooksTwo";
 import Looks3Icon from "@mui/icons-material/Looks3";
+import { useGetStandings } from "../../hooks/useGetStandings";
+import { toJS } from "mobx";
 
 interface ITournamentPageProps {
   user: UserViewModel;
@@ -138,14 +141,29 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
   const isDogfight = tournamentType === "dogfight";
   const isTeamPlay = tournamentType === "teamplay";
   const isLeagueTeamPlay = tournamentType === "leagueteamplay";
+  const { isFetching, data } = useGetStandings(
+    currentTournament?.id || "",
+    tournamentViewModel
+  );
   useMemo(() => {
     if (currentTournament && id && tournamentViewModel.author === "") {
       tournamentViewModel.setTournament(currentTournament);
       tournamentViewModel.setTournamentId(id);
       tournamentViewModel.setAuthor(userId);
-      tournamentViewModel.getStatsPlayersByTournament();
+      console.log("TournamentPage: ", currentTournament);
+      console.log(toJS(tournamentViewModel.standings));
+      //tournamentViewModel.getStatsPlayersByTournament();
     }
-  }, [currentTournament, id, tournamentViewModel, userId]);
+    if (data?.data.standings && tournamentViewModel.standings.length === 0) {
+      tournamentViewModel.setStandingsBytTournament(data?.data.standings);
+    }
+  }, [
+    currentTournament,
+    id,
+    tournamentViewModel,
+    userId,
+    data?.data.standings,
+  ]);
 
   React.useEffect(() => {
     setTitle(currentTournament?.name || "");
@@ -165,14 +183,6 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     return compareDates(endDate, today);
   }, [currentTournament]);
 
-  const standings = useMemo(() => {
-    return [
-      tournamentViewModel.statsPlayers[0] ?? [],
-      tournamentViewModel.statsPlayers[1] ?? [],
-      tournamentViewModel.statsPlayers[2] ?? [],
-    ];
-  }, [tournamentViewModel.statsPlayers]);
-
   const icons = [<LooksOneIcon />, <LooksTwoIcon />, <Looks3Icon />];
 
   const isMobile = useMemo(() => {
@@ -183,20 +193,58 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
 
   const getStandings = () => (
     <Box>
-      <Typography variant="h6" sx={{ fontWeight: "bold", pt: 2 }}>
-        STANDINGS
-      </Typography>
+      {isFetching && (
+        <Box flex={1} display="flex" justifyContent="center">
+          <Skeleton variant="text" animation="wave" height={40} width={100} />
+        </Box>
+      )}
+      {!isFetching && (
+        <Typography variant="h6" sx={{ fontWeight: "bold", pt: 2 }}>
+          STANDINGS
+        </Typography>
+      )}
       <Box
         justifyContent="center"
         alignItems="center"
         display="flex"
         flexDirection={isMobile ? "column" : "row"}
       >
+        {isFetching && (
+          <>
+            <List
+              sx={{
+                minWidth: "200px",
+                padding: "10px",
+                bgcolor: "background.paper",
+              }}
+            >
+              <Skeleton variant="rounded" animation="wave" height={40} />
+            </List>
+            <List
+              sx={{
+                minWidth: "200px",
+                padding: "10px",
+                bgcolor: "background.paper",
+              }}
+            >
+              <Skeleton variant="rounded" animation="wave" height={40} />
+            </List>
+            <List
+              sx={{
+                minWidth: "200px",
+                padding: "10px",
+                bgcolor: "background.paper",
+              }}
+            >
+              <Skeleton variant="rounded" animation="wave" height={40} />
+            </List>
+          </>
+        )}
         {isTeamPlay && <TeamBoard user={user} isSmall />}
         {!isTeamPlay &&
-          standings.map((player, index) => (
+          tournamentViewModel.standings.map((player, index) => (
             <List
-              key={player.tourneyName}
+              key={player.name}
               sx={{ minWidth: "200px", bgcolor: "background.paper" }}
             >
               <ListItem>
@@ -212,10 +260,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
                 <ListItemText
                   primary={
                     <p style={{ fontSize: "1.5em", margin: 0, padding: 0 }}>
-                      {player.tourneyName} -{" "}
-                      <strong>
-                        {isDogfight ? player.netAverage : player.totalPoints}
-                      </strong>
+                      {player.name} - <strong>{player.points}</strong>
                     </p>
                   }
                 />

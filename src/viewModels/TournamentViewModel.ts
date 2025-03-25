@@ -37,6 +37,8 @@ import type {
   IGroup,
   IPlayer,
   ITournamentGroup,
+  statisticsPlayer,
+  standingsType,
 } from "../models/Tournament";
 import PlayerModel, { ITournamentPlayer } from "../models/Player";
 import { IMatch, IMatchResults } from "../models/Match";
@@ -47,6 +49,7 @@ class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
   author = "";
   idTournament = "";
+  standings: Array<standingsType> = [];
   dogfightStats: Array<{
     id: string;
     name: string;
@@ -68,25 +71,7 @@ class TournamentViewModel {
       }>;
     };
   } = {};
-  statsPlayers: Array<{
-    id: number;
-    position: number;
-    tourneyName: string;
-    matchesPlayed: number;
-    wins: number;
-    draws: number;
-    losses: number;
-    bonusPoints: number;
-    matchPoints: number;
-    medalPoints: number;
-    totalPoints: number;
-    grossAverage: string;
-    handicapAverage: string;
-    netAverage: string;
-    teamPoints: number;
-    conference: string;
-    group: string;
-  }> = [];
+  statsPlayers: Array<statisticsPlayer> = [];
   statsTeams: Array<{
     name: string;
     playersNames: string;
@@ -169,6 +154,7 @@ class TournamentViewModel {
       switchPlayer: action,
       removePlayerFromTournament: action,
       getNewStats: action,
+      setStandingsBytTournament: action,
     });
     this.statsPlayers = [];
     this.dogfightStats = [];
@@ -1001,6 +987,10 @@ class TournamentViewModel {
         }
       })
       .reverse();
+  }
+
+  async setStandingsBytTournament(standings: standingsType[]): Promise<void> {
+    this.standings = standings;
   }
 
   async getStatsPlayersByTournament(): Promise<void> {
