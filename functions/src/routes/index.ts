@@ -7,6 +7,7 @@ import { verifyToken } from "../middleware";
 const routes = express();
 import cors = require("cors");
 import { getStandings } from "../api/getStandings";
+import { getCourses } from "../api/getCourses";
 
 routes.use(
   cors({ origin: ["http://localhost:3000", "https://teeboxleague.com"] })
@@ -16,6 +17,7 @@ routes.post("/addUser", verifyToken, addUser);
 routes.get("/getUsers", verifyToken, getUsers);
 routes.post("/getDashboardLeagues", verifyToken, getDashboardLeagues);
 routes.post("/getStandings", verifyToken, getStandings);
+routes.post("/getCourses", verifyToken, getCourses);
 
 // Catch all other routes
 routes.use((req, res) => {

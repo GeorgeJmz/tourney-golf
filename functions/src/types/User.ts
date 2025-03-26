@@ -1,4 +1,5 @@
 export type UserType = {
+  lastCourses: string[];
   name: string;
   lastName: string;
   email: string;
