@@ -10,7 +10,13 @@ import { getStandings } from "../api/getStandings";
 import { getCourses } from "../api/getCourses";
 
 routes.use(
-  cors({ origin: ["http://localhost:3000", "https://teeboxleague.com"] })
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://teeboxleague-11e39--staging-env-mw4n9hlp.web.app",
+      "https://teeboxleague.com",
+    ],
+  })
 );
 routes.get("/", (req, res) => res.status(200).send("Hey there!"));
 routes.post("/addUser", verifyToken, addUser);
