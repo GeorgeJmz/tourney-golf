@@ -39,7 +39,7 @@ export const getDashboardLeagues = async (
     const authorLeaguesSnapshot = await db
       .collection("tournament")
       .where("author", "==", userId)
-      .where("status", "in", ["draft", "published", "closed"])
+      .where("status", "in", ["draft", "published"])
       .get();
 
     const authorLeagues = authorLeaguesSnapshot.docs.map((doc) => ({

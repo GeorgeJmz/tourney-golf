@@ -2,6 +2,7 @@ import * as express from "express";
 import { addUser } from "../api/addUser";
 import { getUsers } from "../api/getUsers";
 import { getDashboardLeagues } from "../api/getDashBoardLeagues";
+import { getOpponents } from "../api/getOpponents";
 import { verifyToken } from "../middleware";
 
 const routes = express();
@@ -14,6 +15,7 @@ routes.use(
     origin: [
       "http://localhost:3000",
       "https://teeboxleague-11e39--staging-env-mw4n9hlp.web.app",
+      "https://teeboxleague-11e39--staging-env-spfi898l.web.app",
       "https://teeboxleague.com",
     ],
   })
@@ -24,6 +26,7 @@ routes.get("/getUsers", verifyToken, getUsers);
 routes.post("/getDashboardLeagues", verifyToken, getDashboardLeagues);
 routes.post("/getStandings", verifyToken, getStandings);
 routes.post("/getCourses", verifyToken, getCourses);
+routes.post("/getOpponents", verifyToken, getOpponents);
 
 // Catch all other routes
 routes.use((req, res) => {
