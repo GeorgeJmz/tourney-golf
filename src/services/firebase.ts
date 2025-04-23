@@ -246,7 +246,7 @@ export const createUser = async (
       ghinNumber: user.ghinNumber || "",
       activeTournaments: [],
       historyTournaments: [],
-    } as IUser;
+    } as Omit<IUser, "sequentialUserId">;
     const url = isLocal
       ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
       : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";

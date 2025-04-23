@@ -3,7 +3,7 @@ export type UserType = {
   name: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
   id: string;
   ghinNumber: string;
   uuid?: string;
@@ -13,6 +13,7 @@ export type UserType = {
     tournamentName: string;
     result: string;
   }[];
+  sequentialUserId?: number;
 };
 
 export type RequestAddUser = {

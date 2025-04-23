@@ -14,8 +14,7 @@ routes.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://teeboxleague-11e39--staging-env-mw4n9hlp.web.app",
-      "https://teeboxleague-11e39--staging-env-spfi898l.web.app",
+      "https://teeboxleague-11e39--staging-env-14sxwc24.web.app",
       "https://teeboxleague.com",
     ],
   })
