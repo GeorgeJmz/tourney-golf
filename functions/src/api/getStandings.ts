@@ -46,7 +46,9 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
       .slice(0, 3)
       .map((player, index) => ({
         name: player.tourneyName,
-        points: isDogFight ? player.netAverage : player.totalPoints,
+        points: isDogFight
+          ? player.netAverage.toString()
+          : player.totalPoints.toString(),
         position: index + 1,
       }));
 
