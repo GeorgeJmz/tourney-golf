@@ -13,7 +13,7 @@
     "backfill-users": "ts-node src/scripts/assignSequentialIdsToExistingUsers.ts"
   },
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "main": "lib/index.js",
   "dependencies": {
