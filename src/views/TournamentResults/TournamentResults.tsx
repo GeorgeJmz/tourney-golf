@@ -239,11 +239,11 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
           Regular Season
         </Typography>
       )}
-      {userStats === "" && hideTeam && (
+      {/* {userStats === "" && hideTeam && (
         <Box>
           <Matriz matrizValues={tournamentViewModel.matrizValues} />
         </Box>
-      )}
+      )} */}
       <div
         style={{
           display: "flex",
@@ -258,7 +258,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
               ? value.matchResults.some(
                   (element) => element.idPlayer === userStats
                 )
-              : !hideTeam;
+              : true;
           })
           .sort((a, b) => differenceDate(a.date, b.date))
           .map((match) => (
@@ -315,7 +315,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                           <TableCell sx={cellStyles}>{players.gross}</TableCell>
                           <TableCell sx={cellStyles}>{players.hcp}</TableCell>
                           <TableCell sx={cellStyles}>{players.score}</TableCell>
-                          {!isLMATCH && !isLMEDAL && !isLMATCHMEDAL && (
+                          {!hideTeam && (
                             <TableCell sx={cellStyles}>
                               {players.teamPoints}
                             </TableCell>
@@ -427,7 +427,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                             <TableCell sx={cellStyles}>
                               {players.score}
                             </TableCell>
-                            {!isLMATCH && !isLMEDAL && !isLMATCHMEDAL && (
+                            {!hideTeam && (
                               <TableCell sx={cellStyles}>
                                 {players.teamPoints}
                               </TableCell>

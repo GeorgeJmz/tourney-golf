@@ -233,10 +233,13 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   const onSwitchPlayer = async () => {
     const displayLoading = getMessages(Messages.LOADING);
     const cuToast = toast.loading(displayLoading);
+    const prevEmail = playerToSwitch?.prevEmail || "";
+    const email = playerToSwitch?.email || "";
+    const name = playerToSwitch?.name || "";
     await tournamentViewModel.switchPlayer(
-      playerToSwitch?.prevEmail || "",
-      playerToSwitch?.email || "",
-      playerToSwitch?.name || ""
+      prevEmail.toLocaleLowerCase(),
+      email.toLocaleLowerCase(),
+      name.toLocaleLowerCase()
     );
     toast.dismiss(cuToast);
     setTimeout(() => {

@@ -91,15 +91,28 @@ class ScoreViewModel {
   setDifferenceHandicap = (
     difference: number,
     hcp: Array<number>,
-    par: Array<number>
+    par: Array<number>,
+    isdifferentCourse: boolean
   ) => {
-    const teamOutHcp =
-      Math.floor(this.score.handicap / 2) + (this.score.handicap % 2);
-    const teamInHcp =
-      Math.ceil(this.score.handicap / 2) - (this.score.handicap % 2);
+    const teamOutHcp = !isdifferentCourse
+      ? Math.floor(this.score.handicap / 2) + (this.score.handicap % 2)
+      : Math.ceil(this.score.handicap / 2) - (this.score.handicap % 2);
+    const teamInHcp = !isdifferentCourse
+      ? Math.ceil(this.score.handicap / 2) - (this.score.handicap % 2)
+      : Math.floor(this.score.handicap / 2) + (this.score.handicap % 2);
 
-    const outHcp = Math.floor(difference / 2) + (difference % 2);
-    const inHcp = Math.ceil(difference / 2) - (difference % 2);
+    const outHcp = !isdifferentCourse
+      ? Math.floor(difference / 2) + (difference % 2)
+      : Math.ceil(difference / 2) - (difference % 2);
+    const inHcp = !isdifferentCourse
+      ? Math.ceil(difference / 2) - (difference % 2)
+      : Math.floor(difference / 2) + (difference % 2);
+
+    console.log("teamOutHcp", teamOutHcp);
+    console.log("teamInHcp", teamInHcp);
+    console.log("outHcp", outHcp);
+    console.log("inHcp", inHcp);
+
     this.currentPar = par;
     const pars = {
       OUT: hcp.slice(0, 9),

@@ -25,6 +25,7 @@ export const createStatistics = async (leagueId: string) => {
   const isLMATCH = tournamentType === "league" && playType === "matchPlay";
   const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
   const isDogFight = tournamentType === "dogfight";
+  const isTeamPlay = tournamentType === "teamplay";
 
   const players: ITournamentPlayer[] = playersSnapshot.docs.map((doc) => ({
     ...(doc.data() as ITournamentPlayer),
@@ -145,10 +146,20 @@ export const createStatistics = async (leagueId: string) => {
         })
         .reverse();
 
+  const teams: { [key: string]: Array<ITournamentPlayer> } =
+    playersWithNames?.reduce((acc, curr) => {
+      const team = curr.team;
+      if (!acc[team]) {
+        acc[team] = [];
+      }
+      acc[team].push(curr);
+      return acc;
+    }, {} as { [key: string]: Array<ITournamentPlayer> });
+
   const statisticsCollection = db.collection("statistics");
   const newStatistics = statisticsCollection.doc(leagueId);
   const statisticsObject = {
-    players: sortedPlayers,
+    players: isTeamPlay ? teams : sortedPlayers,
     tournamentType: tournamentType,
   };
   await newStatistics.set(statisticsObject);

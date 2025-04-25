@@ -84,3 +84,23 @@ export interface IGroup {
   isEditing: boolean;
   players: IPlayer[];
 }
+
+export interface ITournamentPlayer {
+  id: string;
+  email: string;
+  name: string;
+  opponent: Array<string>;
+  conference: string;
+  group: string;
+  team: string;
+  pointsStroke: Array<number>;
+  pointsMatch: Array<number>;
+  pointsTeam: Array<number>;
+  bonusPoints: Array<number>;
+  gross: Array<number>;
+  handicap: Array<number>;
+  net: Array<number>;
+  tournamentId: string;
+  scoreId: Array<string>;
+  date?: Array<string>;
+}

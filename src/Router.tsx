@@ -125,6 +125,10 @@ function Router(): JSX.Element {
           element: withAuth(<TournamentResults user={userViewModel} />),
         },
         {
+          path: "/results-team/:id",
+          element: withAuth(<TournamentResults user={userViewModel} />),
+        },
+        {
           path: "/team-board/:id",
           element: withAuth(<TeamBoard user={userViewModel} />),
         },

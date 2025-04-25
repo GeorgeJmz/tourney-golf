@@ -29,15 +29,26 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
     }
 
     const isDogFight = statistics.tournamentType === "dogfight";
+    const isTeamPlay = statistics.tournamentType === "teamplay";
     const sortedPlayers = statistics.players;
 
     logger.info("sortedPlayers", { structuredData: statistics.players });
     logger.info("isDogFight", { structuredData: statistics.tournamentType });
+    if (isTeamPlay) {
+      return res.status(200).json({
+        status: "success",
+        data: {
+          standings: [],
+        },
+      });
+    }
     const standingsPositions = sortedPlayers
       .slice(0, 3)
       .map((player, index) => ({
         name: player.tourneyName,
-        points: isDogFight ? player.netAverage : player.totalPoints,
+        points: isDogFight
+          ? player.netAverage.toString()
+          : player.totalPoints.toString(),
         position: index + 1,
       }));
 

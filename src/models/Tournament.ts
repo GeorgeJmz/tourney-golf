@@ -75,6 +75,31 @@ export interface IGroup {
   isEditing: boolean;
   players: IPlayer[];
 }
+
+export interface statisticsPlayer {
+  id: number;
+  position: number;
+  tourneyName: string;
+  matchesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  bonusPoints: number;
+  matchPoints: number;
+  medalPoints: number;
+  totalPoints: number;
+  grossAverage: string;
+  handicapAverage: string;
+  netAverage: string;
+  teamPoints: number;
+  conference: string;
+  group: string;
+}
+export interface standingsType {
+  name: string;
+  points: number;
+  position: number;
+}
 const endDate = new Date();
 endDate.setDate(endDate.getDate() + 180);
 const championshipDate = new Date();

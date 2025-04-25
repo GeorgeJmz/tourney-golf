@@ -173,6 +173,57 @@ export const getStandings = async (tournamentId: string) => {
   return response.json();
 };
 
+export const getCourses = async (userId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const url = isLocal
+    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+
+  const response = await fetch(`${url}/getCourses`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: userId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const getOpponents = async (userId: string, leagueId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const url = isLocal
+    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
+    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
+
+  const response = await fetch(`${url}/getOpponents`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userEmail: userId,
+      leagueId: leagueId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const createUser = async (
   user: Partial<IUser>
 ): Promise<Partial<IUser>> => {
@@ -195,7 +246,7 @@ export const createUser = async (
       ghinNumber: user.ghinNumber || "",
       activeTournaments: [],
       historyTournaments: [],
-    } as IUser;
+    } as Omit<IUser, "sequentialUserId">;
     const url = isLocal
       ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
       : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";

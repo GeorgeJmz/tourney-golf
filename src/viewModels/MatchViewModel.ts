@@ -200,12 +200,14 @@ class MatchViewModel {
   setDifferenceHP(): void {
     const playersHandicap = this.players.map((p) => p.score.handicap);
     const minHcp = Math.min(...playersHandicap);
+    const isdifferentCourse = [...this.currentHcp].slice(0, 9).includes(10);
     this.differenceHP = playersHandicap.map((p) => p - minHcp);
     this.players.forEach((p, i) => {
       p.setDifferenceHandicap(
         this.differenceHP[i],
         this.currentHcp,
-        this.currentPar
+        this.currentPar,
+        isdifferentCourse
       );
     });
   }
@@ -213,11 +215,13 @@ class MatchViewModel {
   setDifferenceHPDogfight(): void {
     const playersHandicap = this.players.map((p) => p.score.handicap);
     this.differenceHP = playersHandicap;
+    const isdifferentCourse = [...this.currentHcp].slice(0, 9).includes(10);
     this.players.forEach((p, i) => {
       p.setDifferenceHandicap(
         this.differenceHP[i],
         this.currentHcp,
-        this.currentPar
+        this.currentPar,
+        isdifferentCourse
       );
     });
   }

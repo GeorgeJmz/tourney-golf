@@ -79,6 +79,16 @@ export const profileElementsSettings: Array<ITournamentElement> = [
     },
   },
   {
+    name: "sequentialUserId",
+    placeholder: "ID",
+    input: "text",
+    size: {
+      xs: 12,
+      md: 12,
+      lg: 6,
+    },
+  },
+  {
     name: "name",
     placeholder: "Name",
     input: "text",
@@ -115,7 +125,8 @@ export interface IProfileElement {
   lastName: string;
   email: string;
   ghinNumber: string;
-  [key: string]: string;
+  sequentialUserId: number;
+  [key: string]: string | number;
 }
 
 export const profileFields: IProfileElement = {
@@ -123,6 +134,7 @@ export const profileFields: IProfileElement = {
   lastName: "",
   email: "",
   ghinNumber: "",
+  sequentialUserId: 0,
 };
 
 export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
@@ -138,6 +150,7 @@ export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
       .min(4, "Last Name should be of minimum 4 characters length"),
     ghinNumber: yup.string().required("GHIN Number is required"),
     email: yup.string().required("League type is required"),
+    sequentialUserId: yup.number().required("Is Required"),
   });
 
 export const createAccountElements: Array<ITournamentElement> = [

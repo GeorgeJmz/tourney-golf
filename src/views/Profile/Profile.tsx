@@ -40,6 +40,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
       email: user.user.email,
       lastName: user.user.lastName,
       ghinNumber: user.user.ghinNumber,
+      sequentialUserId: user.user.sequentialUserId,
     } as IProfileElement,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -49,6 +50,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
         id: user.user.id,
         email: user.user.email,
         ghinNumber: values.ghinNumber,
+        sequentialUserId: user.user.sequentialUserId,
       };
       user.updateUser(newUser);
       setTimeout(() => navigate("/dashboard"), 1000);
@@ -69,7 +71,9 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
                 Boolean(formik.errors[inputElement.name])
             );
 
-            const isDisabled = inputElement.name === "email";
+            const isDisabled =
+              inputElement.name === "email" ||
+              inputElement.name === "sequentialUserId";
 
             return (
               <TextInput
