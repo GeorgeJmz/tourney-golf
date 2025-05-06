@@ -131,6 +131,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "CoronadoMunicipal",
+      name: "Coronado Municipal Golf Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueCoronadoMunicipal",
+          color: "Blue",
+          length: "6596",
+        },
+      ],
+    },
+    {
       id: "ClubCampestreTijuana",
       name: "Club Campestre Tijuana",
       address: "Blvd. Agua Caliente 11311, Aviacion, 22020 Tijuana, B.C.",
@@ -1185,6 +1198,17 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [2888, 36],
       out: [2511, 34],
       total: [5399, 70],
+    },
+    BlueCoronadoMunicipal: {
+      distance: [
+        371, 500, 405, 536, 162, 396, 389, 405, 174, 408, 142, 300, 545, 394,
+        175, 370, 427, 497,
+      ],
+      hcp: [5, 15, 9, 1, 17, 7, 11, 3, 13, 6, 18, 16, 2, 8, 12, 10, 4, 14],
+      par: [4, 5, 4, 5, 3, 4, 4, 4, 3, 4, 3, 4, 5, 4, 3, 4, 4, 5],
+      in: [3258, 36],
+      out: [3338, 36],
+      total: [6596, 72],
     },
   };
   const course = details[id];
