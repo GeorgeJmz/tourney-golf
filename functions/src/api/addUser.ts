@@ -26,12 +26,10 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
 
   // --- Validación y Sanitización (sin cambios) ---
   if (!name || !lastName || !email || !id) {
-    return res
-      .status(400)
-      .send({
-        status: "error",
-        message: "Missing required fields (name, lastName, email, id)",
-      });
+    return res.status(400).send({
+      status: "error",
+      message: "Missing required fields (name, lastName, email, id)",
+    });
   }
   if (typeof name !== "string" || name.length > 255) {
     return res
@@ -119,12 +117,10 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
               .json({ status: "error", message: "Límite de IDs alcanzado." });
           }
           if (idError.message?.includes("ERR_COUNTER_NOT_FOUND")) {
-            return res
-              .status(500)
-              .json({
-                status: "error",
-                message: "Error de configuración interna (contador).",
-              });
+            return res.status(500).json({
+              status: "error",
+              message: "Error de configuración interna (contador).",
+            });
           }
           throw idError; // Relanza para que lo capture el catch principal
         }
@@ -193,12 +189,10 @@ export const addUser = async (req: RequestAddUser, res: Response) => {
             .json({ status: "error", message: "Límite de IDs alcanzado." });
         }
         if (idError.message?.includes("ERR_COUNTER_NOT_FOUND")) {
-          return res
-            .status(500)
-            .json({
-              status: "error",
-              message: "Error de configuración interna (contador).",
-            });
+          return res.status(500).json({
+            status: "error",
+            message: "Error de configuración interna (contador).",
+          });
         }
         throw idError; // Relanza para el catch principal
       }
