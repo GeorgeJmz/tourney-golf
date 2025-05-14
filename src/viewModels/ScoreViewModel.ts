@@ -179,6 +179,10 @@ class ScoreViewModel {
     return arrayPositions;
   };
 
+  getScore = () => {
+    return toJS(this.score);
+  };
+
   async createScore(): Promise<string> {
     //const displayLoading = getMessages(Messages.LOADING);
     //const cuToast = toast.loading(displayLoading);
