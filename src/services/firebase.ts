@@ -38,25 +38,29 @@ import {
 } from "firebase/storage";
 import { getDownloadURL } from "firebase/storage";
 import { ITournamentPlayer } from "../models/Player";
+import {
+  firebaseConfigValues,
+  IS_LOCAL_ENV,
+  AUTH_EMULATOR_URL,
+  FIRESTORE_EMULATOR_HOST,
+  FIRESTORE_EMULATOR_PORT,
+  API_BASE_URL,
+  API_ENDPOINTS,
+} from "../config";
 import "firebase/firestore";
 
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_APIKEY,
-  authDomain: process.env.REACT_APP_AUTHDOMAIN,
-  projectId: process.env.REACT_APP_PROJECTID,
-  storageBucket: process.env.REACT_APP_STORAGEBUCKET,
-  messagingSenderId: process.env.REACT_APP_MESSAGINGSENDERID,
-  appId: process.env.REACT_APP_APPID,
-};
 
-export const firebase = initializeApp(firebaseConfig);
+export const firebase = initializeApp(firebaseConfigValues);
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();
-export const isLocal = process.env.REACT_APP_ENV === "LOCAL";
-if (isLocal) {
-  connectFirestoreEmulator(db, "127.0.0.1", 8081);
-  connectAuthEmulator(auth, "http://127.0.0.1:9099");
+if (IS_LOCAL_ENV) {
+  connectFirestoreEmulator(
+    db,
+    FIRESTORE_EMULATOR_HOST,
+    FIRESTORE_EMULATOR_PORT
+  );
+  connectAuthEmulator(auth, AUTH_EMULATOR_URL);
 }
 
 export const passwordReset = async (email: string): Promise<void> => {
@@ -108,10 +112,7 @@ export const sendCustomEmail = async (
 
 export const getAllUsers = async (): Promise<void> => {
   const authToken = await auth.currentUser?.getIdToken();
-  const url = isLocal
-    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-  await fetch(`${url}/getUsers`, {
+  await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_USERS}`, {
     method: "GET",
     headers: { Authorization: `Bearer ${authToken}` },
     mode: "cors",
@@ -125,21 +126,20 @@ export const getAllUsers = async (): Promise<void> => {
 
 export const getAllLeagues = async (userId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
-  const url = isLocal
-    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-
-  const response = await fetch(`${url}/getDashboardLeagues`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.GET_DASHBOARD_LEAGUES}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -150,21 +150,20 @@ export const getAllLeagues = async (userId: string) => {
 
 export const getStandings = async (tournamentId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
-  const url = isLocal
-    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-
-  const response = await fetch(`${url}/getStandings`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      leagueId: tournamentId,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.GET_STANDINGS}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        leagueId: tournamentId,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -175,11 +174,7 @@ export const getStandings = async (tournamentId: string) => {
 
 export const getCourses = async (userId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
-  const url = isLocal
-    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-
-  const response = await fetch(`${url}/getCourses`, {
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_COURSES}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${authToken}`,
@@ -200,22 +195,21 @@ export const getCourses = async (userId: string) => {
 
 export const getOpponents = async (userId: string, leagueId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
-  const url = isLocal
-    ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-    : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-
-  const response = await fetch(`${url}/getOpponents`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userEmail: userId,
-      leagueId: leagueId,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.GET_OPPONENTS}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userEmail: userId,
+        leagueId: leagueId,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -247,10 +241,7 @@ export const createUser = async (
       activeTournaments: [],
       historyTournaments: [],
     } as Omit<IUser, "sequentialUserId">;
-    const url = isLocal
-      ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
-      : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
-    await fetch(`${url}/addUser`, {
+    await fetch(`${API_BASE_URL}${API_ENDPOINTS.ADD_USER}`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
@@ -268,7 +259,7 @@ export const createUser = async (
     return firebaseUser;
 
     // const authToken = await auth.currentUser?.getIdToken();
-    // const url = isLocal
+    // const url = IS_LOCAL_ENV
     //   ? "http://127.0.0.1:5001/teeboxleague-11e39/us-central1/api"
     //   : "https://us-central1-teeboxleague-11e39.cloudfunctions.net/api";
     // await fetch(`${url}/addUser`, {
@@ -320,6 +311,61 @@ export const createUser = async (
     //   "<p>Now you're ready to practice with purpose, play with an edge and become a league legend.</p><p><a href='https://teeboxleague.com/'>Login</a> to create a new league or accept a league invitation.</p>"
     // );
     // return user;
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+export const createMatchEndpoint = async (): Promise<void> => {
+  try {
+    const authToken = await auth.currentUser?.getIdToken();
+    const firebaseMatch = {
+      author: "fX8mU0WnUqh68Njwt2ocKkhfCdF3",
+      course: "AndalusiaCountryClub",
+      courseDisplayName: "Andalusia Country Club",
+      teeBox: "BlueAndalusiaCountryClub",
+      teeBoxDisplayName: "Blue",
+      tournamentId: "f0fCkvDOCLAK43nQJkCe",
+      scores: [
+        {
+          player: "Adrian Aburto",
+          idPlayer: "jeckox@gmail.com",
+          scoreHoles: [3, 3, 5, 4, 4, 4, 3, 4, 4, 4, 4, 3, 4, 3, 5, 4, 4, 5],
+          handicap: 5,
+          out: 34,
+          in: 36,
+          totalGross: 70,
+          totalNet: 70,
+          teamPoints: [3, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        },
+        {
+          player: "test2",
+          idPlayer: "test2@gmail.com",
+          scoreHoles: [4, 3, 5, 4, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5],
+          handicap: 0,
+          out: 36,
+          in: 36,
+          totalGross: 72,
+          totalNet: 72,
+          teamPoints: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        },
+      ],
+      message: "Its Showtime",
+    };
+    await fetch(`${API_BASE_URL}${API_ENDPOINTS.CREATE_MATCH}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(firebaseMatch),
+      mode: "cors",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data, "data");
+      });
   } catch (error) {
     const code = error as FirebaseError;
     throw code;

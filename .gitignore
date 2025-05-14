@@ -50,6 +50,7 @@ Thumbs.db
 # misc
 .DS_Store
 .env
+.env.default
 .env.local
 .env.production
 .env.development.local
