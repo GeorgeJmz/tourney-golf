@@ -341,10 +341,15 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
       leagueType,
     });
 
+    const maximumOpponents = tournamentData.matchesPerRound.map((match) => {
+      const newPlayers = match === "double" ? 3 : match === "triple" ? 4 : 5;
+      return newPlayers;
+    });
     return res.status(200).json({
       status: "success",
       data: {
         opponents,
+        maximumOpponents,
       },
     });
   } catch (error: unknown) {
