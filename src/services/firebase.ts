@@ -49,7 +49,6 @@ import {
 } from "../config";
 import "firebase/firestore";
 
-
 export const firebase = initializeApp(firebaseConfigValues);
 export const auth = getAuth();
 export const db = getFirestore();

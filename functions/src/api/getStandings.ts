@@ -3,7 +3,7 @@ import admin = require("firebase-admin");
 import * as logger from "firebase-functions/logger";
 import { RequestGetStandings } from "../types/Standings";
 import { createStatistics } from "../helpers/createStatistics";
-
+import { calculateTeamPointsStandings } from "../helpers/calculateTeamPointsStandings";
 export const getStandings = async (req: RequestGetStandings, res: Response) => {
   const db = admin.firestore();
   const { leagueId } = req.body;
@@ -30,18 +30,12 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
 
     const isDogFight = statistics.tournamentType === "dogfight";
     const isTeamPlay = statistics.tournamentType === "teamplay";
-    const sortedPlayers = statistics.players;
+    const sortedPlayers = !isTeamPlay
+      ? statistics.players
+      : await calculateTeamPointsStandings(statistics.players, leagueId);
 
     logger.info("sortedPlayers", { structuredData: statistics.players });
     logger.info("isDogFight", { structuredData: statistics.tournamentType });
-    if (isTeamPlay) {
-      return res.status(200).json({
-        status: "success",
-        data: {
-          standings: [],
-        },
-      });
-    }
     const standingsPositions = sortedPlayers
       .slice(0, 3)
       .map((player, index) => ({
