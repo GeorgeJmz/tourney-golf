@@ -11,49 +11,97 @@ import { getStandings } from "../api/getStandings";
 import { getCourses } from "../api/getCourses";
 import { createMatch } from "../api/createMatch";
 
+const MODO_PRUEBA_CORS_PERMISIVO = true;
+
 let allowedOrigins: string[] = [];
-const corsAllowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS; // Accede a la variable de entorno
+const corsAllowedOriginsEnv = process.env.CORS_ALLOWED_ORIGINS;
+
 if (corsAllowedOriginsEnv) {
-  // Divide la cadena por comas y elimina espacios extra
-  allowedOrigins = corsAllowedOriginsEnv.split(",").map(origin => origin.trim());
-  functions.logger.info("CORS: Orígenes permitidos cargados desde process.env.CORS_ALLOWED_ORIGINS:", allowedOrigins);
+  allowedOrigins = corsAllowedOriginsEnv
+    .split(",")
+    .map((origin) => origin.trim());
+  functions.logger.info(
+    "CORS: Orígenes permitidos cargados desde process.env.CORS_ALLOWED_ORIGINS:",
+    allowedOrigins
+  );
 } else {
-  functions.logger.warn("CORS: La variable de entorno CORS_ALLOWED_ORIGINS no está definida. Usando fallback/defaults.");
-  // Fallback para desarrollo o si la variable no está configurada
-  if (process.env.FUNCTIONS_EMULATOR === "true" || process.env.NODE_ENV !== "production") {
-    // Para desarrollo local, permite localhost.
+  functions.logger.warn(
+    "CORS: La variable de entorno CORS_ALLOWED_ORIGINS no está definida. Usando fallback/defaults."
+  );
+
+  if (
+    process.env.FUNCTIONS_EMULATOR === "true" ||
+    process.env.NODE_ENV !== "production"
+  ) {
     allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
   } else {
-    // Para producción, si la variable no está, sé restrictivo.
-    // Podrías decidir tener una lista vacía o solo tu dominio principal.
     allowedOrigins = ["https://teeboxleague.com"];
-    functions.logger.warn("CORS: Fallback de producción aplicado para orígenes permitidos.");
   }
+  functions.logger.info(
+    "CORS: Orígenes de fallback aplicados:",
+    allowedOrigins
+  );
 }
-const corsOptions: cors.CorsOptions = {
-  origin: (requestOrigin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-    // Opcional: permitir solicitudes sin origen (Postman, apps móviles) en desarrollo/emulador.
-    // En producción, sé más estricto con esto según tus necesidades de seguridad.
-    if (!requestOrigin && (process.env.FUNCTIONS_EMULATOR === "true" || process.env.NODE_ENV !== "production")) {
-      functions.logger.info("CORS: Permitiendo solicitud sin origen en entorno de no producción/emulador.");
-      return callback(null, true);
-    }
 
-    if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-      callback(null, true); // El origen está en la lista de permitidos
+const corsOptions: cors.CorsOptions = {
+  origin: (
+    requestOrigin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    if (MODO_PRUEBA_CORS_PERMISIVO) {
+      if (
+        (requestOrigin && allowedOrigins.includes(requestOrigin)) ||
+        !requestOrigin ||
+        requestOrigin === "undefined"
+      ) {
+        if (!requestOrigin || requestOrigin === "undefined") {
+          functions.logger.info(
+            `CORS (MODO_PRUEBA_PERMISIVO): Permitiendo solicitud con origen especial "${requestOrigin}".`
+          );
+        }
+        callback(null, true);
+      } else {
+        functions.logger.error(
+          `CORS (MODO_PRUEBA_PERMISIVO): Origen "${requestOrigin}" no permitido. Lista de permitidos: [${allowedOrigins.join(
+            ", "
+          )}] (y orígenes especiales).`
+        );
+        callback(
+          new Error(
+            `El origen ${requestOrigin} no está permitido por la política de CORS en modo prueba.`
+          )
+        );
+      }
     } else {
-      functions.logger.error(`CORS: Origen "${requestOrigin}" no permitido. Lista de permitidos: [${allowedOrigins.join(", ")}]`);
-      callback(new Error(`El origen ${requestOrigin} no está permitido por la política de CORS.`));
+      if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+        callback(null, true);
+      } else {
+        functions.logger.error(
+          `CORS (MODO PRODUCCIÓN ESTRICTO): Origen "${requestOrigin}" no permitido. Lista de permitidos: [${allowedOrigins.join(
+            ", "
+          )}]`
+        );
+        callback(
+          new Error(
+            `El origen ${requestOrigin} no está permitido por la política de CORS.`
+          )
+        );
+      }
     }
   },
-  // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  // allowedHeaders: ["Content-Type", "Authorization"],
 };
-routes.use(
-  cors(corsOptions)
-);
+
+routes.use(cors(corsOptions));
+
 routes.get("/", (req, res) => res.status(200).send("Hey there!"));
-routes.get("/V", (req, res) => res.status(200).send(corsAllowedOriginsEnv));
+routes.get("/V", (req, res) => {
+  const response = {
+    modoPruebaCorsPermisivo: MODO_PRUEBA_CORS_PERMISIVO,
+    corsAllowedOriginsEnv: corsAllowedOriginsEnv ?? "No definida",
+    effectiveAllowedOrigins: allowedOrigins,
+  };
+  res.status(200).json(response);
+});
 routes.post("/addUser", verifyToken, addUser);
 routes.get("/getUsers", verifyToken, getUsers);
 routes.post("/getDashboardLeagues", verifyToken, getDashboardLeagues);
@@ -62,7 +110,6 @@ routes.post("/getCourses", verifyToken, getCourses);
 routes.post("/getOpponents", verifyToken, getOpponents);
 routes.post("/createMatch", verifyToken, createMatch);
 
-// Catch all other routes
 routes.use((req, res) => {
   res.status(404).send("Not found");
 });
