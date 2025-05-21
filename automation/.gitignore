@@ -1,0 +1,9 @@
+# Node.js dependency directory
+node_modules/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico

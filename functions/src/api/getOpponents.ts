@@ -202,7 +202,9 @@ const findDogfightOpponents = async (
       `Championship eligible players: ${eligiblePlayersForToday.map(
         (p) => p.email
       )}`,
-      { leagueId: tournamentData.id }
+      {
+        leagueId: tournamentData.id,
+      }
     );
   } else {
     // 3b. For regular rounds, all players in the tournament are potentially eligible
@@ -228,7 +230,9 @@ const findDogfightOpponents = async (
     `Potential Dogfight opponents found: ${potentialOpponents.map(
       (p) => p.email
     )}`,
-    { leagueId: tournamentData.id }
+    {
+      leagueId: tournamentData.id,
+    }
   );
 
   // 5. Map to the required output format (already done in step 4)

@@ -30,4 +30,5 @@ export const API_ENDPOINTS = {
   GET_OPPONENTS: "/getOpponents",
   ADD_USER: "/addUser",
   CREATE_MATCH: "/createMatch",
+  GET_BOARD: "/getBoard",
 };

@@ -147,6 +147,27 @@ export const getAllLeagues = async (userId: string) => {
   return response.json();
 };
 
+export const getBoard = async (leagueId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_BOARD}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      leagueId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const getStandings = async (tournamentId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
   const response = await fetch(

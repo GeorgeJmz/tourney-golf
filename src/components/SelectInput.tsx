@@ -28,7 +28,7 @@ export const SelectInput: React.FC<SelectInputProps> = ({
       </InputLabel>
       <Select
         labelId="demo-simple-select-helper-label"
-        id="demo-simple-select-helper"
+        id={`select-${inputElement.name}`}
         value={value as string}
         label={inputElement.placeholder}
         error={isError}

@@ -1,0 +1,19 @@
+{
+  "name": "tourney-golf-automation",
+  "version": "1.0.0",
+  "description": "Automation tests for Tourney Golf application",
+  "scripts": {
+    "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.js",
+    "test:integration": "jest --config jest.integration.config.js",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^29.0.0",
+    "puppeteer": "^24.8.2",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  }
+}

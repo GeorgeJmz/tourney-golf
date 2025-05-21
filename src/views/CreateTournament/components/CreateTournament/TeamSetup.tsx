@@ -59,6 +59,7 @@ const TeamSetup: React.FC<TeamSetupProps> = ({
               size="large"
               onClick={onNextHandler}
               disabled={isNextDisabled}
+              data-testid="save-and-next-step-teams-setup"
             >
               {"Save and next step"}
             </Button>

@@ -119,6 +119,7 @@ export const SendInvitations: React.FC<SendInvitationsProps> = ({
               variant="contained"
               size="large"
               disabled={isDisabled}
+              data-testid="add-player"
             >
               Add Player
             </Button>

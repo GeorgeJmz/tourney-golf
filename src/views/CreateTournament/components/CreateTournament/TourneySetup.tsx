@@ -100,7 +100,12 @@ const TourneySetup: React.FC<TourneySetupFormProps> = ({
         })}
         <Grid item xs={12}>
           <FormControl>
-            <Button type="submit" variant="contained" size="large">
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              data-testid="save-and-next-step-league-setup"
+            >
               {isNewTournament ? "Save and next step" : "Update League"}
             </Button>
           </FormControl>

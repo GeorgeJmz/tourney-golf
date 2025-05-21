@@ -47,7 +47,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prettier": "npx prettier --write .",
-    "lint": "npx eslint ./src/** --fix"
+    "lint": "npx eslint ./src/** --fix",
+    "format:automation": "prettier --write \"automation/src/**/*.{ts,tsx,js,jsx,json}\""
   },
   "browserslist": {
     "production": [
