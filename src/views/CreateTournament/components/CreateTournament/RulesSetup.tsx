@@ -246,7 +246,12 @@ const RulesSetup: React.FC<RulesSetupFormProps> = ({
         })}
         <Grid item xs={12}>
           <FormControl>
-            <Button type="submit" variant="contained" size="large">
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              data-testid="save-and-next-step-rules-setup"
+            >
               {"Save and next step"}
             </Button>
           </FormControl>

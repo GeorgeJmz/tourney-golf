@@ -202,6 +202,7 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
                     style={{
                       paddingBottom: "16px",
                     }}
+                    id={`${player.id}-card`}
                   >
                     <Typography variant="body2" component="p">
                       {player.name}
@@ -286,6 +287,7 @@ export const DragDropv2: React.FC<DragDropv2Props> = ({
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
+                        id={`${group.id}-droppable`}
                         style={{
                           backgroundColor: snapshot.isDraggingOver
                             ? "lightblue"

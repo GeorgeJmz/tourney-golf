@@ -62,6 +62,7 @@ const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
               variant="contained"
               size="large"
               onClick={onNextHandler}
+              data-testid="save-and-next-step-player-setup"
             >
               {"Save and next step"}
             </Button>

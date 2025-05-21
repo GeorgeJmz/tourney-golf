@@ -116,7 +116,9 @@ export const createMatch = async (req: RequestCreateMatch, res: Response) => {
     }
     // Calculate Winners
     const scoresForWinnerCalculation = Array.from(scoresId.values()).map(
-      (item) => ({ score: item.score })
+      (item) => ({
+        score: item.score,
+      })
     );
 
     const {

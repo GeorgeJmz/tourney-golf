@@ -171,7 +171,11 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
       {activeStep === getFilteredSteps().length && (
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps are completed</Typography>
-          <Button onClick={handleReset} sx={{ mt: 1, mr: 1 }}>
+          <Button
+            onClick={handleReset}
+            sx={{ mt: 1, mr: 1 }}
+            data-testid="done-setup"
+          >
             Done
           </Button>
         </Paper>

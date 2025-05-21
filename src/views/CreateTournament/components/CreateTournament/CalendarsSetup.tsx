@@ -48,6 +48,7 @@ const CalendarSetup: React.FC<CalendarSetupProps> = ({
               variant="contained"
               size="large"
               onClick={handleNext}
+              data-testid="save-and-finish-league-setup"
             >
               {"Save and finish League setup"}
             </Button>
