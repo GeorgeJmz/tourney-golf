@@ -252,7 +252,7 @@ export const createMatch = async (req: RequestCreateMatch, res: Response) => {
       .map((player) => player.email)
       .filter((email): email is string => email !== undefined);
     sendMail(emails, title, bodyMail);
-    return res.status(201).send({
+    return res.status(200).send({
       status: "success",
       message: "Match created successfully",
       data: {

@@ -231,6 +231,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "FossilTrace",
+      name: "Fossil Trace Golf Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueFossilTrace",
+          color: "Blue Fossil Trace",
+          length: "6241",
+        },
+      ],
+    },
+    {
       id: "LaJollaCountryClub",
       name: "La Jolla Country Club",
       address: "",
@@ -1209,6 +1222,17 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3258, 36],
       out: [3338, 36],
       total: [6596, 72],
+    },
+    BlueFossilTrace: {
+      distance: [
+        544, 297, 135, 426, 95, 372, 338, 372, 570, 305, 154, 545, 381, 205,
+        536, 141, 320, 505,
+      ],
+      hcp: [3, 13, 15, 5, 17, 9, 11, 7, 1, 10, 16, 4, 8, 14, 2, 18, 12, 6],
+      par: [5, 4, 3, 4, 3, 4, 4, 4, 5, 4, 3, 5, 4, 3, 5, 3, 4, 5],
+      out: [3149, 36],
+      in: [3092, 36],
+      total: [6241, 72],
     },
   };
   const course = details[id];
