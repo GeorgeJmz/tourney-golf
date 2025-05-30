@@ -57,6 +57,7 @@ const GroupsSetup: React.FC<GroupsSetupFormProps> = ({
               size="large"
               disabled={isNextDisabled}
               onClick={onNextHandler}
+              data-testid="save-and-next-step-division-setup"
             >
               {"Save and next step"}
             </Button>

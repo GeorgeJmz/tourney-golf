@@ -69,6 +69,7 @@ const ConferenceSetup: React.FC<ConferenceSetupProps> = ({
               size="large"
               onClick={onNextHandler}
               disabled={isNextDisabled}
+              data-testid="save-and-next-step-conference-setup"
             >
               {"Save and next step"}
             </Button>

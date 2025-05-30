@@ -46,7 +46,10 @@ describe("ExampleCreateTournament", () => {
     await puppeteer.close();
   });
 
-  it("should create a tournament successfully", async () => {
-    await puppeteer.createTournament(puppeteer);
-  });
+  // it("should create a team play tournament successfully", async () => {
+  //   await puppeteer.createTeamPlayTournament(puppeteer);
+  // });
+  it("should create a league tournament successfully", async () => {
+    await puppeteer.createLeagueTournament(puppeteer);
+  }, 50000);
 });

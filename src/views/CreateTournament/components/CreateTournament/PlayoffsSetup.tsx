@@ -29,6 +29,7 @@ const PlayoffsSetup: React.FC<PlayoffsSetupFormProps> = ({
               variant="outlined"
               size="large"
               onClick={handlePrev}
+              data-testid="save-and-next-step-playoffs-setup"
             >
               Previous Step
             </Button>

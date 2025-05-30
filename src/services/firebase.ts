@@ -337,16 +337,19 @@ export const createUser = async (
   }
 };
 
-export const createMatchEndpoint = async (): Promise<void> => {
+export const createMatchEndpoint = async (
+  author: string,
+  tournamentId: string
+): Promise<void> => {
   try {
     const authToken = await auth.currentUser?.getIdToken();
     const firebaseMatch = {
-      author: "fX8mU0WnUqh68Njwt2ocKkhfCdF3",
+      author: author,
       course: "AndalusiaCountryClub",
       courseDisplayName: "Andalusia Country Club",
       teeBox: "BlueAndalusiaCountryClub",
       teeBoxDisplayName: "Blue",
-      tournamentId: "f0fCkvDOCLAK43nQJkCe",
+      tournamentId: tournamentId,
       scores: [
         {
           player: "Adrian Aburto",
@@ -358,6 +361,17 @@ export const createMatchEndpoint = async (): Promise<void> => {
           totalGross: 70,
           totalNet: 70,
           teamPoints: [3, 2, 2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+        },
+        {
+          player: "test1",
+          idPlayer: "test1@gmail.com",
+          scoreHoles: [4, 3, 5, 4, 4, 4, 3, 4, 5, 4, 4, 3, 4, 3, 5, 4, 4, 5],
+          handicap: 0,
+          out: 36,
+          in: 36,
+          totalGross: 72,
+          totalNet: 72,
+          teamPoints: [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
         },
         {
           player: "test2",

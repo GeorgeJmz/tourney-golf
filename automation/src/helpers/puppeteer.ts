@@ -98,9 +98,161 @@ export class PuppeteerHelper {
     }
   }
 
-  async createTournament(helper: PuppeteerHelper) {
+  async createLeagueTournament(helper: PuppeteerHelper) {
     try {
-      const tournamentName = "Tournament Name";
+      const tournamentName =
+        "League Tournament Automation" + new Date().toISOString();
+      await helper.login("jeckox@gmail.com", "Password12345");
+      await helper.clickElement('a[href="/create-tournament"]');
+      await helper.waitForSelector("form");
+      await helper.typeText('input[name="name"]', tournamentName);
+
+      await helper.clickElement('div[id="select-type"]');
+      await helper.clickElement('li[data-value="league"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement('div[id="select-playType"]');
+      await helper.clickElement('li[data-value="matchstrokePlay"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement(
+        'button[data-testid="save-and-next-step-league-setup"]'
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.page?.evaluate(() => {
+        const sveButton = document.querySelector(
+          'button[data-testid="save-and-next-step-rules-setup"]'
+        );
+
+        if (sveButton) {
+          sveButton.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      await helper.clickElement('div[id="matchesPerRound-select"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement('li[data-value="triple"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement('div[id="matchesPerRound-select"]');
+
+      const playoffsInput = await this.page?.waitForSelector(
+        'input[name="playoffs"]'
+      );
+      await playoffsInput?.click();
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement(
+        'button[data-testid="save-and-next-step-rules-setup"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await helper.typeText('input[name="name"]', "Adrian");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.typeText('input[name="email"]', "jeckox@gmail.com");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('button[data-testid="add-player"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.typeText('input[name="name"]', "Test");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.typeText('input[name="email"]', "test1@gmail.com");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('button[data-testid="add-player"]');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await helper.typeText('input[name="name"]', "Test2");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.typeText('input[name="email"]', "test2@gmail.com");
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('button[data-testid="add-player"]');
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      await helper.clickElement(
+        'button[data-testid="save-and-next-step-player-setup"]'
+      );
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('div[id="select-Divisions"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('li[data-value="1"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.dragAndDrop(
+        'div[id="jeckox@gmail.com-card"]',
+        'div[id="division1-droppable"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.dragAndDrop(
+        'div[id="test1@gmail.com-card"]',
+        'div[id="division1-droppable"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.dragAndDrop(
+        'div[id="test2@gmail.com-card"]',
+        'div[id="division1-droppable"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.page?.evaluate(() => {
+        const sveButton = document.querySelector(
+          'button[data-testid="save-and-next-step-division-setup"]'
+        );
+
+        if (sveButton) {
+          sveButton.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement(
+        'button[data-testid="save-and-next-step-division-setup"]'
+      );
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      await helper.clickElement('div[id="select-Conferences"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.clickElement('li[data-value="1"]');
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      await helper.dragAndDrop(
+        'div[id="division1-card"]',
+        'div[id="conference1-droppable"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement(
+        'button[data-testid="save-and-next-step-conference-setup"]'
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      await helper.clickElement(
+        'button[data-testid="save-and-finish-league-setup"]'
+      );
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await helper.clickElement('button[data-testid="done-setup"]');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      await helper.takeScreenshot("tournament_created_league.png");
+
+      console.log("Torneo creado exitosamente");
+    } catch (error) {
+      console.error("Ocurrió un error:", error);
+      throw error;
+    }
+  }
+
+  async createTeamPlayTournament(helper: PuppeteerHelper) {
+    try {
+      const tournamentName =
+        "TeamPlay Tournament Automation" + new Date().toISOString();
       await helper.login("jeckox@gmail.com", "Password12345");
       await helper.clickElement('a[href="/create-tournament"]');
       await helper.waitForSelector("form");
@@ -118,21 +270,24 @@ export class PuppeteerHelper {
         'button[data-testid="save-and-next-step-league-setup"]'
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      // await this.page?.focus("input[name=\"numberOfStages\"]");
-      // await this.page?.keyboard.press("Backspace");
-      // await helper.typeText("input[name=\"numberOfStages\"]", "2");
-      // await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const numberOfStagesInput = await this.page?.waitForSelector(
-        'input[name="numberOfStages"]'
+      await helper.page?.evaluate(() => {
+        const saveButton = document.querySelector(
+          'button[data-testid="save-and-next-step-rules-setup"]'
+        );
+
+        if (saveButton) {
+          saveButton.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      const championshipInput = await this.page?.waitForSelector(
+        'input[name="championshipRound"]'
       );
-      await numberOfStagesInput?.click({ clickCount: 3 });
-      await numberOfStagesInput?.type("2");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
+      await championshipInput?.click();
       await helper.clickElement(
         'button[data-testid="save-and-next-step-rules-setup"]'
       );
+
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       await helper.typeText('input[name="name"]', "Adrian");

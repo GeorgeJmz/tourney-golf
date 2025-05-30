@@ -33,7 +33,7 @@ export const MultipleInput: React.FC<MultipleInputProps> = ({
       <Select
         multiple
         labelId="demo-simple-select-helper-label"
-        id="demo-simple-select-helper"
+        id={`${inputElement.name}-select`}
         value={value}
         label={inputElement.placeholder}
         renderValue={(selected) => (
