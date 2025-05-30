@@ -37,6 +37,7 @@ import TeamBoard from "./views/TournamentStats/TeamBoard";
 import PlayerBoard from "./views/TournamentStats/PlayerBoard";
 import HistoryLeagueTeamplay from "./views/HistoryLeague/HistoryLeagueTeamplay";
 import Stats from "./views/Stats/Stats";
+import ApiTest from "./views/ApiTest/ApiTest";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -155,6 +156,10 @@ function Router(): JSX.Element {
               <AuthUserActions />
             </AuthActions>
           ),
+        },
+        {
+          path: "/api-test",
+          element: withAuth(<ApiTest user={userViewModel} />),
         },
       ],
     },

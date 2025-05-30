@@ -33,7 +33,7 @@ interface IDashboardProps {
 const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
   const [showHistory, setShowHistory] = useState(false);
   const leaguesData = useGetLeagues(user);
-
+  const isDevelopment = !window.location.href.includes("teeboxleague.com");
   const { historyLeague } = useHistoryLeague(
     user.tournaments,
     user.historyTournaments
@@ -66,6 +66,15 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
               </Button>
             </Link>
           </ListItem>
+          {isDevelopment && (
+            <ListItem sx={{ width: "auto" }}>
+              <Link to="/api-test">
+                <Button variant="outlined" size="small">
+                  Api Test
+                </Button>
+              </Link>
+            </ListItem>
+          )}
         </Paper>
       )}
 
