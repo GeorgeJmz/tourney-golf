@@ -14,6 +14,7 @@ import {
   getCourses,
   getOpponents,
   createMatchEndpoint,
+  getStats,
 } from "../../services/firebase";
 import UserViewModel from "../../viewModels/UserViewModel";
 
@@ -132,6 +133,13 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
           }
         >
           Create Match
+        </Button>
+
+        <Button
+          variant="contained"
+          onClick={() => handleApiCall(getStats, tournamentId)}
+        >
+          Get Stats
         </Button>
       </Box>
 
