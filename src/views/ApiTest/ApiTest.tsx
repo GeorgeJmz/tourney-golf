@@ -35,7 +35,7 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const tournamentId = "vPOafSAa3uUBd02WwbeO";
+  const tournamentId = "pZNYIPkKf3xje4gDaRj1";
   const handleApiCall = async <T extends unknown[]>(
     apiFunction: ApiFunction<T>,
     ...args: T
