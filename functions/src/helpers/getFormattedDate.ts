@@ -3,7 +3,7 @@ export const getCurrentMoment = () => {
   const currentMoment = moment();
   return {
     eventDate: currentMoment.valueOf(),
-    eventTimezone: moment.tz.guess(),
+    eventTimezone: "America/Los_Angeles",
   };
 };
 export const convertMomentDate = (date: Array<string>): string => {

@@ -496,7 +496,6 @@ class PlayViewModel {
   /// TeamPlay
   async checkIfCanPlayToday(date: string, player: string): Promise<void> {
     const matches = await getMatchesByTournamentId(this.tournamentId);
-    console.log(matches, "matches");
     const matchesOfToday = matches.filter((match) => {
       const dateMatch = convertMomentDate(match.date);
       const dateToday = convertDate(date, "MM/DD/YYYY");

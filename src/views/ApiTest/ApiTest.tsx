@@ -6,7 +6,6 @@ import {
   Paper,
   CircularProgress,
 } from "@mui/material";
-import { useAuth } from "../../hooks/useUserContext";
 import {
   getAllUsers,
   getAllLeagues,
@@ -35,7 +34,7 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const tournamentId = "pZNYIPkKf3xje4gDaRj1";
+  const tournamentId = "vPOafSAa3uUBd02WwbeO";
   const handleApiCall = async <T extends unknown[]>(
     apiFunction: ApiFunction<T>,
     ...args: T
@@ -62,7 +61,15 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
     }
     if (response) {
       return (
-        <Paper sx={{ p: 2, mt: 2, maxHeight: "400px", overflow: "auto" }}>
+        <Paper
+          sx={{
+            p: 2,
+            mt: 2,
+            maxHeight: "600px",
+            overflow: "auto",
+            textAlign: "left",
+          }}
+        >
           <pre>{JSON.stringify(response, null, 2)}</pre>
         </Paper>
       );
@@ -83,7 +90,7 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
 
         <Button
           variant="contained"
-          onClick={() => handleApiCall(getAllLeagues, user.user.email || "")}
+          onClick={() => handleApiCall(getAllLeagues, user.user.id || "")}
         >
           Get All Leagues
         </Button>

@@ -8,6 +8,11 @@ import * as utc from "dayjs/plugin/utc";
 import * as isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import * as isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { IMatch } from "../types/Match";
+import {
+  getFormattedDate,
+  convertMomentDate,
+  convertDate,
+} from "../helpers/getFormattedDate";
 
 dayjs.extend(utc);
 dayjs.extend(isSameOrAfter);
@@ -64,6 +69,20 @@ const getMatchesByTournamentIdAndRound = async (
     .where("round", "==", round)
     .get();
 
+  if (snapshot.empty) {
+    return [];
+  }
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as IMatch));
+};
+
+const getMatchesByTournamentId = async (
+  db: admin.firestore.Firestore,
+  tournamentId: string
+): Promise<IMatch[]> => {
+  const snapshot = await db
+    .collection("match")
+    .where("tournamentId", "==", tournamentId)
+    .get();
   if (snapshot.empty) {
     return [];
   }
@@ -241,9 +260,8 @@ const findDogfightOpponents = async (
 
 /**
  * Finds potential opponents for a player in a "teamplay" league.
- * (Implementation Pending)
  */
-const findTeamplayOpponents = (
+const findTeamplayOpponents = async (
   requestingPlayer: ITournamentPlayer,
   tournamentData: ITournament
 ) => {
@@ -251,8 +269,57 @@ const findTeamplayOpponents = (
     leagueId: tournamentData.id,
     userId: requestingPlayer.email,
   });
-  // TODO: Implement specific logic for Teamplay
-  return []; // Return type should match expected opponent structure
+  try {
+    const db = admin.firestore();
+    const matches = await getMatchesByTournamentId(db, tournamentData.id || "");
+    const { formattedDate } = getFormattedDate();
+    const matchesOfToday = matches.filter((match) => {
+      const dateMatch = convertMomentDate(match.date);
+      const dateToday = formattedDate;
+
+      return dateMatch === dateToday;
+    });
+    const playersOfToday = matchesOfToday.flatMap((match) => {
+      return match.matchResults.map((player) => player.idPlayer);
+    });
+    const isRequestingPlayerPlayed = playersOfToday.includes(
+      requestingPlayer.email || ""
+    );
+    if (isRequestingPlayerPlayed) {
+      return {
+        opponents: [],
+        message: "Requesting player has already played today",
+      };
+    }
+    const potentialPlayers = tournamentData.playersList;
+    const champDate = tournamentData?.championshipRound
+      ? [convertDate(tournamentData?.championshipDate || "", "MM/DD/YYYY")]
+      : [];
+
+    const isChampionship =
+      champDate?.includes(formattedDate) &&
+      playersOfToday.includes(requestingPlayer.email || "");
+    const opponents = potentialPlayers?.filter((player) =>
+      isChampionship
+        ? player?.email !== requestingPlayer.email &&
+          playersOfToday.includes(player?.email || "")
+        : player?.email !== requestingPlayer.email &&
+          !playersOfToday.includes(player?.email || "")
+    ) as unknown as IOpponents[];
+
+    return {
+      opponents,
+      message: "",
+    };
+  } catch (error) {
+    logger.error("Error fetching matches", {
+      error,
+    });
+    return {
+      opponents: [],
+      message: "Error fetching opponents",
+    };
+  }
 };
 
 export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
@@ -315,6 +382,7 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
     } as ITournamentPlayer;
 
     let opponents: IOpponents[] = [];
+    let message = "";
     const leagueType = tournamentData.tournamentType || "standard";
 
     logger.info(`Determining opponents for league type: ${leagueType}`, {
@@ -330,9 +398,13 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
           tournamentData
         );
         break;
-      case "teamplay":
-        opponents = findTeamplayOpponents(requestingPlayer, tournamentData);
+      case "teamplay": {
+        const { opponents: opponentsTeamplay, message: messageTeamplay } =
+          await findTeamplayOpponents(requestingPlayer, tournamentData);
+        opponents = opponentsTeamplay;
+        message = messageTeamplay;
         break;
+      }
       case "standard":
       default:
         opponents = findStandardOpponents(requestingPlayer, tournamentData);
@@ -354,6 +426,7 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
       data: {
         opponents,
         maximumOpponents,
+        message,
       },
     });
   } catch (error: unknown) {
