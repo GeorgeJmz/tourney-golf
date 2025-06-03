@@ -11,6 +11,7 @@ import { getStandings } from "../api/getStandings";
 import { getCourses } from "../api/getCourses";
 import { createMatch } from "../api/createMatch";
 import { getBoard } from "../api/getBoard";
+import { getStats } from "../api/getStats";
 
 const MODO_PRUEBA_CORS_PERMISIVO = true;
 
@@ -111,6 +112,7 @@ routes.post("/getCourses", verifyToken, getCourses);
 routes.post("/getOpponents", verifyToken, getOpponents);
 routes.post("/createMatch", verifyToken, createMatch);
 routes.post("/getBoard", verifyToken, getBoard);
+routes.post("/getStats", verifyToken, getStats);
 
 routes.use((req, res) => {
   res.status(404).send("Not found");

@@ -405,6 +405,23 @@ export const createMatchEndpoint = async (
     throw code;
   }
 };
+
+export const getStats = async (leagueId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_STATS}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      leagueId: leagueId,
+    }),
+    mode: "cors",
+  });
+  console.log(response, "response");
+  return response.json();
+};
 export const updateUser = async (
   user: Partial<IUser>
 ): Promise<Partial<IUser>> => {

@@ -1,13 +1,17 @@
 import { ITournament } from "../types/DashboardLeagues";
 import admin = require("firebase-admin");
 import { ITournamentPlayer, IUser } from "../types/Standings";
+import { IMatch } from "../types/Match";
+import { getCourseDetail } from "../helpers/courses";
 
 export const createStatistics = async (leagueId: string) => {
   const db = admin.firestore();
-  const [tournamentsSnapshot, playersSnapshot] = await Promise.all([
-    db.collection("tournament").where("id", "==", leagueId).get(),
-    db.collection("player").where("tournamentId", "==", leagueId).get(),
-  ]);
+  const [tournamentsSnapshot, playersSnapshot, matchesSnapshot] =
+    await Promise.all([
+      db.collection("tournament").where("id", "==", leagueId).get(),
+      db.collection("player").where("tournamentId", "==", leagueId).get(),
+      db.collection("match").where("tournamentId", "==", leagueId).get(),
+    ]);
   const currentLeague = tournamentsSnapshot.docs[0].data() as ITournament;
   const {
     tournamentType,
@@ -29,6 +33,11 @@ export const createStatistics = async (leagueId: string) => {
 
   const players: ITournamentPlayer[] = playersSnapshot.docs.map((doc) => ({
     ...(doc.data() as ITournamentPlayer),
+    id: doc.id,
+  }));
+
+  const matches: IMatch[] = matchesSnapshot.docs.map((doc) => ({
+    ...(doc.data() as IMatch),
     id: doc.id,
   }));
 
@@ -56,6 +65,121 @@ export const createStatistics = async (leagueId: string) => {
     ...player,
     name: nameMap.get(player.email) || player.name,
   }));
+
+  // Process stats for sortedStats
+  const processedStats: {
+    [key: string]: {
+      [key: string]: Array<{
+        player: string;
+        date: string;
+        hdc: string;
+        net: number;
+        score: string;
+        course: number;
+        points: string;
+        opponent: string;
+      }>;
+    };
+  } = {};
+
+  matches.forEach((match) => {
+    match.matchResults.forEach((player, i) => {
+      const id = player.idPlayer;
+      const moreData = playersWithNames.find((p) => p.email === id);
+      const currentPosition = moreData?.scoreId.findIndex(
+        (s) => s === match.scoresId[i]
+      );
+      const currentConference = moreData?.conference || "";
+
+      const getTotalPoints = (player: {
+        pointsMatch: number;
+        pointsStroke: number;
+        bonusPoints: number;
+      }) => {
+        if (isLTMATCH || isLMATCH) {
+          return player.pointsMatch + player.bonusPoints;
+        }
+        if (isLTMEDAL || isLMEDAL) {
+          return player.pointsStroke + player.bonusPoints;
+        }
+        return player.pointsMatch + player.pointsStroke + player.bonusPoints;
+      };
+
+      const values = {
+        player: moreData?.name || "",
+        date: moreData?.date ? moreData?.date[currentPosition || 0] : "",
+        hdc: player.hcp,
+        net:
+          player.score -
+          getCourseDetail(match.teeBox).par.reduce(
+            (acc, curr) => acc + curr,
+            0
+          ),
+        score: match.scoresId[i],
+        points: getTotalPoints({
+          pointsMatch: moreData?.pointsMatch[currentPosition || 0] || 0,
+          pointsStroke: moreData?.pointsStroke[currentPosition || 0] || 0,
+          bonusPoints:
+            moreData?.bonusPoints !== undefined
+              ? moreData?.bonusPoints[currentPosition || 0] || 0
+              : 0,
+        }).toString(),
+        course: getCourseDetail(match.teeBox).par.reduce(
+          (acc, curr) => acc + curr,
+          0
+        ),
+        opponent:
+          nameMap.get(moreData?.opponent[currentPosition || 0] || "") || "",
+      };
+
+      if (!processedStats[currentConference]) {
+        processedStats[currentConference] = {};
+      }
+      if (processedStats[currentConference][id]) {
+        processedStats[currentConference][id].push(values);
+      } else {
+        processedStats[currentConference][id] = [values];
+      }
+    });
+  });
+
+  // Sort the stats
+  const sortedStats = Object.entries(processedStats).reduce(
+    (acc, [conference, stats]) => {
+      acc[conference] = Object.values(stats)
+        .sort((a, b) => a[0].player.localeCompare(b[0].player))
+        .map((items) => {
+          const sortedItems = items
+            .slice()
+            .sort(
+              (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+          return {
+            player: sortedItems[0].player,
+            date: sortedItems.map((item) => item.date),
+            hdc: sortedItems.map((item) => item.hdc),
+            net: sortedItems.map((item) => item.net),
+            score: sortedItems.map((item) => item.score),
+            points: sortedItems.map((item) => item.points),
+            course: sortedItems.map((item) => item.course),
+            opponent: sortedItems.map((item) => item.opponent),
+          };
+        });
+      return acc;
+    },
+    {} as {
+      [key: string]: Array<{
+        player: string;
+        date: string[];
+        hdc: string[];
+        net: number[];
+        score: string[];
+        points: string[];
+        course: number[];
+        opponent: string[];
+      }>;
+    }
+  );
 
   const calculatePlayerStats = async (player: ITournamentPlayer) => {
     const getAverage = (values: number[]) => {
@@ -161,6 +285,7 @@ export const createStatistics = async (leagueId: string) => {
   const statisticsObject = {
     players: isTeamPlay ? teams : sortedPlayers,
     tournamentType: tournamentType,
+    ...(isTeamPlay ? {} : { stats: sortedStats }),
   };
   await newStatistics.set(statisticsObject);
   return statisticsObject;

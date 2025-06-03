@@ -14,6 +14,7 @@ import {
   getCourses,
   getOpponents,
   createMatchEndpoint,
+  getStats,
 } from "../../services/firebase";
 import UserViewModel from "../../viewModels/UserViewModel";
 
@@ -34,7 +35,7 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const tournamentId = "vPOafSAa3uUBd02WwbeO";
+  const tournamentId = "pZNYIPkKf3xje4gDaRj1";
   const handleApiCall = async <T extends unknown[]>(
     apiFunction: ApiFunction<T>,
     ...args: T
@@ -132,6 +133,13 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
           }
         >
           Create Match
+        </Button>
+
+        <Button
+          variant="contained"
+          onClick={() => handleApiCall(getStats, tournamentId)}
+        >
+          Get Stats
         </Button>
       </Box>
 
