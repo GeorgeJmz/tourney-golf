@@ -1,8 +1,7 @@
 export type StatsBody = {
-    leagueId: string;
-  };
-  
-  export type RequestGetStats = {
-    body: StatsBody;
-  };
-  
+  leagueId: string;
+};
+
+export type RequestGetStats = {
+  body: StatsBody;
+};
