@@ -13,13 +13,13 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
   }
 
   try {
-    const [tournamentsSnapshot] = await Promise.all([
+    const [statisticsSnapshot] = await Promise.all([
       db.collection("statistics").doc(leagueId).get(),
     ]);
 
-    const statistics = (await !tournamentsSnapshot.exists)
+    const statistics = (await !statisticsSnapshot.exists)
       ? await createStatistics(leagueId)
-      : tournamentsSnapshot.data();
+      : statisticsSnapshot.data();
 
     logger.info("statistics", { structuredData: statistics });
     if (!statistics) {

@@ -2,6 +2,7 @@ import { Response } from "express";
 import admin = require("firebase-admin");
 import { RequestGetStats } from "../types/Stats";
 import { logger } from "firebase-functions/v2";
+import { createStatistics } from "../helpers/createStatistics";
 
 export const getStats = async (req: RequestGetStats, res: Response) => {
   const db = admin.firestore();
@@ -12,9 +13,13 @@ export const getStats = async (req: RequestGetStats, res: Response) => {
   }
 
   try {
-    const statisticsRef = db.collection("statistics").doc(leagueId);
-    const statisticsDoc = await statisticsRef.get();
-    const statistics = statisticsDoc.data();
+    const [statisticsSnapshot] = await Promise.all([
+      db.collection("statistics").doc(leagueId).get(),
+    ]);
+
+    const statistics = (await !statisticsSnapshot.exists)
+      ? await createStatistics(leagueId)
+      : statisticsSnapshot.data();
 
     if (!statistics) {
       return res.status(404).json({ error: "Statistics not found" });

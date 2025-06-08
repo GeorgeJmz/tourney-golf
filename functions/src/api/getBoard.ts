@@ -2,6 +2,7 @@ import { Response } from "express";
 import admin = require("firebase-admin");
 import { RequestGetBoard } from "../types/Board";
 import { logger } from "firebase-functions/v2";
+import { createStatistics } from "../helpers/createStatistics";
 
 export const getBoard = async (req: RequestGetBoard, res: Response) => {
   const db = admin.firestore();
@@ -11,9 +12,14 @@ export const getBoard = async (req: RequestGetBoard, res: Response) => {
     return res.status(400).json({ error: "Invalid leagueId" });
   }
   try {
-    const statisticsRef = db.collection("statistics").doc(leagueId);
-    const statisticsDoc = await statisticsRef.get();
-    const statistics = statisticsDoc.data();
+    const [statisticsSnapshot] = await Promise.all([
+      db.collection("statistics").doc(leagueId).get(),
+    ]);
+
+    const statistics = (await !statisticsSnapshot.exists)
+      ? await createStatistics(leagueId)
+      : statisticsSnapshot.data();
+
     return res.status(200).json({
       status: "success",
       data: {
