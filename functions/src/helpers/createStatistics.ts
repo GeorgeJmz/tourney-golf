@@ -104,11 +104,10 @@ export const createStatistics = async (leagueId: string) => {
         }
         return player.pointsMatch + player.pointsStroke + player.bonusPoints;
       };
-
       const values = {
         player: moreData?.name || "",
-        date: moreData?.date ? moreData?.date[currentPosition || 0] : "",
-        hdc: player.hcp,
+        date: moreData?.date?.[currentPosition || 0] || "",
+        hdc: `${player.hcp}`,
         net:
           player.score -
           getCourseDetail(match.teeBox).par.reduce(
@@ -142,7 +141,6 @@ export const createStatistics = async (leagueId: string) => {
       }
     });
   });
-
   // Sort the stats
   const sortedStats = Object.entries(processedStats).reduce(
     (acc, [conference, stats]) => {
@@ -157,7 +155,7 @@ export const createStatistics = async (leagueId: string) => {
           return {
             player: sortedItems[0].player,
             date: sortedItems.map((item) => item.date),
-            hdc: sortedItems.map((item) => item.hdc),
+            hdc: sortedItems.map((item) => `${item.hdc}`),
             net: sortedItems.map((item) => item.net),
             score: sortedItems.map((item) => item.score),
             points: sortedItems.map((item) => item.points),
@@ -180,7 +178,6 @@ export const createStatistics = async (leagueId: string) => {
       }>;
     }
   );
-
   const calculatePlayerStats = async (player: ITournamentPlayer) => {
     const getAverage = (values: number[]) => {
       const sum = values.reduce((acc, curr) => acc + curr, 0);
@@ -287,6 +284,10 @@ export const createStatistics = async (leagueId: string) => {
     tournamentType: tournamentType,
     ...(isTeamPlay ? {} : { stats: sortedStats }),
   };
-  await newStatistics.set(statisticsObject);
+  try {
+    await newStatistics.set(statisticsObject);
+  } catch (error) {
+    console.log(error, "Error creating statistics at createStatistics");
+  }
   return statisticsObject;
 };
