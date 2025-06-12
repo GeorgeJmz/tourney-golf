@@ -132,18 +132,25 @@ export const NavBar: React.FC<INavBarProps> = (props: INavBarProps) => {
           <Toolbar />
         </React.Fragment>
       )}
-      <Container
-        sx={{
-          padding: 0,
-          "@media (min-width: 600px)": {
+      {props.isVisible && (
+        <Container
+          sx={{
             padding: 0,
-          },
-        }}
-      >
+            "@media (min-width: 600px)": {
+              padding: 0,
+            },
+          }}
+        >
+          <Box>
+            <Outlet />
+          </Box>
+        </Container>
+      )}
+      {!props.isVisible && (
         <Box>
           <Outlet />
         </Box>
-      </Container>
+      )}
     </React.Fragment>
   );
 };
