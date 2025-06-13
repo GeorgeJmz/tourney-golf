@@ -171,6 +171,29 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "DiamanteDunesCourse",
+      name: "Diamante Dunes Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "DiamanteDunesCourseTee1",
+          color: "Tee 1",
+          length: "7022",
+        },
+        {
+          id: "DiamanteDunesCourseTee2",
+          color: "Tee II",
+          length: "6536",
+        },
+        {
+          id: "DiamanteDunesCourseTee3",
+          color: "Tee III",
+          length: "6099",
+        },
+      ],
+    },
+    {
       id: "DelMarCountryClub",
       name: "Del Mar Country Club",
       address: "",
@@ -1232,6 +1255,39 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       out: [3149, 36],
       in: [3092, 36],
       total: [6241, 72],
+    },
+    DiamanteDunesCourseTee1: {
+      distance: [
+        562, 252, 394, 376, 177, 488, 292, 400, 511, 172, 507, 211, 516, 380,
+        587, 432, 175, 590,
+      ],
+      hcp: [8, 16, 6, 12, 18, 4, 14, 10, 2, 17, 3, 13, 7, 11, 1, 8, 15, 5],
+      par: [5, 3, 4, 4, 3, 5, 3, 4, 4, 3, 4, 3, 5, 4, 5, 4, 3, 5],
+      out: [3452, 35],
+      in: [3570, 36],
+      total: [7022, 71],
+    },
+    DiamanteDunesCourseTee2: {
+      distance: [
+        554, 229, 365, 358, 154, 475, 247, 374, 484, 158, 453, 180, 499, 358,
+        568, 390, 154, 536,
+      ],
+      hcp: [8, 16, 6, 12, 18, 4, 14, 10, 2, 17, 3, 13, 7, 11, 1, 8, 15, 5],
+      par: [5, 3, 4, 4, 3, 5, 3, 4, 4, 3, 4, 3, 5, 4, 5, 4, 3, 5],
+      out: [3240, 35],
+      in: [3296, 36],
+      total: [6536, 71],
+    },
+    DiamanteDunesCourseTee3: {
+      distance: [
+        526, 201, 341, 323, 143, 468, 223, 355, 440, 145, 428, 165, 482, 327,
+        544, 359, 130, 499,
+      ],
+      hcp: [8, 16, 6, 12, 18, 4, 14, 10, 2, 17, 3, 13, 7, 11, 1, 8, 15, 5],
+      par: [5, 3, 4, 4, 3, 5, 3, 4, 4, 3, 4, 3, 5, 4, 5, 4, 3, 5],
+      out: [3020, 35],
+      in: [3079, 36],
+      total: [6099, 71],
     },
   };
 
