@@ -10,12 +10,14 @@ export const FeatureCard = ({
   imgSrc,
   alt,
   reverse = false,
+  noImage = false,
 }: {
   title: string;
   description: string;
   imgSrc: string;
   alt: string;
   reverse?: boolean;
+  noImage?: boolean;
 }) => (
   <Grid
     container
@@ -24,7 +26,7 @@ export const FeatureCard = ({
     direction={reverse ? "row-reverse" : "row"}
     sx={{ mb: 8 }}
   >
-    <Grid item md={6}>
+    <Grid item md={noImage ? 12 : 6}>
       <AnimatedBox>
         <Typography
           variant="h3"
@@ -44,33 +46,35 @@ export const FeatureCard = ({
         </Typography>
       </AnimatedBox>
     </Grid>
-    <Grid item md={6}>
-      <AnimatedBox>
-        <Box
-          sx={{
-            bgcolor: "common.black",
-            borderRadius: "24px",
-            p: 1,
-            boxShadow: 20,
-            transition: "transform 0.3s",
-            "&:hover": {
-              transform: "scale(1.05)",
-            },
-          }}
-        >
-          <img
-            src={imgSrc}
-            alt={alt}
-            style={{
-              width: "75%",
-              height: "auto",
-              borderRadius: "16px",
-              display: "block",
-              margin: "0 auto",
+    {!noImage && (
+      <Grid item md={6}>
+        <AnimatedBox>
+          <Box
+            sx={{
+              bgcolor: "common.black",
+              borderRadius: "24px",
+              p: 1,
+              boxShadow: 20,
+              transition: "transform 0.3s",
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
             }}
-          />
-        </Box>
-      </AnimatedBox>
-    </Grid>
+          >
+            <img
+              src={imgSrc}
+              alt={alt}
+              style={{
+                width: "75%",
+                height: "auto",
+                borderRadius: "16px",
+                display: "block",
+                margin: "0 auto",
+              }}
+            />
+          </Box>
+        </AnimatedBox>
+      </Grid>
+    )}
   </Grid>
 );

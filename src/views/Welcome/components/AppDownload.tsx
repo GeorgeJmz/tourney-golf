@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 import { ReactComponent as AppDownloadButton } from "../../../assets/appstore.svg";
+import { ReactComponent as AndroidDownloadButton } from "../../../assets/googleplay.svg";
 
 const AnimatedBox = styled(Box)<{ delay?: number }>(({ delay = 0 }) => ({
   animation: "fadeIn 0.8s ease-out forwards",
@@ -33,19 +34,7 @@ export const AppDownload = () => (
           variant="h2"
           sx={{ mb: 3, fontSize: { xs: "2.25rem", md: "3rem" } }}
         >
-          Ready to Transform Your Golf Game?
-        </Typography>
-      </AnimatedBox>
-      <AnimatedBox delay={0.3}>
-        <Typography
-          sx={{
-            fontSize: { xs: "1.1rem", md: "1.25rem" },
-            mb: 6,
-            opacity: 0.9,
-          }}
-        >
-          Join thousands of golfers who have already elevated their game with
-          TEE BOX LEAGUE
+          Practice with purpose, play with an edge, and become a league legend
         </Typography>
       </AnimatedBox>
       <AnimatedBox delay={0.6}>
@@ -60,6 +49,7 @@ export const AppDownload = () => (
           }}
         >
           <AppDownloadButton />
+          <AndroidDownloadButton />
         </Box>
       </AnimatedBox>
     </Container>

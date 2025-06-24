@@ -13,34 +13,26 @@ import { FeatureCard } from "./FeatureCard";
 export const Features = () => {
   const featureData = [
     {
-      title: "League Management",
+      title: "Manage your league in TBL",
       description:
-        "Create and manage golf leagues with ease. Track standings, organize tournaments, and build competitive communities.",
-      imgSrc: "/select_course_screen.png",
-      alt: "League Management",
+        "Determine the length of the season, number of rounds and points per win / draw",
+      imgSrc: "/league_details_standings_screen.png",
+      alt: "Manage your league in TBL",
     },
     {
-      title: "Live Scoring",
+      title: "Immediate Scoring Notifications",
       description:
-        "Real-time score tracking with intuitive hole-by-hole input. Never lose track of your game again.",
+        "Players upload their scores and league-wide results notifications are sent.",
       imgSrc: "/score_screen.png",
-      alt: "Live Scoring",
+      alt: "Immediate Scoring Notifications",
       reverse: true,
     },
     {
-      title: "Detailed Statistics",
+      title: "Leaderboards",
       description:
-        "Comprehensive stats and analytics to improve your game. Track handicaps, course performance, and progress over time.",
-      imgSrc: "/score_dialog.png",
-      alt: "Detailed Statistics",
-    },
-    {
-      title: "Course Selection",
-      description:
-        "Choose from a wide variety of golf courses. Find your favorite courses and discover new challenges.",
-      imgSrc: "/select_opponent_screen.png",
-      alt: "Course Selection",
-      reverse: true,
+        "Comprehensive stats and analytics with live individual and team leaderboards",
+      imgSrc: "/board_screen.png",
+      alt: "Leaderboards",
     },
   ];
 
@@ -52,7 +44,7 @@ export const Features = () => {
             variant="h2"
             sx={{ mb: 2, fontSize: { xs: "2.25rem", md: "3rem" } }}
           >
-            Everything You Need for Golf
+            You’re ready to start your golf season
           </Typography>
           <Typography
             sx={{
@@ -62,8 +54,9 @@ export const Features = () => {
               mx: "auto",
             }}
           >
-            From casual rounds to competitive leagues, TEE BOX LEAGUE provides
-            all the tools you need to elevate your golf experience.
+            TBL manages several types of golf leagues, all designed to promote
+            competitive play and deliver a sought-after outcome: your name in
+            the winners circle and bragging rights that last a lifetime
           </Typography>
         </Box>
         {featureData.map((feature, index) => (

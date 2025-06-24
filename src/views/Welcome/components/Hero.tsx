@@ -115,7 +115,7 @@ export const Hero = () => (
             variant="inherit"
             sx={{ color: "#4ade80" }}
           >
-            LEAGUE
+            League
           </Typography>
         </Typography>
       </AnimatedBox>
@@ -137,7 +137,7 @@ export const Hero = () => (
           sx={{
             color: "#4ade80",
             fontWeight: 600,
-            fontSize: { xs: "1.1rem", md: "1.25rem" },
+            fontSize: { xs: "1.25rem", md: "1.5rem" },
             mb: 4,
           }}
         >
@@ -149,31 +149,12 @@ export const Hero = () => (
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: { xs: "column", sm: "column" },
             gap: 2,
             justifyContent: "center",
             alignItems: "center",
           }}
         >
-          <Button
-            variant="contained"
-            sx={{
-              bgcolor: "primary.main",
-              "&:hover": {
-                bgcolor: "secondary.main",
-                transform: "scale(1.05)",
-              },
-              px: 4,
-              py: "12px",
-              fontSize: "1.125rem",
-              fontWeight: 600,
-              borderRadius: "8px",
-              transition: "all 0.3s",
-              textTransform: "none",
-            }}
-          >
-            Download Now
-          </Button>
           <Link to="/login">
             <Button
               variant="contained"
@@ -190,6 +171,7 @@ export const Hero = () => (
                 borderRadius: "8px",
                 transition: "all 0.3s",
                 textTransform: "none",
+                minWidth: "14rem",
               }}
             >
               Login
@@ -213,18 +195,13 @@ export const Hero = () => (
                 borderRadius: "8px",
                 transition: "all 0.3s",
                 textTransform: "none",
+                minWidth: "14rem",
               }}
             >
               Create an Account
             </Button>
           </Link>
         </Box>
-      </AnimatedBox>
-
-      <AnimatedBox delay={0.9} sx={{ mt: 8 }}>
-        <Typography sx={{ fontSize: "0.875rem", color: "grey.400", mb: 2 }}>
-          Experience the power of digital golf scoring
-        </Typography>
       </AnimatedBox>
     </Container>
   </Box>

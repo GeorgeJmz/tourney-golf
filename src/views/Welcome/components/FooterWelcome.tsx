@@ -90,7 +90,7 @@ export const Footer = () => {
                 component="span"
                 sx={{ fontWeight: 700, textAlign: "center" }}
               >
-                TEE BOX LEAGUE
+                TEE BOX League
               </Typography>
             </Box>
 
@@ -102,8 +102,7 @@ export const Footer = () => {
                 textAlign: "center",
               }}
             >
-              The ultimate golf scoring and league management app. Practice with
-              purpose, play with an edge, and become a league legend.
+              The ultimate league App.
             </Typography>
           </Grid>
           <Grid
@@ -117,16 +116,6 @@ export const Footer = () => {
               justifyContent: "flex-start",
             }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 600,
-                mb: 2,
-                textAlign: { xs: "center", md: "right" },
-              }}
-            >
-              Support
-            </Typography>
             <Box
               component="ul"
               sx={{
@@ -182,7 +171,8 @@ export const Footer = () => {
           }}
         >
           <Typography>
-            © {new Date().getFullYear()} TEE BOX LEAGUE. All rights reserved.
+            © {new Date().getFullYear()} TEE BOX League. All rights reserved.
+            Brilliant Minds Inc powered by Big Mkt Inc.
           </Typography>
         </Box>
       </Container>
