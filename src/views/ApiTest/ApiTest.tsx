@@ -15,6 +15,7 @@ import {
   getOpponents,
   createMatchEndpoint,
   getStats,
+  deleteAccount,
 } from "../../services/firebase";
 import UserViewModel from "../../viewModels/UserViewModel";
 
@@ -140,6 +141,14 @@ const ApiTest: React.FC<IApiTest> = ({ user }) => {
           onClick={() => handleApiCall(getStats, tournamentId)}
         >
           Get Stats
+        </Button>
+
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => handleApiCall(deleteAccount, user.user.id || "")}
+        >
+          Delete Account (Soft Delete)
         </Button>
       </Box>
 

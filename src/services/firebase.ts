@@ -1494,3 +1494,24 @@ export const updateMatches = async (): Promise<void> => {
     });
   });
 };
+
+export const deleteAccount = async (userId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_ACCOUNT}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
