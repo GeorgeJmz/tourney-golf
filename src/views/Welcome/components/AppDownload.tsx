@@ -48,8 +48,11 @@ export const AppDownload = () => (
             mb: 6,
           }}
         >
-          <AppDownloadButton />
-          <AndroidDownloadButton />
+          <a href="https://apps.apple.com/app/tee-box-league/id6746877703" target="_blank" rel="noopener noreferrer">
+            <AppDownloadButton />
+          </a>
+            <AndroidDownloadButton />
+         
         </Box>
       </AnimatedBox>
     </Container>

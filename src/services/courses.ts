@@ -458,6 +458,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "PalaMesa",
+      name: "Pala Mesa Golf & Resort",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "PalaMesaBlue",
+          color: "Blue",
+          length: "6138",
+        },
+      ],
+    },
+    {
       id: "SingingHillsWillowGlen",
       name: "Singing Hills / Willow Glen",
       address: "3199 Stonefield Dr, Jamul, CA 91935",
@@ -1288,6 +1301,16 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       out: [3020, 35],
       in: [3079, 36],
       total: [6099, 71],
+    },
+    PalaMesaBlue: {
+      distance: [
+        391, 461, 378, 166, 290, 372, 159, 495, 378, 464, 292, 473, 376, 151, 401, 150, 334, 407
+      ],
+      hcp: [3, 13, 1, 17, 15, 5, 11, 9, 7, 10, 14, 16, 6, 18, 2, 12, 8, 4],
+      par: [4, 5, 4, 3, 4, 4, 3, 5, 4, 5, 4, 5, 4, 3, 4, 3, 4, 4],
+      out: [3090, 36],
+      in: [3048, 36],
+      total: [6138, 72],
     },
   };
 

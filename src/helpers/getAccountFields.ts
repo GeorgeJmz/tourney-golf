@@ -143,11 +143,11 @@ export const profileFieldsValidation: yup.ObjectSchema<IProfileElement> = yup
     name: yup
       .string()
       .required("Name is required")
-      .min(4, "Name should be of minimum 4 characters length"),
+      .min(2, "Name should be of minimum 2 characters length"),
     lastName: yup
       .string()
       .required("Last Name is required")
-      .min(4, "Last Name should be of minimum 4 characters length"),
+      .min(2, "Last Name should be of minimum 2 characters length"),
     ghinNumber: yup.string().required("GHIN Number is required"),
     email: yup.string().required("League type is required"),
     sequentialUserId: yup.number().required("Is Required"),
@@ -228,11 +228,11 @@ export const accountFieldsValidation: yup.ObjectSchema<IAccountElement> = yup
     name: yup
       .string()
       .required("Name is required")
-      .min(4, "Name should be of minimum 4 characters length"),
+      .min(2, "Name should be of minimum 2 characters length"),
     lastName: yup
       .string()
       .required("Last Name is required")
-      .min(4, "Last Name should be of minimum 4 characters length"),
+      .min(2, "Last Name should be of minimum 2 characters length"),
     email: yup
       .string()
       .email("Must be a valid email")

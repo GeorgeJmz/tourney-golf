@@ -138,8 +138,8 @@ export const requestAccountReactivation = async (req: { body: { email: string } 
 
     // Enviar email con link
     const link = `https://teeboxleague.com/reactivate-account?token=${token}`;
-    const subject = "Reactivación de cuenta TEEBOX League";
-    const body = `Haz click en el siguiente enlace para reactivar tu cuenta: <a href='${link}'>Reactivar cuenta</a>. Este enlace expirará en 1 hora.`;
+    const subject = "Account Reactivation - TEEBOX League";
+    const body = `Click on the following link to reactivate your account: <a href='${link}'>Reactivate Account</a>. This link will expire in 1 hour.`;
     await sendMail(email, subject, body);
 
     return res.status(200).json({

@@ -109,6 +109,7 @@ class TournamentViewModel {
     names: [],
   };
   playersResultsOptions: Array<{ label: string; value: string }> = [];
+  playersList: Array<{ email: string; name: string }> = [];
 
   constructor() {
     makeObservable(this, {
@@ -155,6 +156,7 @@ class TournamentViewModel {
       removePlayerFromTournament: action,
       getNewStats: action,
       setStandingsBytTournament: action,
+      playersList: observable,
     });
     this.statsPlayers = [];
     this.dogfightStats = [];
@@ -222,6 +224,10 @@ class TournamentViewModel {
       email: email.toLowerCase(),
       id: email,
     });
+    this.playersList.push({
+      email: email.toLowerCase(),
+      name,
+    });
     if (this.tournament.playersPerGroup.length > 0) {
       const id = `${email}-${this.tournament.playersList.length - 1}`;
       this.tournament.playersPerGroup[0].players.push({ name, email, id });
@@ -238,9 +244,12 @@ class TournamentViewModel {
   }
 
   removeEmailFromList(key: number): void {
-    const newEmailList = [...this.tournament.playersList];
-    newEmailList.splice(key, 1);
-    this.tournament.playersList = newEmailList;
+    const emailList = this.tournament.playersList[key].email;
+    if (emailList) {
+      const newEmailList = [...this.tournament.playersList].filter((player) => player.email !== emailList);
+      this.tournament.playersList = newEmailList;
+      this.playersList = this.playersList.filter((player) => player.email !== emailList);
+    }
   }
 
   getEmailList(): Array<Partial<IPlayer>> {
@@ -1734,6 +1743,20 @@ class TournamentViewModel {
       location.reload();
     }, 3000);
     //location.reload();
+  }
+
+  async getTournamentList() {
+    const emails = this.tournament.playersList.map((player) => player.email || "");
+    const names = await getNamesByEmails(emails);
+    const listEmails = names?.reduce((acc, curr) => {
+      acc[curr.email] = curr.name + " " + curr.lastName;
+      return acc;
+    }, {} as { [key: string]: string });
+    const list = Object.entries(listEmails || {}).map(([email, name]) => ({
+      email: name === "User Disabled" ? "" : email || "",
+      name: name || "",
+    }));
+    this.playersList = list;
   }
 }
 

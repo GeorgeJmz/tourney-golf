@@ -164,20 +164,19 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
         aria-describedby="delete-account-dialog-description"
       >
         <DialogTitle id="delete-account-dialog-title">
-          Confirm Account Deletion
+          CONFIRM DELETE ACCOUNT
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-account-dialog-description">
-            Are you sure you want to disable your account? This action will:
+          This action will:
             <br />
-            • Temporarily disable your account (soft delete)
+            • Temporarily disable your account
             <br />
-            • You won't be able to access until your account is reactivated
+            • You won't be able to access your account unless it's reactivated
             <br />
-            • Your data will be preserved but you won't be able to use it
+            • It will be permanently deleted in 30 days
             <br />
             <br />
-            This action can be reversed by contacting an administrator.
           </DialogContentText>
           {deleteError && (
             <Alert severity="error" sx={{ mt: 2 }}>
@@ -195,7 +194,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
             variant="contained"
             disabled={isDeleting}
           >
-            {isDeleting ? "Disabling..." : "Yes, disable account"}
+            {isDeleting ? "Disabling..." : "Yes, delete account"}
           </Button>
         </DialogActions>
       </Dialog>

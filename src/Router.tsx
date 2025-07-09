@@ -38,6 +38,8 @@ import PlayerBoard from "./views/TournamentStats/PlayerBoard";
 import HistoryLeagueTeamplay from "./views/HistoryLeague/HistoryLeagueTeamplay";
 import Stats from "./views/Stats/Stats";
 import ApiTest from "./views/ApiTest/ApiTest";
+import RequestAccountReactivation from "./views/RequestAccountReactivation/RequestAccountReactivation";
+import ReactivateAccount from "./views/ReactivateAccount/ReactivateAccount";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -160,6 +162,14 @@ function Router(): JSX.Element {
         {
           path: "/api-test",
           element: withAuth(<ApiTest user={userViewModel} />),
+        },
+        {
+          path: "/request-account-reactivation",
+          element: <RequestAccountReactivation />,
+        },
+        {
+          path: "/reactivate-account",
+          element: <ReactivateAccount />,
         },
       ],
     },
