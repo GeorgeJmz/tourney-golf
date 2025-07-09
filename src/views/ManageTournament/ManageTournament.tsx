@@ -84,6 +84,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
       label: "Player Setup",
       component: (
         <PlayerSetup
+          isEdit={true}
           tournamentViewModel={tournamentViewModel}
           handleNext={handleNext}
           handlePrev={handlePrev}

@@ -14,6 +14,7 @@ export type UserType = {
     result: string;
   }[];
   sequentialUserId?: number;
+  disabled?: boolean;
 };
 
 export type RequestAddUser = {

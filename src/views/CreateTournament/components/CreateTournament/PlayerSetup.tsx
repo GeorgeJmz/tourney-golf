@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { observer } from "mobx-react";
 import {
   step2,
@@ -12,16 +12,18 @@ import { SendInvitations } from "../../../../components/SendInvitations";
 
 interface PlayerSetupFormProps {
   tournamentViewModel: TournamentViewModel;
+  isEdit?: boolean;
   handleNext: () => void;
   handlePrev: () => void;
 }
 
 const PlayerSetup: React.FC<PlayerSetupFormProps> = ({
   tournamentViewModel,
+  isEdit,
   handleNext,
 }) => {
   const validationSchema = step2FieldsValidations;
-  const emailList = tournamentViewModel.tournament.playersList;
+  const emailList = isEdit ? tournamentViewModel.playersList : tournamentViewModel.tournament.playersList;
   const onSubmitHandler = (email: string, name: string) => {
     tournamentViewModel.addEmailToList(email, name);
   };

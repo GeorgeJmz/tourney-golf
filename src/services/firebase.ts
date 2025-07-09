@@ -1128,7 +1128,13 @@ export const getNamesByEmails = async (
     const querySnapshot = await getDocs(userQuery);
 
     querySnapshot.forEach((doc) => {
-      users.push(doc.data() as IUser);
+      const user = doc.data() as IUser;
+      const newUser = {
+        ...user,
+        name: "User",
+        lastName: "Disabled",
+      };
+      users.push(user.disabled ? newUser : user);
     });
   }
 
@@ -1493,4 +1499,63 @@ export const updateMatches = async (): Promise<void> => {
       //updateDoc(docRef, { matchResults: newMatchResultsObject });
     });
   });
+};
+
+export const deleteAccount = async (userId: string) => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_ACCOUNT}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const requestAccountReactivation = async (email: string) => {
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.REQUEST_ACCOUNT_REACTIVATION}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+};
+
+export const reactivateAccountWithToken = async (token: string) => {
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.REACTIVATE_ACCOUNT_WITH_TOKEN}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      token,
+    }),
+    mode: "cors",
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 };

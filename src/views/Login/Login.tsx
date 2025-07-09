@@ -74,6 +74,18 @@ const Login: React.FC = () => {
                   </Button>
                 </Link> */}
               </div>
+              <div>
+              <Link to="/request-account-reactivation">
+                  <Button 
+                    variant="text" 
+                    color="secondary" 
+                    size="small"
+                    sx={{ mt: 1, fontSize: "12px" }}
+                  >
+                    Request Account Reactivation
+                  </Button>
+                </Link>
+              </div>
             </Stack>
           </Paper>
         </Container>

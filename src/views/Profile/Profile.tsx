@@ -9,6 +9,12 @@ import {
   Paper,
   Container,
   FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Alert,
 } from "@mui/material";
 import {
   profileFieldsValidation,
@@ -21,6 +27,7 @@ import { TextInput } from "../../components/TextInput";
 import { NavbarTitleContext } from "../../hooks/useNavContext";
 import UserViewModel from "../../viewModels/UserViewModel";
 import { useNavigate } from "react-router-dom";
+import { deleteAccount, logout } from "../../services/firebase";
 
 import { toJS } from "mobx";
 
@@ -31,6 +38,9 @@ interface IProfilePageProps {
 const Profile: React.FC<IProfilePageProps> = ({ user }) => {
   const { setTitle } = React.useContext(NavbarTitleContext);
   const navigate = useNavigate();
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
 
   const validationSchema = profileFieldsValidation;
 
@@ -56,6 +66,30 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
       setTimeout(() => navigate("/dashboard"), 1000);
     },
   });
+
+  const handleDeleteAccount = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteAccount(user.user.id || "");
+      await logout();
+      setDeleteDialogOpen(false);
+      navigate("/");
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : "Error deleting account");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setDeleteDialogOpen(false);
+    setDeleteError(null);
+  };
 
   React.useEffect(() => {
     setTitle("Edit Profile");
@@ -106,11 +140,64 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
                 >
                   Cancel
                 </Button>
+                <Button
+                  sx={{ marginLeft: "20px" }}
+                  type="button"
+                  variant="outlined"
+                  color="error"
+                  size="large"
+                  onClick={handleDeleteAccount}
+                >
+                  Delete Account
+                </Button>
               </div>
             </FormControl>
           </Grid>
         </Grid>
       </form>
+
+      {/* Dialog de confirmación para eliminar cuenta */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={cancelDelete}
+        aria-labelledby="delete-account-dialog-title"
+        aria-describedby="delete-account-dialog-description"
+      >
+        <DialogTitle id="delete-account-dialog-title">
+          CONFIRM DELETE ACCOUNT
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-account-dialog-description">
+          This action will:
+            <br />
+            • Temporarily disable your account
+            <br />
+            • You won't be able to access your account unless it's reactivated
+            <br />
+            • It will be permanently deleted in 30 days
+            <br />
+            <br />
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={cancelDelete} disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDelete} 
+            color="error" 
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? "Disabling..." : "Yes, delete account"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

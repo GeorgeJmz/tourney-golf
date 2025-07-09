@@ -12,6 +12,7 @@ import { getCourses } from "../api/getCourses";
 import { createMatch } from "../api/createMatch";
 import { getBoard } from "../api/getBoard";
 import { getStats } from "../api/getStats";
+import { deleteAccount, reactivateAccount, requestAccountReactivation, reactivateAccountWithToken } from "../api/deleteAccount";
 
 const MODO_PRUEBA_CORS_PERMISIVO = true;
 
@@ -113,6 +114,10 @@ routes.post("/getOpponents", verifyToken, getOpponents);
 routes.post("/createMatch", verifyToken, createMatch);
 routes.post("/getBoard", verifyToken, getBoard);
 routes.post("/getStats", verifyToken, getStats);
+routes.post("/deleteAccount", verifyToken, deleteAccount);
+routes.post("/reactivateAccount", verifyToken, reactivateAccount);
+routes.post("/requestAccountReactivation", requestAccountReactivation);
+routes.post("/reactivateAccountWithToken", reactivateAccountWithToken);
 
 routes.use((req, res) => {
   res.status(404).send("Not found");

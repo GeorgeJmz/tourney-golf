@@ -23,9 +23,11 @@
     "firebase-admin": "^11.8.0",
     "firebase-functions": "^6.1.2",
     "isomorphic-dompurify": "^2.19.0",
-    "moment-timezone": "^0.5.48"
+    "moment-timezone": "^0.5.48",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "dotenv": "^16.5.0",
