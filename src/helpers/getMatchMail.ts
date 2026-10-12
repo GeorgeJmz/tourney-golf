@@ -85,13 +85,19 @@ export const getBodyMail = (
 
     const indexHole = index > 9 ? index - 1 : index;
 
+    // Para TeamPlay/Dogfight (hideMatch=true) usar handicap individual completo (teamScoreHolesHP)
+    // Para Match Play (hideMatch=false) usar diferencia de handicaps (scoreHolesHP)
+    const handicapArray = hideMatch 
+      ? currentPlayer.score.teamScoreHolesHP 
+      : currentPlayer.score.scoreHolesHP;
+
     const hasHandicap =
       currentPlayer.score.scoreHoles[indexHole] &&
-      currentPlayer.score.scoreHolesHP[indexHole];
+      handicapArray[indexHole];
     // const getScoreWithHP = hasHandicap
     //   ? `${currentPlayer.score.scoreHoles[indexHole]}/${
     //       currentPlayer.score.scoreHoles[indexHole] -
-    //       currentPlayer.score.scoreHolesHP[indexHole]
+    //       handicapArray[indexHole]
     //     }`
     //   : currentPlayer.score.scoreHoles[indexHole];
     const getScoreWithHP = hasHandicap

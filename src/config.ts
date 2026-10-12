@@ -35,4 +35,5 @@ export const API_ENDPOINTS = {
   DELETE_ACCOUNT: "/deleteAccount",
   REQUEST_ACCOUNT_REACTIVATION: "/requestAccountReactivation",
   REACTIVATE_ACCOUNT_WITH_TOKEN: "/reactivateAccountWithToken",
+  GET_PLAYOFFS: "/getPlayoffs",
 };

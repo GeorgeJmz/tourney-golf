@@ -21,11 +21,24 @@ const PasswordReset: React.FC = () => {
   const [confirm, setConfirm] = useState("");
   const [successMessage, setSuccessMessage] = useState(false);
 
+  const validatePasswordFormat = (password: string): boolean => {
+    // Minimum 8 characters, at least one uppercase letter and one number
+    const re = /^(?=.*\d)(?=.*[A-Z]).{8,}$/;
+    return re.test(password);
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (pass !== confirm) {
       alert("Passwords did not match.");
+      return;
+    }
+
+    if (!validatePasswordFormat(pass)) {
+      alert(
+        "Password must contain 8 characters minimum\nAt least One Capital letter and One number"
+      );
       return;
     }
 
@@ -83,6 +96,7 @@ const PasswordReset: React.FC = () => {
                       label="Password"
                       value={pass}
                       onChange={(e) => setPass(e.target.value)}
+                      helperText="Password must contain 8 characters minimum, at least one Capital letter and one number"
                     />
                     <TextField
                       fullWidth
@@ -91,6 +105,7 @@ const PasswordReset: React.FC = () => {
                       label="Confirm Password"
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
+                      sx={{ mt: 2 }}
                     />
                   </Grid>
                   <Grid item xs={12}>

@@ -39,11 +39,14 @@ export interface ITournament {
     end: string;
   }[];
   championshipRound?: boolean;
+  weightedChampionshipRound?: number;
   championshipDate?: string;
   minRounds?: number;
   playOffsDetail: IPlayOffsDetail;
   champion?: string;
   uuid?: string;
+  createdAt?: string;
+  lastActivityDate?: string;
 }
 
 export interface IPlayOffsDetail {
@@ -64,6 +67,7 @@ export interface ITournamentGroup {
 export enum TournamentStatus {
   DRAFT = "draft",
   PUBLISHED = "published",
+  ACTIVE = "active",
   CLOSED = "closed",
 }
 export interface IPlayer {

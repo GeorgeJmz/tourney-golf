@@ -28,8 +28,10 @@ export const createStatistics = async (leagueId: string) => {
     tournamentType === "leagueteamplay" && playType === "medalplaystableford";
   const isLMATCH = tournamentType === "league" && playType === "matchPlay";
   const isLMEDAL = tournamentType === "league" && playType === "strokePlay";
+  const isMatchStrokePlay = tournamentType === "league" && playType === "matchstrokePlay";
   const isDogFight = tournamentType === "dogfight";
   const isTeamPlay = tournamentType === "teamplay";
+  const isDerby = tournamentType === "derby";
 
   const players: ITournamentPlayer[] = playersSnapshot.docs.map((doc) => ({
     ...(doc.data() as ITournamentPlayer),
@@ -218,20 +220,47 @@ export const createStatistics = async (leagueId: string) => {
         ? strokePoints.total + bonusPoints
         : matchPoints.total + strokePoints.total + bonusPoints;
 
+    // Calcular total gross (suma de todos los gross para Derby)
+    const totalGross = player.gross.reduce(
+      (acc, curr) => acc + parseInt(curr.toString()),
+      0
+    );
+
+    // Calcular total net (suma de todos los net para Derby con handicap)
+    const totalNet = player.net.reduce(
+      (acc, curr) => acc + parseInt(curr.toString()),
+      0
+    );
+
     return {
       id: player.id,
       tourneyName: player.name,
+      roundsPlayed: player.pointsTeam.length,
       matchesPlayed:
         playType !== "matchstrokePlay"
           ? player.opponent.length
           : player.opponent.length * 2,
-      wins: isLTMATCH || isLMATCH ? matchPoints.wins : strokePoints.wins,
-      draws: isLTMATCH || isLMATCH ? matchPoints.draws : strokePoints.draws,
-      losses: isLTMATCH || isLMATCH ? matchPoints.losses : strokePoints.losses,
+      wins: isLTMATCH || isLMATCH
+        ? matchPoints.wins
+        : isMatchStrokePlay
+        ? matchPoints.wins + strokePoints.wins
+        : strokePoints.wins,
+      draws: isLTMATCH || isLMATCH
+        ? matchPoints.draws
+        : isMatchStrokePlay
+        ? matchPoints.draws + strokePoints.draws
+        : strokePoints.draws,
+      losses: isLTMATCH || isLMATCH
+        ? matchPoints.losses
+        : isMatchStrokePlay
+        ? matchPoints.losses + strokePoints.losses
+        : strokePoints.losses,
       bonusPoints: bonusPoints,
       matchPoints: matchPoints.total,
       medalPoints: strokePoints.total,
       totalPoints: totalPoints,
+      totalGross: totalGross,
+      totalNet: totalNet,
       grossAverage: getAverage(
         player.gross.map((value) => parseInt(value.toString()))
       ),
@@ -251,7 +280,9 @@ export const createStatistics = async (leagueId: string) => {
     playersWithNames.map(calculatePlayerStats)
   );
 
-  const sortedPlayers = !isDogFight
+  const sortedPlayers = isDerby
+    ? newPlayers.sort((a, b) => a.totalNet - b.totalNet) // Ascendente: menos strokes netos = mejor (considera handicap)
+    : !isDogFight
     ? newPlayers.sort((a, b) => b.totalPoints - a.totalPoints)
     : newPlayers
         .sort((a, b) => {
@@ -281,8 +312,17 @@ export const createStatistics = async (leagueId: string) => {
   const newStatistics = statisticsCollection.doc(leagueId);
   const statisticsObject = {
     players: isTeamPlay ? teams : sortedPlayers,
+    // Solo incluir playersRawData para TeamPlay
+    ...(isTeamPlay ? { playersRawData: teams } : {}),
     tournamentType: tournamentType,
-    ...(isTeamPlay ? {} : { stats: sortedStats }),
+    // Solo incluir stats para League (con conferences), no para TeamPlay, Dogfight, ni Derby
+    ...(isTeamPlay || isDogFight || isDerby ? {} : { stats: sortedStats }),
+    results: matches,
+    conferenceList: Array.isArray(currentLeague.conferencesList)
+      ? (currentLeague.conferencesList as { id: string; name: string }[]).map(
+          (c) => ({ nombre: c.name, id: c.id })
+        )
+      : [],
   };
   try {
     await newStatistics.set(statisticsObject);

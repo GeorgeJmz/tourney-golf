@@ -92,9 +92,10 @@ class PlayViewModel {
     if (
       this.currentStep === 2 &&
       this.currentTournament.tournamentType !== "dogfight" &&
-      this.currentTournament.tournamentType !== "teamplay"
+      this.currentTournament.tournamentType !== "teamplay" &&
+      this.currentTournament.tournamentType !== "derby"
     ) {
-      console.log(this.allPlayers, "no dogfight no teamplay");
+      console.log(this.allPlayers, "no dogfight no teamplay no derby");
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
       players.forEach((player) => {
@@ -119,9 +120,10 @@ class PlayViewModel {
     if (
       this.currentStep === 2 &&
       (this.currentTournament.tournamentType === "dogfight" ||
-        this.currentTournament.tournamentType === "teamplay")
+        this.currentTournament.tournamentType === "teamplay" ||
+        this.currentTournament.tournamentType === "derby")
     ) {
-      console.log(this.allPlayers, "dogfight or teamplay  ");
+      console.log(this.allPlayers, "dogfight or teamplay or derby");
       console.log(toJS(this.matches), "matches");
       const author = this.allPlayers[0];
       const players = [...this.allPlayers].slice(1);
@@ -156,7 +158,8 @@ class PlayViewModel {
   setScoreModal(scores: Array<number>, hole: number): void {
     if (
       this.currentTournament.tournamentType !== "dogfight" &&
-      this.currentTournament.tournamentType !== "teamplay"
+      this.currentTournament.tournamentType !== "teamplay" &&
+      this.currentTournament.tournamentType !== "derby"
     ) {
       scores.forEach((score, key) => {
         this.allPlayers[key].setHoleScore(hole, score);
@@ -172,7 +175,8 @@ class PlayViewModel {
     }
     if (
       this.currentTournament.tournamentType === "dogfight" ||
-      this.currentTournament.tournamentType === "teamplay"
+      this.currentTournament.tournamentType === "teamplay" ||
+      this.currentTournament.tournamentType === "derby"
     ) {
       scores.forEach((score, key) => {
         this.allPlayers[key].setHoleScore(hole, score);

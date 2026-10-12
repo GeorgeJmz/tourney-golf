@@ -28,8 +28,22 @@ const parseDate = (
   if (typeof dateInput === "object" && "toDate" in dateInput) {
     return dayjs.utc(dateInput.toDate());
   }
-  // Handle date strings (attempt parsing)
-  const parsed = dayjs.utc(dateInput);
+  // Handle date strings - parse as MM/DD/YYYY without forcing UTC
+  // This allows proper comparison with dates from getFormattedDate()
+  if (typeof dateInput === "string") {
+    const mmddyyyyPattern = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (mmddyyyyPattern.test(dateInput)) {
+      const parsed = dayjs(dateInput, "MM/DD/YYYY");
+      if (parsed.isValid()) {
+        return parsed;
+      }
+    }
+    // Fallback for other string formats
+    const parsed = dayjs(dateInput);
+    return parsed.isValid() ? parsed : null;
+  }
+  // Handle other types
+  const parsed = dayjs(dateInput);
   return parsed.isValid() ? parsed : null;
 };
 
@@ -42,6 +56,44 @@ const getRoundForDate = (
     for (let i = 0; i < tournament.roundDates.length; i++) {
       const roundDate = parseDate(tournament.roundDates[i]);
       if (roundDate && roundDate.isSame(targetDate, "day")) {
+        return i + 1; // Rounds are 1-based index
+      }
+    }
+  }
+
+  // Check championship round
+  if (tournament.championshipRound) {
+    const champDate = parseDate(tournament.championshipDate);
+    if (champDate && champDate.isSame(targetDate, "day")) {
+      return 0; // Championship round is 0
+    }
+  }
+
+  return null; // No round scheduled for this date
+};
+
+// For Derby: Check if date is within a round range (start-end)
+const getRoundForDateRange = (
+  tournament: ITournament,
+  targetDate: dayjs.Dayjs
+): number | null => {
+  // Derby uses roundDates as array of objects with start/end (ranges)
+  const roundDatesAsRanges = tournament.roundDates as unknown as Array<{
+    start: string;
+    end: string;
+  }>;
+
+  if (roundDatesAsRanges && roundDatesAsRanges.length > 0) {
+    for (let i = 0; i < roundDatesAsRanges.length; i++) {
+      const startDate = parseDate(roundDatesAsRanges[i].start);
+      const endDate = parseDate(roundDatesAsRanges[i].end);
+
+      if (
+        startDate &&
+        endDate &&
+        targetDate.isSameOrAfter(startDate, "day") &&
+        targetDate.isSameOrBefore(endDate, "day")
+      ) {
         return i + 1; // Rounds are 1-based index
       }
     }
@@ -139,6 +191,116 @@ const findStandardOpponents = (
       division: player.group,
       team: player.team,
     })) as unknown as IOpponents[];
+};
+
+const findDerbyOpponents = async (
+  db: admin.firestore.Firestore,
+  requestingPlayer: ITournamentPlayer,
+  tournamentData: ITournament
+): Promise<IOpponents[]> => {
+  // CRITICAL: Use the same date source (LA timezone) for both round calculation and match filtering
+  // This ensures consistency and avoids timezone-related bugs
+  const { formattedDate: todayFormatted } = getFormattedDate();
+  const todayDayjs = dayjs(todayFormatted, "MM/DD/YYYY");
+  const currentRound = getRoundForDateRange(tournamentData, todayDayjs);
+
+  if (currentRound === null) {
+    logger.info("No Derby round scheduled for today.", {
+      leagueId: tournamentData.id,
+      date: todayFormatted,
+    });
+    return [];
+  }
+
+  logger.info(
+    `Determining Derby opponents for round ${currentRound} on ${todayFormatted}`,
+    { leagueId: tournamentData.id }
+  );
+
+  // Derby: Get matches for TODAY specifically (not entire round/stage)
+  // This allows players to play once per day within a stage
+  const allMatches = await getMatchesByTournamentId(db, tournamentData.id || "");
+  
+  const matchesForToday = allMatches.filter((match) => {
+    const matchDate = convertMomentDate(match.date);
+    return matchDate === todayFormatted && match.round === currentRound;
+  });
+  
+  const playersWhoPlayedToday = new Set<string>(
+    matchesForToday.flatMap((match) =>
+      match.matchResults
+        ? match.matchResults.map((player) => player.idPlayer)
+        : []
+    )
+  );
+
+  logger.info(
+    `Players who played TODAY (${todayFormatted}) in round ${currentRound}: ${Array.from(
+      playersWhoPlayedToday
+    )}`,
+    { leagueId: tournamentData.id }
+  );
+
+  // Check if requesting player has already played TODAY
+  if (playersWhoPlayedToday.has(requestingPlayer.email || "")) {
+    logger.info(
+      `Requesting player ${requestingPlayer.email} has already played TODAY (${todayFormatted}). No opponents needed.`,
+      { leagueId: tournamentData.id }
+    );
+    return [];
+  }
+
+  // Determine eligible players for TODAY
+  let eligiblePlayersForToday: IOpponents[] = [];
+
+  if (currentRound === 0) {
+    // Championship round: only players who played previous rounds (AND haven't played today)
+    const championshipEligiblePlayersEmails =
+      await getPlayersWhoPlayedRoundsGreaterThanZero(
+        db,
+        tournamentData.id || ""
+      );
+    eligiblePlayersForToday = tournamentData.playersList
+      .filter((p) => championshipEligiblePlayersEmails.has(p.email || ""))
+      .map((player) => ({
+        name: player.name,
+        email: player.email,
+        conference: player.conference,
+        division: player.group,
+        team: player.team,
+      })) as unknown as IOpponents[];
+    logger.info(
+      `Championship eligible players: ${eligiblePlayersForToday.map(
+        (p) => p.email
+      )}`,
+      { leagueId: tournamentData.id }
+    );
+  } else {
+    // Regular rounds: all players in the tournament can play (if they haven't played today)
+    eligiblePlayersForToday = tournamentData.playersList.map((player) => ({
+      name: player.name,
+      email: player.email,
+      conference: player.conference,
+      division: player.group,
+      team: player.team,
+    })) as unknown as IOpponents[];
+  }
+
+  // Filter to find opponents (not self, haven't played TODAY)
+  const potentialOpponents = eligiblePlayersForToday.filter((player) => {
+    const isNotSelf = player.email !== requestingPlayer.email;
+    const hasNotPlayedToday = !playersWhoPlayedToday.has(player.email || "");
+    return isNotSelf && hasNotPlayedToday;
+  });
+
+  logger.info(
+    `Potential Derby opponents found: ${potentialOpponents.map(
+      (p) => p.email
+    )}`,
+    { leagueId: tournamentData.id }
+  );
+
+  return potentialOpponents;
 };
 
 const findDogfightOpponents = async (
@@ -391,6 +553,13 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
     });
 
     switch (leagueType) {
+      case "derby":
+        opponents = await findDerbyOpponents(
+          db,
+          requestingPlayer,
+          tournamentData
+        );
+        break;
       case "dogfight":
         opponents = await findDogfightOpponents(
           db,
@@ -417,10 +586,8 @@ export const getOpponents = async (req: RequestGetOpponents, res: Response) => {
       leagueType,
     });
 
-    const maximumOpponents = tournamentData.matchesPerRound.map((match) => {
-      const newPlayers = match === "double" ? 3 : match === "triple" ? 4 : 5;
-      return newPlayers;
-    });
+    // Maximum opponents is the maximum number of opponents that can be played in a round defaulting to 4
+    const maximumOpponents = Array.isArray(tournamentData.matchesPerRound) && tournamentData.matchesPerRound.length ? tournamentData.matchesPerRound.map(m => m === "double" ? 3 : m === "triple" ? 4 : 5) : [5];
     return res.status(200).json({
       status: "success",
       data: {

@@ -50,13 +50,22 @@ const ReactivateAccount: React.FC = () => {
 
   if (isProcessing) {
     return (
-      <Container sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-      }}>
-        <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Box
+          sx={{
+            mt: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Paper sx={{ p: 4, width: "100%", textAlign: "center" }}>
             <CircularProgress sx={{ mb: 2 }} />
             <Typography variant="h6" gutterBottom>
@@ -73,19 +82,35 @@ const ReactivateAccount: React.FC = () => {
 
   if (success) {
     return (
-      <Container sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-      }}>
-        <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Box
+          sx={{
+            mt: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Paper sx={{ p: 4, width: "100%" }}>
-            <Typography variant="h5" component="h1" gutterBottom align="center" color="success.main">
+            <Typography
+              variant="h5"
+              component="h1"
+              gutterBottom
+              align="center"
+              color="success.main"
+            >
               Account Reactivated Successfully!
             </Typography>
             <Typography variant="body1" align="center" sx={{ mb: 3 }}>
-              Your account has been reactivated. You can now log in with your email and password.
+              Your account has been reactivated. You can now log in with your
+              email and password.
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               <Button
@@ -103,18 +128,33 @@ const ReactivateAccount: React.FC = () => {
   }
 
   return (
-    <Container sx={{
+    <Container
+      sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-      }}>
-      <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      }}
+    >
+      <Box
+        sx={{
+          mt: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Paper sx={{ p: 4, width: "100%" }}>
-          <Typography variant="h5" component="h1" gutterBottom align="center" color="error.main">
+          <Typography
+            variant="h5"
+            component="h1"
+            gutterBottom
+            align="center"
+            color="error.main"
+          >
             Reactivation Failed
           </Typography>
-          
+
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
@@ -124,13 +164,16 @@ const ReactivateAccount: React.FC = () => {
           <Typography variant="body1" align="center" sx={{ mb: 3 }}>
             We couldn't reactivate your account. This could be because:
           </Typography>
-          
-          <Typography variant="body2" align="center" sx={{ mb: 3, color: "text.secondary" }}>
+
+          <Typography
+            variant="body2"
+            align="center"
+            sx={{ mb: 3, color: "text.secondary" }}
+          >
             • The link has expired (links expire after 1 hour)
             <br />
             • The link has already been used
-            <br />
-            • The link is invalid
+            <br />• The link is invalid
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
@@ -140,10 +183,7 @@ const ReactivateAccount: React.FC = () => {
             >
               Request New Link
             </Button>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/login")}
-            >
+            <Button variant="outlined" onClick={() => navigate("/login")}>
               Go to Login
             </Button>
           </Box>
@@ -153,4 +193,4 @@ const ReactivateAccount: React.FC = () => {
   );
 };
 
-export default ReactivateAccount; 
+export default ReactivateAccount;

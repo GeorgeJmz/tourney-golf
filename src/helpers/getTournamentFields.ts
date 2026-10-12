@@ -50,7 +50,8 @@ export const step1: Array<ITournamentElement> = [
       { displayName: "League + Team Play", value: "leagueteamplay" },
       { displayName: "Team Play", value: "teamplay" },
       // { displayName: "Team 3 Stage", value: "3stage" },
-      { displayName: "Dogfight", value: "dogfight" },
+      //{ displayName: "Dogfight", value: "dogfight" },
+      { displayName: "Derby", value: "derby" },
     ],
   },
   {
@@ -118,7 +119,7 @@ export const getStep1 = (type: string) => {
       },
     ] as ITournamentElement[];
   }
-  if (type === "dogfight") {
+  if (type === "dogfight" || type === "derby") {
     return [
       step1[0],
       step1[1],
@@ -285,8 +286,28 @@ export const rules: Array<ITournamentElement> = [
     input: "switch",
     size: {
       xs: 12,
-      md: 3,
-      lg: 3,
+      md: 2,
+      lg: 2,
+    },
+  },
+  {
+    name: "playOffsStartDate",
+    placeholder: "Start Date Playoffs",
+    input: "date",
+    size: {
+      xs: 12,
+      md: 4,
+      lg: 4,
+    },
+  },
+  {
+    name: "playOffsCutOff",
+    placeholder: "Cutoff Playoffs",
+    input: "date",
+    size: {
+      xs: 12,
+      md: 6,
+      lg: 6,
     },
   },
 ];
@@ -435,15 +456,71 @@ export const getRules = (type: string, tournamentType: string) => {
       },
     ] as ITournamentElement[];
   }
+  if (tournamentType === "derby") {
+    return [
+      {
+        name: "numberOfStages",
+        placeholder: "Number of Team Stages",
+        input: "number",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "roundDates",
+        placeholder: "Round Dates",
+        input: "multipleDatesStages",
+        size: {
+          xs: 12,
+          md: 12,
+          lg: 12,
+        },
+      },
+      {
+        name: "championshipRound",
+        placeholder: "Championship Round",
+        input: "switch",
+        size: {
+          xs: 12,
+          md: 3,
+          lg: 3,
+        },
+      },
+      {
+        name: "weightedChampionshipRound",
+        placeholder: "Weighted Championship",
+        input: "number",
+        size: {
+          xs: 12,
+          md: 3,
+          lg: 3,
+        },
+      },
+      {
+        name: "championshipDate",
+        placeholder: "Championship Date",
+        input: "date",
+        size: {
+          xs: 12,
+          md: 6,
+          lg: 6,
+        },
+      },
+    ] as ITournamentElement[];
+  }
   console.log("type", type);
   console.log("tournamentType", tournamentType);
   if (tournamentType === "leagueteamplay" && type === "matchplaystableford") {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...matchPoints,
-      rules[3],
       ...rulesTeamPlay,
     ] as ITournamentElement[];
   }
@@ -451,9 +528,11 @@ export const getRules = (type: string, tournamentType: string) => {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...medalPoints,
-      rules[3],
       ...rulesTeamPlay,
     ] as ITournamentElement[];
   }
@@ -464,10 +543,12 @@ export const getRules = (type: string, tournamentType: string) => {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...matchPoints,
       ...medalPoints,
-      rules[3],
       ...rulesTeamPlay,
     ] as ITournamentElement[];
   }
@@ -475,28 +556,34 @@ export const getRules = (type: string, tournamentType: string) => {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...matchPoints,
-      rules[3],
     ] as ITournamentElement[];
   }
   if (type === "strokePlay" || type === "stableford") {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...medalPoints,
-      rules[3],
     ] as ITournamentElement[];
   }
   if (type === "matchstrokePlay") {
     return [
       rules[0],
       rules[1],
+      rules[3],
+      rules[4],
+      rules[5],
       rules[2],
       ...matchPoints,
       ...medalPoints,
-      rules[3],
     ] as ITournamentElement[];
   }
   return rules as ITournamentElement[];
@@ -505,6 +592,8 @@ export const getRules = (type: string, tournamentType: string) => {
 export interface IRulesInputElement {
   startDate: string | null;
   cutOffDate: string | null;
+  playOffsStartDate: string | null;
+  playOffsCutOff: string | null;
   pointsPerTie: number | "";
   pointsPerWin: number | "";
   pointsPerTieMedal: number | "";
@@ -516,6 +605,7 @@ export interface IRulesInputElement {
     | string
     | number
     | null
+    | undefined
     | Array<string>
     | Array<{ start: string; end: string }>;
 }
@@ -523,11 +613,13 @@ export interface IRulesInputElement {
 export const rulesFields: IRulesInputElement = {
   startDate: null,
   cutOffDate: null,
+  playOffsStartDate: null,
+  playOffsCutOff: null,
   pointsPerTie: 1,
   pointsPerWin: 3,
   pointsPerTieMedal: 1,
   pointsPerWinMedal: 3,
-  matchesPerRound: [],
+  matchesPerRound: ["cuadruple", "triple", "double"],
   multipleDatesStages: [],
   playoffs: false,
 };
@@ -537,6 +629,8 @@ export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
   .shape({
     startDate: yup.string().required("Start Date is required"),
     cutOffDate: yup.string().required("CutOff Date is required"),
+    playOffsStartDate: yup.string().nullable().optional(),
+    playOffsCutOff: yup.string().nullable().optional(),
     pointsPerWin: yup
       .number()
       .min(1, "Min")
@@ -559,7 +653,7 @@ export const rulesFieldsValidations: yup.ObjectSchema<IRulesInputElement> = yup
       .required("Points Per Tie is required"),
     playoffs: yup.boolean().required("Playoffs"),
     matchesPerRound: yup.array().required("Matches Required"),
-  });
+  }) as yup.ObjectSchema<IRulesInputElement>;
 
 export const step2: Array<ITournamentElement> = [
   {

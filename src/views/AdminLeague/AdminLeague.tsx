@@ -4,6 +4,7 @@ import UserViewModel from "../../viewModels/UserViewModel";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import TournamentViewModel from "../../viewModels/TournamentViewModel";
+import { getTournamentById } from "../../services/firebase";
 
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -37,7 +38,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { set, toJS } from "mobx";
-import { IPlayer } from "../../models/Tournament";
+import { IPlayer, ITournament } from "../../models/Tournament";
 import { getMessages } from "../../helpers/getMessages";
 import { toast } from "react-toastify";
 import { Messages } from "../../helpers/messages";
@@ -107,6 +108,11 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
   const [newChampion, setNewChampion] = React.useState("");
   const [userStats, setUserStats] = React.useState("");
   const [rowChanged, setRowChanged] = React.useState<Array<string>>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [loadedTournament, setLoadedTournament] =
+    React.useState<ITournament | null>(null);
+  const [unauthorized, setUnauthorized] = React.useState(false);
+  const [tournamentReady, setTournamentReady] = React.useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient(); // Accede al QueryClient
 
@@ -119,28 +125,88 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
     setValue(newValue);
   };
 
-  const currentTournament = React.useMemo(() => {
-    const current = user.activeTournaments.find((t) => t.id === id);
-    if (current) {
-      return current;
-    }
-    return user.tournaments.find((t) => t.id === id);
-  }, []);
-  if (id) {
-    tournamentViewModel.setTournamentId(id);
-  }
-  if (currentTournament && tournamentViewModel.author === "") {
-    tournamentViewModel.setTournament(currentTournament);
-    setNewLeagueName(currentTournament.name);
-    setNewChampion(currentTournament.champion || "");
-    tournamentViewModel.setAuthor(userId);
-  }
+  // Verificar si es admin
+  const isAdmin = React.useMemo(
+    () => user.user.isAdmin === true,
+    [user.user.isAdmin]
+  );
 
+  // Cargar torneo con verificación de permisos
+  React.useEffect(() => {
+    const loadTournamentFromFirebase = async () => {
+      if (!id) {
+        return;
+      }
+
+      // Primero busca en activeTournaments y tournaments
+      const localTournament =
+        user.activeTournaments.find((t) => t.id === id) ||
+        user.tournaments.find((t) => t.id === id);
+
+      if (localTournament) {
+        setLoadedTournament(localTournament);
+        setUnauthorized(false);
+        return;
+      }
+
+      // Si NO es autor, verifica si es admin
+      if (!isAdmin) {
+        setUnauthorized(true);
+        return;
+      }
+
+      // Si es admin pero no es autor, carga desde Firebase
+      setLoading(true);
+      try {
+        const tournament = await getTournamentById(id);
+        if (tournament) {
+          setLoadedTournament(tournament);
+          setUnauthorized(false);
+        } else {
+          setUnauthorized(true);
+        }
+      } catch (error) {
+        console.error("Error loading tournament:", error);
+        toast.error("Error al cargar el torneo");
+        setUnauthorized(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTournamentFromFirebase();
+  }, [id, user.activeTournaments, user.tournaments, isAdmin]);
+
+  const currentTournament = React.useMemo(() => {
+    return (
+      loadedTournament ||
+      user.activeTournaments.find((t) => t.id === id) ||
+      user.tournaments.find((t) => t.id === id)
+    );
+  }, [loadedTournament, user.activeTournaments, user.tournaments, id]);
+
+  // Inicializar tournamentViewModel cuando currentTournament esté disponible
   React.useEffect(() => {
     if (id) {
+      tournamentViewModel.setTournamentId(id);
+    }
+    if (currentTournament && tournamentViewModel.author === "") {
+      console.log("Inicializando tournamentViewModel con:", currentTournament);
+      tournamentViewModel.setTournament(currentTournament);
+      setNewLeagueName(currentTournament.name);
+      setNewChampion(currentTournament.champion || "");
+      tournamentViewModel.setAuthor(userId);
+      setTournamentReady(true);
+    }
+  }, [currentTournament, id, tournamentViewModel, userId]);
+
+  // Cargar matches solo después de que el torneo esté configurado
+  React.useEffect(() => {
+    if (id && currentTournament && tournamentViewModel.author !== "") {
+      console.log("Cargando matches para torneo:", currentTournament.name);
       tournamentViewModel.getAllMatchesResultsByTournament();
     }
-  }, [id]);
+  }, [id, currentTournament, tournamentViewModel.author]);
 
   const onSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -180,6 +246,8 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
 
   const playType = currentTournament?.playType;
   const tournamentType = currentTournament?.tournamentType;
+
+  console.log("Tournament Type:", tournamentType, "Tournament Ready:", tournamentReady);
 
   const hideTeam =
     tournamentType !== "leagueteamplay" && tournamentType !== "teamplay";
@@ -301,6 +369,60 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
       )
     : [];
 
+  // Estados de carga y error
+  if (loading || (!currentTournament && !unauthorized)) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+          minHeight: "300px",
+        }}
+      >
+        <Typography>Cargando torneo...</Typography>
+      </Box>
+    );
+  }
+
+  if (unauthorized) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography variant="h5" color="error" gutterBottom>
+          Acceso No Autorizado
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          No tienes permisos para administrar este torneo.
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => navigate("/dashboard")}
+        >
+          Volver al Dashboard
+        </Button>
+      </Box>
+    );
+  }
+
+  if (!currentTournament) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography variant="h5" color="error" gutterBottom>
+          Torneo No Encontrado
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => navigate("/dashboard")}
+        >
+          Volver al Dashboard
+        </Button>
+      </Box>
+    );
+  }
+
   return (
     <div>
       <Box
@@ -333,7 +455,7 @@ const AdminLeague: React.FC<IAdminLeagueProps> = ({ user }) => {
           </Tabs>
           <TabPanel value={value} index={0}>
             <React.Fragment>
-              <ManageTournament user={user} />
+              <ManageTournament user={user} tournament={currentTournament} />
             </React.Fragment>
           </TabPanel>
           <TabPanel value={value} index={1}>

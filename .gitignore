@@ -60,7 +60,18 @@ Thumbs.db
 .firebase
 .firebaserc
 
+# backups and migration logs
+/backups
+backups/
+/migration-logs
+migration-logs/
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .firebaserc
+
+# notas generadas en sesiones de IA
+/IMPLEMENTATION_SUMMARY.md
+/ACTIVITY_TRACKING_USAGE.md
+/DERBY_*.md

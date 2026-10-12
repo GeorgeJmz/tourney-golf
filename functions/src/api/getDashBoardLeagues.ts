@@ -7,6 +7,27 @@ import type {
 import * as logger from "firebase-functions/logger";
 import { UserType } from "../types/User";
 
+const chunkArray = <T>(arr: T[], size: number): T[][] =>
+  arr.length === 0
+    ? []
+    : [arr.slice(0, size), ...chunkArray(arr.slice(size), size)];
+
+const queryByChunks = async (
+  db: admin.firestore.Firestore,
+  ids: string[]
+): Promise<ITournament[]> => {
+  if (ids.length === 0) { return []; }
+  const chunks = chunkArray(ids, 30);
+  const snapshots = await Promise.all(
+    chunks.map((chunk) =>
+      db.collection("tournament").where("id", "in", chunk).get()
+    )
+  );
+  return snapshots.flatMap((snap) =>
+    snap.docs.map((doc) => ({ ...(doc.data() as ITournament), uuid: doc.id }))
+  );
+};
+
 export const getDashboardLeagues = async (
   req: RequestGetDashboadLeagues,
   res: Response
@@ -19,7 +40,6 @@ export const getDashboardLeagues = async (
   }
 
   try {
-    // Obtener el usuario
     const usersSnapshot = await db
       .collection("users")
       .where("id", "==", userId)
@@ -30,54 +50,40 @@ export const getDashboardLeagues = async (
     }
 
     const currentUser = usersSnapshot.docs[0].data() as UserType;
-    const activeTournamentsList =
-      currentUser.activeTournaments || ([] as string[]);
-    const historyTournamentsList =
-      currentUser.historyTournaments || ([] as string[]);
 
-    // Obtener ligas del autor
-    const authorLeaguesSnapshot = await db
-      .collection("tournament")
-      .where("author", "==", userId)
-      .where("status", "in", ["draft", "published"])
-      .get();
+    const activeTournamentIds = (
+      (currentUser.activeTournaments as unknown as Array<string | { tournamentId: string }>) || []
+    )
+      .map((t) => (typeof t === "string" ? t : t.tournamentId))
+      .filter(Boolean) as string[];
 
-    const authorLeagues = authorLeaguesSnapshot.docs.map((doc) => ({
+    const historyTournamentIds = (
+      (currentUser.historyTournaments as unknown as Array<string | { tournamentId: string }>) || []
+    )
+      .map((t) => (typeof t === "string" ? t : t.tournamentId))
+      .filter(Boolean) as string[];
+
+    const [authorLeaguesSnapshot, activeLeagues, historyLeagues] =
+      await Promise.all([
+        db
+          .collection("tournament")
+          .where("author", "==", userId)
+          .where("status", "in", ["draft", "published"])
+          .get(),
+        queryByChunks(db, activeTournamentIds),
+        queryByChunks(db, historyTournamentIds),
+      ]);
+
+    const adminLeagues = authorLeaguesSnapshot.docs.map((doc) => ({
       ...doc.data(),
       uuid: doc.id,
     }));
-
-    // Obtener ligas activas
-    let activeLeagues = [] as ITournament[];
-    if (activeTournamentsList.length > 0) {
-      const activeLeaguesSnapshot = await db
-        .collection("tournament")
-        .where("id", "in", activeTournamentsList)
-        .get();
-      activeLeagues = activeLeaguesSnapshot.docs.map((doc) => ({
-        ...(doc.data() as ITournament),
-        uuid: doc.id,
-      }));
-    }
-
-    // Obtener ligas históricas
-    let historyLeagues = [] as ITournament[];
-    if (historyTournamentsList.length > 0) {
-      const historyLeaguesSnapshot = await db
-        .collection("tournament")
-        .where("id", "in", historyTournamentsList)
-        .get();
-      historyLeagues = historyLeaguesSnapshot.docs.map((doc) => ({
-        ...(doc.data() as ITournament),
-        uuid: doc.id,
-      }));
-    }
 
     return res.status(200).json({
       status: "success",
       data: {
         activeLeagues,
-        adminLeagues: authorLeagues,
+        adminLeagues,
         historyLeagues,
       },
     });

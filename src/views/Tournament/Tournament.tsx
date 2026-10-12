@@ -32,14 +32,18 @@ export const TournamentMenu = memo(
   ({
     isMobile,
     isActiveTournament,
+    isActivePlayoffs,
     isDogfight,
+    isDerby,
     isTeamPlay,
     isLeagueTeamPlay,
     id,
   }: {
     isMobile: boolean;
     isActiveTournament: boolean;
+    isActivePlayoffs: boolean;
     isDogfight: boolean;
+    isDerby: boolean;
     isTeamPlay: boolean;
     isLeagueTeamPlay: boolean;
     id: string;
@@ -49,6 +53,8 @@ export const TournamentMenu = memo(
         ? `${basePath}-dogfight/${id}`
         : isTeamPlay
         ? `${basePath}-team/${id}`
+        : isDerby
+        ? `${basePath}-derby/${id}`
         : `${basePath}/${id}`;
     };
 
@@ -72,7 +78,7 @@ export const TournamentMenu = memo(
             </Button>
           </Link>
         </Box>
-        {!isDogfight && !isTeamPlay && (
+        {!isDogfight && !isTeamPlay && !isDerby && (
           <Box flexBasis={isMobile ? "50%" : "10%"}>
             <Link to={`/stats/${id}`}>
               <Button variant="text" color="primary">
@@ -81,7 +87,7 @@ export const TournamentMenu = memo(
             </Link>
           </Box>
         )}
-        {!isTeamPlay && (
+        {!isTeamPlay && !isDerby && (
           <Box flexBasis={isMobile ? "50%" : "15%"}>
             <Link to={getLinkPath("/stats-tournament")}>
               <Button variant="text" color="primary">
@@ -98,7 +104,6 @@ export const TournamentMenu = memo(
           </Link>
         </Box>
         {(isTeamPlay || isLeagueTeamPlay) && (
-          <>
             <Box flexBasis={isMobile ? "50%" : "10%"}>
               <Link to={`/team-board/${id}`}>
                 <Button variant="text" color="primary">
@@ -106,14 +111,24 @@ export const TournamentMenu = memo(
                 </Button>
               </Link>
             </Box>
+        )}
+        {(isTeamPlay || isLeagueTeamPlay || isDerby) && (
             <Box flexBasis={isMobile ? "50%" : "10%"}>
-              <Link to={`/player-board/${id}`}>
+              <Link to={isDerby ? `/derby-board/${id}` : `/player-board/${id}`}>
                 <Button variant="text" color="primary">
-                  {isLeagueTeamPlay ? "Player" : "Player Board"}
+                  {isLeagueTeamPlay || isDerby ? "Player" : "Player Board"}
                 </Button>
               </Link>
             </Box>
-          </>
+        )}
+        {!isDogfight && !isDerby && isActivePlayoffs && (
+          <Box flexBasis={isMobile ? "50%" : "10%"}>
+            <Link to={`/playoffs-view/${id}`}>
+              <Button variant="text" color="primary">
+                Playoffs
+              </Button>
+            </Link>
+          </Box>
         )}
         <Box flexBasis={isMobile ? "50%" : "10%"}>
           <Link to={`/rules-tournament/${id}`}>
@@ -139,6 +154,7 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
 
   const tournamentType = currentTournament?.tournamentType;
   const isDogfight = tournamentType === "dogfight";
+  const isDerby = tournamentType === "derby";
   const isTeamPlay = tournamentType === "teamplay";
   const isLeagueTeamPlay = tournamentType === "leagueteamplay";
   const { isFetching, data } = useGetStandings(
@@ -181,6 +197,27 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
     const compareDates = (d1: string, d2: string) =>
       new Date(d1) >= new Date(d2);
     return compareDates(endDate, today);
+  }, [currentTournament]);
+
+  const isActivePlayoffs = useMemo(() => {
+    if (!currentTournament || !currentTournament.playOffs) {
+      return false;
+    }
+    const start = convertDate(
+      currentTournament.playOffsStartDate || "",
+      "MM/DD/YYYY"
+    );
+    const end = convertDate(
+      currentTournament.playOffsCutOff || "",
+      "MM/DD/YYYY"
+    );
+    const today = convertDate(new Date().toISOString(), "MM/DD/YYYY");
+    if (!start || !end) {
+      return false;
+    }
+    const isBetween = (s: string, e: string, t: string) =>
+      new Date(t) >= new Date(s) && new Date(t) <= new Date(e);
+    return isBetween(start, end, today);
   }, [currentTournament]);
 
   const icons = [<LooksOneIcon />, <LooksTwoIcon />, <Looks3Icon />];
@@ -281,7 +318,9 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
               {...{
                 isMobile,
                 isActiveTournament,
+                isActivePlayoffs,
                 isDogfight,
+                isDerby,
                 isTeamPlay,
                 isLeagueTeamPlay,
                 id: id || "",
@@ -294,7 +333,9 @@ const TournamentPage: React.FC<ITournamentPageProps> = ({ user }) => {
               {...{
                 isMobile,
                 isActiveTournament,
+                isActivePlayoffs,
                 isDogfight,
+                isDerby,
                 isTeamPlay,
                 isLeagueTeamPlay,
                 id: id || "",

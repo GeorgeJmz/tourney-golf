@@ -13,6 +13,8 @@ export interface ITournament {
   cutOffDate: string;
   playOffsDate?: Date;
   playOffs: boolean;
+  playOffsStartDate?: string;
+  playOffsCutOff?: string;
   matchesPerRound: string[];
   playersList: Array<Partial<IPlayer>>;
   groupsList?: Array<ITournamentGroup>;
@@ -31,10 +33,13 @@ export interface ITournament {
     end: string;
   }[];
   championshipRound?: boolean;
+  weightedChampionshipRound?: number;
   championshipDate?: string;
   minRounds?: number;
   playOffsDetail: IPlayOffsDetail;
   champion?: string;
+  createdAt?: string;
+  lastActivityDate?: string;
 }
 
 export interface IPlayOffsDetail {
@@ -55,6 +60,7 @@ export interface ITournamentGroup {
 export enum TournamentStatus {
   DRAFT = "draft",
   PUBLISHED = "published",
+  ACTIVE = "active",
   CLOSED = "closed",
 }
 export interface IPlayer {
@@ -84,6 +90,7 @@ export interface statisticsPlayer {
   wins: number;
   draws: number;
   losses: number;
+  roundsPlayed: number;
   bonusPoints: number;
   matchPoints: number;
   medalPoints: number;
@@ -100,10 +107,10 @@ export interface standingsType {
   points: number;
   position: number;
 }
-const endDate = new Date();
-endDate.setDate(endDate.getDate() + 180);
-const championshipDate = new Date();
-championshipDate.setDate(championshipDate.getDate() + 181);
+import dayjs from "dayjs";
+
+const endDate = dayjs().add(180, "day");
+const championshipDate = dayjs().add(181, "day");
 export default class TournamentModel implements ITournament {
   id? = "";
   author = "";
@@ -118,9 +125,11 @@ export default class TournamentModel implements ITournament {
   playersPerGroup = [] as Array<IGroup>;
   teams = [] as Array<IGroup>;
   playType = "";
-  playOffs = false;
-  startDate = new Date().toISOString();
-  cutOffDate = endDate.toISOString();
+  playOffs = true;
+  startDate = dayjs().format("MM/DD/YYYY");
+  cutOffDate = endDate.format("MM/DD/YYYY");
+  playOffsStartDate?: string;
+  playOffsCutOff?: string;
   matchesPerRound = [] as string[];
   conference = [] as Array<IGroup>;
   status = TournamentStatus.DRAFT;
@@ -129,9 +138,10 @@ export default class TournamentModel implements ITournament {
   pointsPerWinMedal = 3;
   pointsPerTieMedal = 1;
   numberOfRounds = 1;
-  roundDates = [new Date().toISOString()];
+  roundDates = [dayjs().format("MM/DD/YYYY")];
   championshipRound = false;
-  championshipDate = championshipDate.toISOString();
+  weightedChampionshipRound = 1;
+  championshipDate = championshipDate.format("MM/DD/YYYY");
   minRounds = 1;
   playOffsDetail = {
     players: 0,
@@ -141,11 +151,13 @@ export default class TournamentModel implements ITournament {
   numberOfStages = 1;
   stagesDates = [
     {
-      start: new Date().toISOString(),
-      end: new Date().toISOString(),
+      start: dayjs().format("MM/DD/YYYY"),
+      end: dayjs().format("MM/DD/YYYY"),
     },
   ];
   champion? = "";
+  createdAt? = "";
+  lastActivityDate? = "";
 
   constructor(init?: Partial<TournamentModel>) {
     Object.assign(this, init);

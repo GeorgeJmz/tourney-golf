@@ -19,6 +19,7 @@ import TournamentStats from "./views/TournamentStats/TournamentStats";
 import TournamentDogfightStats from "./views/TournamentStats/DogfightStats";
 import TournamentResults from "./views/TournamentResults/TournamentResults";
 import TournamentResultsDogfight from "./views/TournamentResults/DogfightResults";
+import DerbyResults from "./views/TournamentResults/DerbyResults";
 import Profile from "./views/Profile/Profile";
 import MatchDetail from "./views/MatchDetail/MatchDetail";
 import AdminLeague from "./views/AdminLeague/AdminLeague";
@@ -31,15 +32,19 @@ import CreateTournament from "./views/CreateTournament/CreateTournament";
 import Rules from "./views/Rules/Rules";
 import Dogfight from "./views/Play/Dogfight";
 import PlayOffsPlayer from "./views/PlayOffs/PlayOffsPlayer";
+import PlayOffsView from "./views/PlayOffs/PlayOffsView";
 import HistoryLeague from "./views/HistoryLeague/HistoryLeague";
 import Teamplay from "./views/Play/Teamplay";
 import TeamBoard from "./views/TournamentStats/TeamBoard";
 import PlayerBoard from "./views/TournamentStats/PlayerBoard";
+import DerbyBoard from "./views/TournamentStats/DerbyBoard";
 import HistoryLeagueTeamplay from "./views/HistoryLeague/HistoryLeagueTeamplay";
 import Stats from "./views/Stats/Stats";
 import ApiTest from "./views/ApiTest/ApiTest";
 import RequestAccountReactivation from "./views/RequestAccountReactivation/RequestAccountReactivation";
 import ReactivateAccount from "./views/ReactivateAccount/ReactivateAccount";
+import AdminAllLeagues from "./views/AdminAllLeagues/AdminAllLeagues";
+import Derby from "./views/Play/Derby";
 
 function Router(): JSX.Element {
   const { user } = useAuth();
@@ -80,6 +85,10 @@ function Router(): JSX.Element {
           element: withAuth(<AdminLeague user={userViewModel} />),
         },
         {
+          path: "/admin-all-leagues",
+          element: withAuth(<AdminAllLeagues user={userViewModel} />),
+        },
+        {
           path: "/history-league/:id",
           element: withAuth(<HistoryLeague user={userViewModel} />),
         },
@@ -104,6 +113,10 @@ function Router(): JSX.Element {
           element: withAuth(<PlayOffsPlayer user={userViewModel} />),
         },
         {
+          path: "/playoffs-view/:id",
+          element: withAuth(<PlayOffsView user={userViewModel} />),
+        },
+        {
           path: "/stats-tournament-dogfight/:id",
           element: withAuth(<TournamentDogfightStats user={userViewModel} />),
         },
@@ -124,6 +137,10 @@ function Router(): JSX.Element {
           element: withAuth(<Teamplay user={userViewModel} />),
         },
         {
+          path: "/play-tournament-derby/:id",
+          element: withAuth(<Derby user={userViewModel} />),
+        },
+        {
           path: "/results/:id",
           element: withAuth(<TournamentResults user={userViewModel} />),
         },
@@ -132,12 +149,20 @@ function Router(): JSX.Element {
           element: withAuth(<TournamentResults user={userViewModel} />),
         },
         {
+          path: "/results-derby/:id",
+          element: withAuth(<DerbyResults user={userViewModel} />),
+        },
+        {
           path: "/team-board/:id",
           element: withAuth(<TeamBoard user={userViewModel} />),
         },
         {
           path: "/player-board/:id",
           element: withAuth(<PlayerBoard user={userViewModel} />),
+        },
+        {
+          path: "/derby-board/:id",
+          element: withAuth(<DerbyBoard user={userViewModel} />),
         },
         {
           path: "/results-dogfight/:id",

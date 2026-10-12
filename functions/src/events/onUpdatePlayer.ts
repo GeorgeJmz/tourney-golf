@@ -10,7 +10,51 @@ exports.onUpdatePlayer = onDocumentUpdatedWithAuthContext(
     const previousValue = event.data?.before.data();
     const newValue = event.data?.after.data() as ITournamentPlayer;
 
-    const isChanged = previousValue?.gross.length !== newValue?.gross.length;
+    const hasBonusPointsChange = () => {
+      if (previousValue?.bonusPoints.length !== newValue?.bonusPoints.length) {
+        return true;
+      }
+      let hasChange = false;
+      previousValue?.bonusPoints.forEach((bp: number, index: number) => {
+        if (bp !== newValue?.bonusPoints[index]) {
+          hasChange = true;
+        }
+      });
+      return hasChange;
+    };
+
+    const hasMatchPointsChange = () => {
+      if (previousValue?.pointsMatch.length !== newValue?.pointsMatch.length) {
+        return true;
+      }
+      let hasChange = false;
+      previousValue?.pointsMatch.forEach((mp: number, index: number) => {
+        if (mp !== newValue?.pointsMatch[index]) {
+          hasChange = true;
+        }
+      });
+      return hasChange;
+    };
+
+    const hasStrokePointsChange = () => {
+      if (
+        previousValue?.pointsStroke.length !== newValue?.pointsStroke.length
+      ) {
+        return true;
+      }
+      let hasChange = false;
+      previousValue?.pointsStroke.forEach((sp: number, index: number) => {
+        if (sp !== newValue?.pointsStroke[index]) {
+          hasChange = true;
+        }
+      });
+      return hasChange;
+    };
+
+    const isChanged =
+      hasBonusPointsChange() ||
+      hasMatchPointsChange() ||
+      hasStrokePointsChange();
 
     if (isChanged) {
       const leagueId = newValue.tournamentId;

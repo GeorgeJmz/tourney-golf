@@ -11,6 +11,7 @@ interface MultipleRangesInputProps {
   inputElement: ITournamentElement;
   isError: boolean;
   error: string | undefined;
+  isTeamStage?: boolean;
   values:
     | {
         start: string;
@@ -31,13 +32,14 @@ interface MultipleRangesInputProps {
 export const MultipleRangesInput: React.FC<MultipleRangesInputProps> = ({
   inputElement,
   isError,
+  isTeamStage,
   onChange,
   values,
 }) => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     {values &&
       values.map((_, index) => (
-        <>
+        <React.Fragment key={`stage-range-${index}`}>
           <Grid
             item
             xs={inputElement.size.xs / 2}
@@ -58,7 +60,7 @@ export const MultipleRangesInput: React.FC<MultipleRangesInputProps> = ({
                       )
                     : null;
                 }}
-                label={`Team Stage ${index + 1} Start`}
+                label={isTeamStage ? `Team Stage ${index + 1} Start` : `Stage ${index + 1} Start`}
               />
             </FormControl>
           </Grid>
@@ -82,11 +84,11 @@ export const MultipleRangesInput: React.FC<MultipleRangesInputProps> = ({
                       )
                     : null;
                 }}
-                label={`Team Stage ${index + 1} Start`}
+                label={isTeamStage ? `Team Stage ${index + 1} End` : `Stage ${index + 1} End`}
               />
             </FormControl>
           </Grid>
-        </>
+        </React.Fragment>
       ))}
   </LocalizationProvider>
 );

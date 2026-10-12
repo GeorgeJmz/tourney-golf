@@ -44,6 +44,7 @@ import PlayerModel, { ITournamentPlayer } from "../models/Player";
 import { IMatch, IMatchResults } from "../models/Match";
 import { convertDateToMoment, convertMomentDate } from "../helpers/convertDate";
 import { getCourseDetail } from "../services/courses";
+import dayjs from "dayjs";
 
 class TournamentViewModel {
   tournament: TournamentModel = new TournamentModel();
@@ -192,11 +193,21 @@ class TournamentViewModel {
   }
 
   getRulesValues(): IRulesInputElement {
+    // Calcular dinámicamente las fechas de playoffs basadas en cutOffDate actual
+    const cutoffDate = this.tournament.cutOffDate;
+    const cutoffDayjs = dayjs(cutoffDate);
+    const playoffsStartDate = cutoffDayjs.add(1, "day").format();
+    const playoffsCutOffDate = cutoffDayjs.add(1, "day").format();
+    
     return {
       playoffs: this.tournament.playOffs,
       startDate: this.tournament.startDate,
       cutOffDate: this.tournament.cutOffDate,
-      matchesPerRound: toJS(this.tournament.matchesPerRound),
+      playOffsStartDate: this.tournament.playOffsStartDate || playoffsStartDate,
+      playOffsCutOff: this.tournament.playOffsCutOff || playoffsCutOffDate,
+      matchesPerRound: toJS(this.tournament.matchesPerRound).length > 0
+        ? toJS(this.tournament.matchesPerRound)
+        : ["cuadruple", "triple", "double"],
       pointsPerTie: this.tournament.pointsPerTie || 1,
       pointsPerWin: this.tournament.pointsPerWin || 3,
       pointsPerTieMedal: this.tournament.pointsPerTieMedal || 1,
@@ -204,6 +215,7 @@ class TournamentViewModel {
       numberOfRounds: this.tournament.numberOfRounds || 1,
       roundDates: toJS(this.tournament.roundDates) || [],
       championshipRound: this.tournament.championshipRound || false,
+      weightedChampionshipRound: this.tournament.weightedChampionshipRound || 1,
       championshipDate: this.tournament.championshipDate,
       minRounds: this.tournament.minRounds || 1,
       numberOfStages: this.tournament.numberOfStages || 1,
@@ -216,7 +228,8 @@ class TournamentViewModel {
   }
 
   saveEmailList(): void {
-    this.updateTournament(toJS(this.tournament));
+    // Solo enviar playersList, no todo el objeto
+    this.updateTournament({ playersList: toJS(this.tournament.playersList) });
   }
   addEmailToList(email: string, name: string): void {
     this.tournament.playersList.push({
@@ -246,9 +259,13 @@ class TournamentViewModel {
   removeEmailFromList(key: number): void {
     const emailList = this.tournament.playersList[key].email;
     if (emailList) {
-      const newEmailList = [...this.tournament.playersList].filter((player) => player.email !== emailList);
+      const newEmailList = [...this.tournament.playersList].filter(
+        (player) => player.email !== emailList
+      );
       this.tournament.playersList = newEmailList;
-      this.playersList = this.playersList.filter((player) => player.email !== emailList);
+      this.playersList = this.playersList.filter(
+        (player) => player.email !== emailList
+      );
     }
   }
 
@@ -270,7 +287,11 @@ class TournamentViewModel {
   updatePlayersPerGroup(groups: IGroup[]): void {
     this.tournament.playersPerGroup = groups;
     this.tournament.groups = groups.length - 1;
-    this.updateTournament(toJS(this.tournament));
+    // Solo enviar los campos modificados
+    this.updateTournament({
+      playersPerGroup: toJS(groups),
+      groups: groups.length - 1,
+    });
   }
 
   updateGroupList(newGroups: Array<ITournamentGroup>): void {
@@ -323,12 +344,14 @@ class TournamentViewModel {
 
   updateTeams(teams: IGroup[]): void {
     this.tournament.teams = teams;
-    this.updateTournament(toJS(this.tournament));
+    // Solo enviar el campo modificado
+    this.updateTournament({ teams: toJS(teams) });
   }
 
   updateConference(conference: IGroup[]): void {
     this.tournament.conference = conference;
-    this.updateTournament(toJS(this.tournament));
+    // Solo enviar el campo modificado
+    this.updateTournament({ conference: toJS(conference) });
   }
 
   startTournament(): void {
@@ -1157,6 +1180,7 @@ class TournamentViewModel {
           draws: getDraws(),
           losses: getLoss(),
           bonusPoints: getBonusPoints(),
+          roundsPlayed: player.pointsTeam.length,
           matchPoints: player.pointsMatch.reduce((acc, curr) => acc + curr, 0),
           medalPoints: player.pointsStroke.reduce((acc, curr) => acc + curr, 0),
           totalPoints: getTotalPoints(),
@@ -1390,6 +1414,7 @@ class TournamentViewModel {
           id: Number(player.id),
           position: 0, // Add position property
           tourneyName: player.name, // Add tourneyName property
+          roundsPlayed: player.pointsTeam.length,
           matchesPlayed:
             playType !== "matchstrokePlay"
               ? player.opponent.length
@@ -1656,17 +1681,23 @@ class TournamentViewModel {
     const cuToast = toast.loading(displayLoading);
     try {
       const thisTournament = toJS(this.tournament);
-      await updateTournament(this.idTournament, {
+      
+      // Preservar campos de fecha que no deben sobrescribirse desde formularios
+      const { createdAt, lastActivityDate, ...tournamentData } = tournament;
+      
+      const mergedTournament = {
         ...thisTournament,
-        ...tournament,
-        author: this.author,
-      });
+        ...tournamentData,
+        // Preservar el autor original si ya existe
+        author: thisTournament.author || this.author,
+        // Preservar explícitamente createdAt del torneo original
+        ...(thisTournament.createdAt && { createdAt: thisTournament.createdAt }),
+        // lastActivityDate se actualiza automáticamente en firebase.ts
+      };
+      
+      await updateTournament(this.idTournament, mergedTournament);
 
-      this.setTournament({
-        ...thisTournament,
-        ...tournament,
-        author: this.author,
-      });
+      this.setTournament(mergedTournament);
       const displayMessage = getMessages(Messages.TOURNAMENT_UPDATED);
       toast.update(cuToast, {
         render: displayMessage,
@@ -1714,13 +1745,8 @@ class TournamentViewModel {
     <p>Fore!</p>
     <p>The ${leagueName} season has officially come to a close, and what a season it’s been! Huge thanks to everyone who participated, whether you were sinking birdies or stuck in the rough, you all made this league a hole-in-one.</p>
     <p>A special shout-out to <b>${championName}</b>, who swung their way to the top and claimed the champion’s crown. Time to update that trophy shelf!</p>
-    <p>For those looking to relive the glory (or, ahem, some of those "almost" shots), head over to your <b>History</b> tab and under the champ's name you can find:</p>
-    <ul>
-    <li>All <b>Match Results</b></li>
-    <li>The <b>Full Leaderboard</b></li>
-    <li>The <b>Playoff Bracket</b></li>
-    </ul>
-    <p>Thanks again for bringing your A-game this season. We’ll see you back on the green next time—because every round is just one swing away from greatness (or the bunker)!</p>
+    <p>For those looking to relive the glory, head over to your <b>History</b> tab and find past league information (hopefully your name is engraved between the Champions).</p>
+    <p>Thanks again for bringing your A-game this season. We’ll see you back on the green next time, because every round is just one swing away from greatness (or the bunker)!</p>
     <p>Keep it on the fairway,</p>
     <p>The Tee Box League Team</p>
     `;
@@ -1746,7 +1772,9 @@ class TournamentViewModel {
   }
 
   async getTournamentList() {
-    const emails = this.tournament.playersList.map((player) => player.email || "");
+    const emails = this.tournament.playersList.map(
+      (player) => player.email || ""
+    );
     const names = await getNamesByEmails(emails);
     const listEmails = names?.reduce((acc, curr) => {
       acc[curr.email] = curr.name + " " + curr.lastName;

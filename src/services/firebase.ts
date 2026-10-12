@@ -22,6 +22,7 @@ import {
   arrayUnion,
   updateDoc,
   connectFirestoreEmulator,
+  orderBy,
 } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 import type { IUser } from "../models/User";
@@ -121,6 +122,121 @@ export const getAllUsers = async (): Promise<void> => {
       console.log(data);
     })
     .catch((error) => console.log(error));
+};
+
+export const getAllTournaments = async (): Promise<ITournament[]> => {
+  try {
+    const tournamentCollection = collection(db, "tournament");
+    const querySnapshot = await getDocs(tournamentCollection);
+    const tournaments: ITournament[] = [];
+
+    querySnapshot.forEach((doc) => {
+      tournaments.push({
+        ...doc.data(),
+        id: doc.id,
+      } as ITournament);
+    });
+
+    // Ordenar en cliente por lastActivityDate (con fallback a startDate)
+    // Esto asegura que TODAS las ligas se muestren, incluso las sin lastActivityDate
+    return tournaments.sort((a, b) => {
+      const dateA = a.lastActivityDate
+        ? new Date(a.lastActivityDate).getTime()
+        : a.startDate
+        ? new Date(a.startDate).getTime()
+        : 0;
+      const dateB = b.lastActivityDate
+        ? new Date(b.lastActivityDate).getTime()
+        : b.startDate
+        ? new Date(b.startDate).getTime()
+        : 0;
+      return dateB - dateA; // Más reciente primero
+    });
+  } catch (error) {
+    console.error("Error fetching all tournaments:", error);
+    throw error;
+  }
+};
+
+/**
+ * Obtiene todos los torneos ordenados por última actividad
+ * Útil para identificar ligas activas vs inactivas
+ * @returns Array de torneos ordenados por lastActivityDate (más reciente primero)
+ */
+export const getAllTournamentsByActivity = async (): Promise<ITournament[]> => {
+  try {
+    const tournamentCollection = collection(db, "tournament");
+    const tournamentQuery = query(
+      tournamentCollection,
+      orderBy("lastActivityDate", "desc")
+    );
+    const querySnapshot = await getDocs(tournamentQuery);
+    const tournaments: ITournament[] = [];
+
+    querySnapshot.forEach((doc) => {
+      tournaments.push({
+        ...doc.data(),
+        id: doc.id,
+      } as ITournament);
+    });
+
+    return tournaments;
+  } catch (error) {
+    console.error("Error fetching tournaments by activity:", error);
+    // Fallback: si no existe el índice, usar getAllTournaments y ordenar en cliente
+    const allTournaments = await getAllTournaments();
+    return allTournaments.sort((a, b) => {
+      const dateA = a.lastActivityDate
+        ? new Date(a.lastActivityDate).getTime()
+        : 0;
+      const dateB = b.lastActivityDate
+        ? new Date(b.lastActivityDate).getTime()
+        : 0;
+      return dateB - dateA;
+    });
+  }
+};
+
+/**
+ * Calcula los días desde la última actividad de un torneo
+ * @param tournament - Torneo a verificar
+ * @returns Número de días desde la última actividad, o null si no tiene fecha
+ */
+export const getDaysSinceLastActivity = (
+  tournament: ITournament
+): number | null => {
+  if (!tournament.lastActivityDate) {
+    return null;
+  }
+  const lastActivity = new Date(tournament.lastActivityDate);
+  const now = new Date();
+  
+  // Resetear horas para comparar solo fechas
+  const lastActivityDate = new Date(lastActivity.getFullYear(), lastActivity.getMonth(), lastActivity.getDate());
+  const nowDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  
+  const diffTime = nowDate.getTime() - lastActivityDate.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays;
+};
+
+/**
+ * Verifica si un torneo está inactivo
+ * @param tournament - Torneo a verificar
+ * @param daysThreshold - Días de inactividad para considerarlo inactivo (default: 30)
+ * @returns true si el torneo está inactivo
+ */
+export const isTournamentInactive = (
+  tournament: ITournament,
+  daysThreshold = 30
+): boolean => {
+  const days = getDaysSinceLastActivity(tournament);
+  if (days === null) {
+    // Si no tiene lastActivityDate, considerarlo inactivo si status es closed
+    return tournament.status === "closed";
+  }
+  return days > daysThreshold;
 };
 
 export const getAllLeagues = async (userId: string) => {
@@ -337,6 +453,77 @@ export const createUser = async (
   }
 };
 
+/**
+ * Create a match using the backend API endpoint
+ * This endpoint handles both individual 1v1 matches and multi-player matches (teamplay/dogfight)
+ * The backend automatically determines the match type and applies the appropriate logic
+ */
+interface CreateMatchPayload {
+  author: string;
+  tournamentId: string;
+  course: string;
+  courseDisplayName: string;
+  teeBox: string;
+  teeBoxDisplayName: string;
+  scores: Array<{
+    player: string;
+    idPlayer: string;
+    scoreHoles: number[];
+    scoreHolesHP?: number[];
+    teamScoreHolesHP?: number[];
+    handicap: number;
+    out: number;
+    in: number;
+    totalGross: number;
+    totalNet: number;
+    teamPoints: number[];
+  }>;
+  message: string;
+}
+
+interface CreateMatchResponse {
+  status: string;
+  message: string;
+  data: {
+    matchId: string[];
+    round?: number;
+  };
+}
+
+export const createMatchBackend = async (
+  payload: CreateMatchPayload
+): Promise<CreateMatchResponse> => {
+  try {
+    const authToken = await auth.currentUser?.getIdToken();
+    const response = await fetch(
+      `${API_BASE_URL}${API_ENDPOINTS.CREATE_MATCH}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        mode: "cors",
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    const code = error as FirebaseError;
+    throw code;
+  }
+};
+
+/**
+ * @deprecated Use createMatchBackend instead
+ * Legacy test endpoint - kept for backward compatibility
+ */
 export const createMatchEndpoint = async (
   author: string,
   tournamentId: string
@@ -1057,7 +1244,13 @@ export const createTournament = async (
   tournament: Partial<ITournament>
 ): Promise<string> => {
   try {
-    const doc = await addDoc(collection(db, "tournament"), tournament);
+    const now = new Date().toISOString();
+    const tournamentWithDates = {
+      ...tournament,
+      createdAt: now,
+      lastActivityDate: now,
+    };
+    const doc = await addDoc(collection(db, "tournament"), tournamentWithDates);
     return doc.id;
   } catch (error) {
     const code = error as FirebaseError;
@@ -1071,11 +1264,35 @@ export const updateTournament = async (
 ): Promise<void> => {
   try {
     const documentRef = doc(db, "tournament", documentId);
-    console.log(updatedData, "updatedData");
-    await setDoc(documentRef, updatedData, { merge: true });
+    const dataWithActivity = {
+      ...updatedData,
+      lastActivityDate: new Date().toISOString(),
+    };
+    console.log(dataWithActivity, "updatedData");
+    await setDoc(documentRef, dataWithActivity, { merge: true });
   } catch (error) {
     const code = error as FirebaseError;
     throw code;
+  }
+};
+
+export const getTournamentById = async (
+  id: string
+): Promise<ITournament | null> => {
+  try {
+    const documentRef = doc(db, "tournament", id);
+    const docSnapshot = await getDoc(documentRef);
+    
+    if (docSnapshot.exists()) {
+      return {
+        ...docSnapshot.data(),
+        id: docSnapshot.id,
+      } as ITournament;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching tournament:", error);
+    return null;
   }
 };
 
@@ -1205,6 +1422,20 @@ export const getMatchesByID = async (
     matches.push(doc.data() as unknown as IMatch);
   });
   return matches as Array<IMatch>;
+};
+
+export const getMatchById = async (id: string): Promise<IMatch | null> => {
+  const documentRef = doc(db, "match", id);
+  try {
+    const docSnapshot = await getDoc(documentRef);
+    if (docSnapshot.exists()) {
+      return { ...docSnapshot.data(), id: docSnapshot.id } as IMatch;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting match by ID:", error);
+    return null;
+  }
 };
 
 export const createMatch = async (match: IMatch): Promise<string> => {
@@ -1503,17 +1734,20 @@ export const updateMatches = async (): Promise<void> => {
 
 export const deleteAccount = async (userId: string) => {
   const authToken = await auth.currentUser?.getIdToken();
-  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.DELETE_ACCOUNT}`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${authToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.DELETE_ACCOUNT}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1523,16 +1757,19 @@ export const deleteAccount = async (userId: string) => {
 };
 
 export const requestAccountReactivation = async (email: string) => {
-  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.REQUEST_ACCOUNT_REACTIVATION}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.REQUEST_ACCOUNT_REACTIVATION}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1542,16 +1779,19 @@ export const requestAccountReactivation = async (email: string) => {
 };
 
 export const reactivateAccountWithToken = async (token: string) => {
-  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.REACTIVATE_ACCOUNT_WITH_TOKEN}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      token,
-    }),
-    mode: "cors",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}${API_ENDPOINTS.REACTIVATE_ACCOUNT_WITH_TOKEN}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+      }),
+      mode: "cors",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1559,3 +1799,87 @@ export const reactivateAccountWithToken = async (token: string) => {
 
   return response.json();
 };
+
+export const getRules = async (
+  tournamentId: string
+): Promise<{ rules: string; calendar: string; calcutta: string }> => {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}/getRules`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ tournamentId }),
+    mode: "cors",
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data = await response.json();
+  return data.data;
+};
+
+export async function getResults(leagueId: string) {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}/getResults`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ leagueId }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getTeamboard(leagueId: string) {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}/getTeamboard`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ leagueId }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getPlayerBoard(leagueId: string) {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}/getPlayerBoard`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ leagueId }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function getPlayoffs(leagueId: string) {
+  const authToken = await auth.currentUser?.getIdToken();
+  const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GET_PLAYOFFS}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ leagueId }),
+  });
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status}`);
+  }
+  return response.json();
+}
