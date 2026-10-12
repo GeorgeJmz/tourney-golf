@@ -283,6 +283,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
       lastName: "",
       email: "",
       password: "",
+      ghinNumber: "",
     } as IAccountElement,
     validationSchema: validationSchema,
     onSubmit: async (values) => {
@@ -292,7 +293,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
         lastName: values.lastName,
         email: values?.email.toLowerCase() || "",
         password: values.password,
-        ghinNumber: values.ghinNumber.toLowerCase() || "",
+        ghinNumber: values.ghinNumber?.toLowerCase() || "",
         handicap: 0,
       });
       //user.updateUser(newUser);
@@ -330,7 +331,7 @@ const CreateAccountForm: React.FC<CreateAccountFormProps> = ({
                   xs={inputElement.size.xs}
                   md={inputElement.size.md}
                 >
-                  <Tooltip title="Pasword minimum requirements: 8 Characters, One Capital Letter, One Number">
+                  <Tooltip title="Password must contain 8 characters minimum, at least One Capital letter and One number">
                     <FormControl
                       sx={{ m: 2, width: "25ch" }}
                       variant="outlined"

@@ -80,7 +80,9 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
       setDeleteDialogOpen(false);
       navigate("/");
     } catch (error) {
-      setDeleteError(error instanceof Error ? error.message : "Error deleting account");
+      setDeleteError(
+        error instanceof Error ? error.message : "Error deleting account"
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -168,7 +170,7 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="delete-account-dialog-description">
-          This action will:
+            This action will:
             <br />
             • Temporarily disable your account
             <br />
@@ -188,9 +190,9 @@ const Profile: React.FC<IProfilePageProps> = ({ user }) => {
           <Button onClick={cancelDelete} disabled={isDeleting}>
             Cancel
           </Button>
-          <Button 
-            onClick={confirmDelete} 
-            color="error" 
+          <Button
+            onClick={confirmDelete}
+            color="error"
             variant="contained"
             disabled={isDeleting}
           >

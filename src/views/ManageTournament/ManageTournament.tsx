@@ -20,13 +20,21 @@ import TeamSetup from "./../CreateTournament/components/CreateTournament/TeamSet
 import CalendarsSetup from "./../CreateTournament/components/CreateTournament/CalendarsSetup";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { getTournamentById } from "../../services/firebase";
+import { toast } from "react-toastify";
+import { ITournament } from "../../models/Tournament";
 
 interface IManageTournamentProps {
   user: UserViewModel;
+  tournament?: ITournament; // Prop opcional del torneo ya cargado
 }
 
-const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
+const ManageTournament: React.FC<IManageTournamentProps> = ({ user, tournament }) => {
   const [activeStep, setActiveStep] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [loadedTournament, setLoadedTournament] =
+    React.useState<ITournament | null>(null);
+  const [unauthorized, setUnauthorized] = React.useState(false);
   const navigate = useNavigate();
   const userId = React.useMemo(() => user.getUserId(), []);
   const queryClient = useQueryClient(); // Accede al QueryClient
@@ -35,16 +43,81 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
     []
   );
   const { id } = useParams();
-  const currentTournament = React.useMemo(
-    () => user.tournaments.find((t) => t.id === id),
-    []
+
+  // Verificar si es admin
+  const isAdmin = React.useMemo(
+    () => user.user.isAdmin === true,
+    [user.user.isAdmin]
   );
 
-  if (currentTournament && id && tournamentViewModel.author === "") {
-    tournamentViewModel.setTournament(currentTournament);
-    tournamentViewModel.setTournamentId(id);
-    tournamentViewModel.setAuthor(userId);
-  }
+  // Cargar torneo con verificación de permisos
+  React.useEffect(() => {
+    const loadTournamentFromFirebase = async () => {
+      if (!id) {
+        return;
+      }
+
+      // Si recibe tournament como prop (viene de AdminLeague), usarlo directamente
+      if (tournament) {
+        console.log("✅ Usando tournament recibido como prop:", tournament.name);
+        setLoadedTournament(tournament);
+        setUnauthorized(false);
+        return; // ✅ No cargar desde Firebase, evita duplicación
+      }
+
+      // Primero verifica si es autor (tiene el torneo en su lista)
+      const localTournament = user.tournaments.find((t) => t.id === id);
+
+      if (localTournament) {
+        setLoadedTournament(localTournament);
+        setUnauthorized(false);
+        return;
+      }
+
+      // Si NO es autor, verifica si es admin
+      if (!isAdmin) {
+        setUnauthorized(true);
+        return;
+      }
+
+      // Si es admin pero no es autor, carga desde Firebase
+      setLoading(true);
+      try {
+        const tournamentData = await getTournamentById(id);
+        if (tournamentData) {
+          setLoadedTournament(tournamentData);
+          setUnauthorized(false);
+        } else {
+          setUnauthorized(true);
+        }
+      } catch (error) {
+        console.error("Error loading tournament:", error);
+        toast.error("Error al cargar el torneo");
+        setUnauthorized(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTournamentFromFirebase();
+  }, [id, user.tournaments, isAdmin, tournament]);
+
+  const currentTournament = React.useMemo(
+    () => loadedTournament || user.tournaments.find((t) => t.id === id),
+    [loadedTournament, user.tournaments, id]
+  );
+
+  console.log(currentTournament, "currentTournament");
+
+  // Inicializar tournamentViewModel cuando currentTournament esté disponible
+  React.useEffect(() => {
+    if (currentTournament && id && tournamentViewModel.author === "") {
+      console.log("⚙️ Inicializando tournamentViewModel con:", currentTournament.name);
+      tournamentViewModel.setTournament(currentTournament);
+      tournamentViewModel.setTournamentId(id);
+      tournamentViewModel.setAuthor(userId);
+    }
+  }, [currentTournament, id, tournamentViewModel, userId]);
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -143,7 +216,7 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
         (s) => s.label !== "Division Setup" && s.label !== "Conference Setup"
       );
     }
-    if (type === "dogfight") {
+    if (type === "dogfight" || type === "derby") {
       return steps.filter(
         (s) =>
           s.label !== "Division Setup" &&
@@ -153,6 +226,77 @@ const ManageTournament: React.FC<IManageTournamentProps> = ({ user }) => {
     }
     return steps;
   };
+
+  // Estados de carga y error
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+          minHeight: "300px",
+        }}
+      >
+        <Typography>Cargando torneo...</Typography>
+      </Box>
+    );
+  }
+
+  if (unauthorized) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography variant="h5" color="error" gutterBottom>
+          Acceso No Autorizado
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          No tienes permisos para administrar este torneo.
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => navigate("/dashboard")}
+        >
+          Volver al Dashboard
+        </Button>
+      </Box>
+    );
+  }
+
+  if (!currentTournament && !loading) {
+    return (
+      <Box sx={{ p: 3, textAlign: "center" }}>
+        <Typography variant="h5" color="error" gutterBottom>
+          Torneo No Encontrado
+        </Typography>
+        <Button
+          variant="contained"
+          sx={{ mt: 2 }}
+          onClick={() => navigate("/dashboard")}
+        >
+          Volver al Dashboard
+        </Button>
+      </Box>
+    );
+  }
+
+  // No renderizar hasta que tournamentViewModel esté inicializado
+  if (!tournamentViewModel.tournament.name || tournamentViewModel.author === "") {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+          minHeight: "300px",
+        }}
+      >
+        <Typography>Inicializando torneo...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ background: "white", p: 3 }}>

@@ -158,7 +158,12 @@ const TournamentResultsDogfight: React.FC<ITournamentStatsProps> = ({
                       <TableCell sx={nameStyles}>
                         {match.round === 0
                           ? "Championship"
-                          : `Round ${match.round}`}{" "}
+                          : `Round ${match.round}`}
+                        <br />
+                        <span style={{ fontSize: isMobile() ? "10px" : "13px", fontWeight: "normal", color: "rgb(100, 100, 100)" }}>
+                          {match.courseDisplayName}
+                          {match.teeBoxDisplayName && ` - ${match.teeBoxDisplayName}`}
+                        </span>
                       </TableCell>
                       <TableCell sx={headerStyles}>Gross</TableCell>
                       <TableCell sx={headerStyles}>HDCP</TableCell>
@@ -191,7 +196,7 @@ const TournamentResultsDogfight: React.FC<ITournamentStatsProps> = ({
                               ""
                             )}-match-${!hideMatch ? "true" : "false"}-team-${
                               !hideTeam ? "true" : "false"
-                            }-medal-${!hideMedal ? "true" : "false"}`}
+                            }-medal-${!hideMedal ? "true" : "false"}-matchid-${match.id}`}
                           >
                             <Button variant="text" color="primary">
                               View Scorecard

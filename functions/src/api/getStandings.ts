@@ -4,6 +4,8 @@ import * as logger from "firebase-functions/logger";
 import { RequestGetStandings } from "../types/Standings";
 import { createStatistics } from "../helpers/createStatistics";
 import { calculateTeamPointsStandings } from "../helpers/calculateTeamPointsStandings";
+import { calculateDerbyStandings } from "../helpers/calculateDerbyStandings";
+import { ITournament } from "../types/DashboardLeagues";
 export const getStandings = async (req: RequestGetStandings, res: Response) => {
   const db = admin.firestore();
   const { leagueId } = req.body;
@@ -13,11 +15,12 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
   }
 
   try {
-    const [statisticsSnapshot] = await Promise.all([
+    const [statisticsSnapshot, tournamentSnapshot] = await Promise.all([
       db.collection("statistics").doc(leagueId).get(),
+      db.collection("tournament").where("id", "==", leagueId).get(),
     ]);
 
-    const statistics = (await !statisticsSnapshot.exists)
+    let statistics = (await !statisticsSnapshot.exists)
       ? await createStatistics(leagueId)
       : statisticsSnapshot.data();
 
@@ -29,16 +32,69 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
     }
 
     const isDogFight = statistics.tournamentType === "dogfight";
+    const isDerby = statistics.tournamentType === "derby";
     const isTeamPlay = statistics.tournamentType === "teamplay";
-    const sortedPlayers = !isTeamPlay
+
+    // Para Derby, calcular standings basados en la etapa/round actual
+    if (isDerby) {
+      const derbyStandings = await calculateDerbyStandings(leagueId);
+      logger.info("derbyStandings", { structuredData: derbyStandings });
+
+      const standingsPositions = derbyStandings
+        .slice(0, 3)
+        .map((player, index) => ({
+          name: player.tourneyName,
+          points: player.bestNet.toString(),
+          position: index + 1,
+        }));
+
+      // isPlayoffsActive check para Derby
+      let isPlayoffsActive = false;
+      try {
+        if (!tournamentSnapshot.empty) {
+          const tournament = tournamentSnapshot.docs[0].data() as ITournament & {
+            playOffsStartDate?: unknown;
+            playOffsCutOff?: unknown;
+          };
+          isPlayoffsActive =
+            typeof tournament.playOffsStartDate !== "undefined" &&
+            tournament.playOffsStartDate !== null &&
+            typeof tournament.playOffsCutOff !== "undefined" &&
+            tournament.playOffsCutOff !== null;
+        }
+      } catch (e) {
+        logger.warn("Unable to read playoffs fields", { error: e });
+      }
+
+      return res.status(200).json({
+        status: "success",
+        data: {
+          standings: standingsPositions,
+          isPlayoffsActive,
+        },
+      });
+    }
+
+    const sortedPlayers = (!isTeamPlay
       ? statistics.players
-      : await calculateTeamPointsStandings(statistics.players, leagueId);
+      : await calculateTeamPointsStandings(
+          statistics.players,
+          leagueId
+        )) as Array<{
+      tourneyName: string;
+      netAverage: number;
+      totalPoints: number;
+      medalPoints: number;
+      totalGross?: number;
+      totalNet?: number;
+    }>;
 
     logger.info("sortedPlayers", { structuredData: statistics.players });
     logger.info("isDogFight", { structuredData: statistics.tournamentType });
+    
     const standingsPositions = sortedPlayers
       .slice(0, 3)
-      .map((player, index) => ({
+      .map((player: { tourneyName: string; netAverage: number; totalPoints: number; medalPoints: number; totalGross?: number; totalNet?: number }, index: number) => ({
         name: player.tourneyName,
         points: isDogFight
           ? player.netAverage.toString()
@@ -46,10 +102,29 @@ export const getStandings = async (req: RequestGetStandings, res: Response) => {
         position: index + 1,
       }));
 
+    // isPlayoffsActive solo si existen ambos campos en tournament
+    let isPlayoffsActive = false;
+    try {
+      if (!tournamentSnapshot.empty) {
+        const tournament = tournamentSnapshot.docs[0].data() as ITournament & {
+          playOffsStartDate?: unknown;
+          playOffsCutOff?: unknown;
+        };
+        isPlayoffsActive =
+          typeof tournament.playOffsStartDate !== "undefined" &&
+          tournament.playOffsStartDate !== null &&
+          typeof tournament.playOffsCutOff !== "undefined" &&
+          tournament.playOffsCutOff !== null;
+      }
+    } catch (e) {
+      logger.warn("Unable to read playoffs fields", { error: e });
+    }
+
     return res.status(200).json({
       status: "success",
       data: {
         standings: standingsPositions,
+        isPlayoffsActive,
       },
     });
   } catch (error) {

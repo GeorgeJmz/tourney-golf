@@ -117,6 +117,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "ChulaVistaGolfCourse",
+      name: "Chula Vista Golf Course",
+      address: "4475 Bonita Road, CA 91902",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BackChulaVistaGolfCourse",
+          color: "Back",
+          length: "6323",
+        },
+      ],
+    },
+    {
       id: "CoronadoMunicipal",
       name: "Coronado Municipal Golf Course",
       address: "",
@@ -171,6 +184,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "DanzanteBay",
+      name: "Danzantes Bay",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueDanzanteBay",
+          color: "Blue",
+          length: "6141"
+        }
+      ],
+    },
+    {
       id: "DiamanteDunesCourse",
       name: "Diamante Dunes Course",
       address: "",
@@ -209,6 +235,19 @@ export const getCourses = (): GolfCoursesResponse => ({
           color: "White",
           length: "6527",
         },
+      ],
+    },
+    {
+      id: "ElTigreGolfClub",
+      name: "El Tigre Golf Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueElTigreGolfClub",
+          color: "Blue",
+          length: "6624"
+        }
       ],
     },
     {
@@ -417,6 +456,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "theGolfClubOfCalifornia",
+      name: "The Golf Club of California",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueTheGolfClubOfCalifornia",
+          color: "Blue",
+          length: "6500",
+        },
+      ],
+    },
+    {
       id: "theLinksAtLakehouse",
       name: "The Links at Lakehouse",
       address: "",
@@ -468,6 +520,32 @@ export const getCourses = (): GolfCoursesResponse => ({
           color: "Blue",
           length: "6138",
         },
+      ],
+    },
+    {
+      id: "RanchoBernardoInn",
+      name: "Rancho Bernardo Inn",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueRanchoBernardoInn",
+          color: "Blue",
+          length: "6272",
+        },
+      ],
+    },
+    {
+      id: "RedhawkGolfCourse",
+      name: "Redhawk Golf Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueRedhawkGolfCourse",
+          color: "Blue",
+          length: "6287"
+        }
       ],
     },
     {
@@ -591,6 +669,19 @@ export const getCourses = (): GolfCoursesResponse => ({
         },
       ],
     },
+    {
+      id: "VidantaGregNorman",
+      name: "Vidanta - Greg Norman Golf Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueVidantaGregNorman",
+          color: "Blue",
+          length: "6793"
+        }
+      ]
+    }
   ],
 });
 
@@ -1304,7 +1395,8 @@ export const getCourseDetail = (id: string): ICourseDetail => {
     },
     PalaMesaBlue: {
       distance: [
-        391, 461, 378, 166, 290, 372, 159, 495, 378, 464, 292, 473, 376, 151, 401, 150, 334, 407
+        391, 461, 378, 166, 290, 372, 159, 495, 378, 464, 292, 473, 376, 151,
+        401, 150, 334, 407,
       ],
       hcp: [3, 13, 1, 17, 15, 5, 11, 9, 7, 10, 14, 16, 6, 18, 2, 12, 8, 4],
       par: [4, 5, 4, 3, 4, 4, 3, 5, 4, 5, 4, 5, 4, 3, 4, 3, 4, 4],
@@ -1312,6 +1404,101 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3048, 36],
       total: [6138, 72],
     },
+    BackChulaVistaGolfCourse: {
+      distance: [
+        339, 491, 347, 141, 505, 421, 522, 408, 172, 367, 411, 513, 324, 357,
+        157, 368, 187, 490,
+      ],
+      hcp: [7, 5, 11, 17, 13, 1, 9, 3, 15, 10, 2, 12, 16, 4, 18, 6, 14, 8],
+      par: [4, 5, 4, 3, 5, 4, 5, 4, 3, 4, 4, 5, 4, 4, 3, 4, 3, 5],
+      out: [3346, 37],
+      in: [3174, 36],
+      total: [6520, 73],
+    },
+    BlueRanchoBernardoInn: {
+      distance: [
+        333, 163, 481, 177, 366, 366, 444, 477, 290, 
+        389, 150, 479, 124, 419, 362, 384, 341, 527
+      ],
+      hcp: [
+        15, 13, 7, 11, 3, 5, 1, 9, 17, 
+        8, 16, 10, 18, 2, 4, 14, 12, 6
+      ],
+      par: [
+        4, 3, 5, 3, 4, 4, 4, 5, 4, 
+        4, 3, 5, 3, 4, 4, 4, 4, 5
+      ],
+      in: [3175, 36],
+      out: [3097, 36],
+      total: [6272, 72]
+    },
+    BlueVidantaGregNorman: {
+      distance: [
+        355, 433, 400, 450, 193, 588, 275, 452, 153,
+        355, 170, 593, 150, 546, 439, 524, 203, 514
+      ],
+      hcp: [9, 5, 13, 15, 7, 3, 17, 1, 11, 2, 16, 6, 18, 10, 8, 12, 4, 14],
+      par: [4, 4, 4, 5, 3, 5, 4, 4, 3, 4, 3, 5, 3, 5, 4, 5, 3, 5],
+      out: [3299, 36],
+      in: [3494, 37],
+      total: [6793, 73]
+    },
+    BlueElTigreGolfClub: {
+      distance: [
+        400, 158, 401, 517, 430, 125, 365, 368, 526,
+        476, 386, 184, 378, 475, 179, 385, 178, 543
+      ],
+      hcp: [3, 15, 7, 13, 1, 17, 11, 9, 5, 18, 6, 12, 2, 16, 14, 4, 10, 8],
+      par: [4, 3, 4, 5, 4, 3, 4, 4, 5, 5, 4, 3, 4, 5, 3, 4, 3, 5],
+      out: [3290, 36],
+      in: [3334, 36],
+      total: [6624, 72]
+    },
+    BlueDanzanteBay: {
+      distance: [
+        308, 487, 159, 337, 498, 329, 390, 396, 158,
+        457, 366, 475, 134, 367, 321, 299, 149, 443
+      ],
+      hcp: [17, 7, 5, 15, 3, 11, 9, 1, 13, 12, 2, 6, 16, 4, 14, 18, 8, 10],
+      par: [4, 5, 3, 4, 5, 4, 4, 4, 3, 5, 4, 5, 3, 4, 4, 4, 3, 4],
+      out: [3062, 36],
+      in: [3079, 36],
+      total: [6141, 72]
+    },
+    BlueRedhawkGolfCourse: {
+      distance: [
+        486, 366, 325, 126, 408, 363, 506, 137, 370,
+        417, 526, 142, 411, 323, 340, 409, 168, 464
+      ],
+      hcp: [
+        5, 3, 7, 15, 1, 9, 11, 13, 17,
+        6, 10, 14, 2, 18, 16, 8, 12, 4
+      ],
+      par: [
+        5, 4, 4, 3, 4, 4, 5, 3, 4,
+        4, 5, 3, 4, 4, 4, 4, 3, 5
+      ],
+      in: [3200, 36],
+      out: [3087, 36],
+      total: [6287, 72]
+    },
+    BlueTheGolfClubOfCalifornia: {
+      distance: [
+        363, 507, 367, 369, 138, 563, 171, 423, 419,
+        509, 366, 315, 404, 483, 348, 164, 408, 183
+      ],
+      hcp: [
+        13, 5, 11, 9, 17, 1, 15, 7, 3,
+        10, 14, 6, 2, 8, 18, 16, 4, 12
+      ],
+      par: [
+        4, 5, 4, 4, 3, 5, 3, 4, 4,
+        5, 4, 4, 4, 5, 4, 3, 4, 3
+      ],
+      in: [3180, 36],
+      out: [3320, 36],
+      total: [6500, 72]
+    }
   };
 
   const course = details[id];

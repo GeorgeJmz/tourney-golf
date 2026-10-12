@@ -21,7 +21,7 @@ import { TextInput } from "../../components/TextInput";
 import { NavbarTitleContext } from "../../hooks/useNavContext";
 import UserViewModel from "../../viewModels/UserViewModel";
 
-import { getScoresByID } from "../../services/firebase";
+import { getScoresByID, getMatchById } from "../../services/firebase";
 import MatchViewModel from "../../viewModels/MatchViewModel";
 import ScoreViewModel from "../../viewModels/ScoreViewModel";
 import HorizontalScoreCard from "../Play/components/HorizontalScoreCard";
@@ -38,53 +38,72 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
   const [hideTeam, setHideTeam] = React.useState<boolean>(false);
   const [hideMedal, setHideMedal] = React.useState<boolean>(false);
   const [hideWinner, setHideWinner] = React.useState<boolean>(false);
+  const [courseDisplayName, setCourseDisplayName] = React.useState<string>("");
+  const [teeBoxDisplayName, setTeeBoxDisplayName] = React.useState<string>("");
 
   const getScores = async () => {
-    const n = id?.split("-") || []; // "oRkIhspefwzCGhdNQJZ6-match-false-team-true-medal-true".split("-");
-    const npl = [] as string[];
-    const nparam = [] as string[];
-    let aux = true;
-    if (n.length > 0) {
-      n.forEach((element) => {
-        if (element === "match") {
-          aux = false;
-        }
-        if (aux) {
-          npl.push(element);
-        } else {
-          nparam.push(element);
-        }
-      });
+    // Parsear la URL: "scoreId1-scoreId2-...-match-true-team-false-medal-true-winner-false-matchid-abc123"
+    const urlParts = id?.split("-") || [];
+    
+    // Separar scoresId de los parámetros
+    const matchIndex = urlParts.findIndex(part => part === "match");
+    if (matchIndex === -1) {
+      console.error("Invalid URL format");
+      return;
     }
-    const players = npl;
-    const params = nparam;
-    const m = params[1] === "true" ? false : true;
-    const team = params[3] === "true" ? false : true;
-    const medal = params[5] === "true" ? false : true;
-    const hideW = params[7] === "true" ? false : true;
-    const score = [];
-    for (const player of players) {
-      const scores = await getScoresByID(player || "");
+
+    const scoresId = urlParts.slice(0, matchIndex);
+    const params = urlParts.slice(matchIndex);
+    
+    // Extraer flags de la URL (ya vienen calculados)
+    const matchFlag = params[1] === "true" ? false : true;  // invertido porque hideMatch
+    const teamFlag = params[3] === "true" ? false : true;
+    const medalFlag = params[5] === "true" ? false : true;
+    const winnerFlag = params[7] === "true" ? false : true;
+    
+    setHideMatch(matchFlag);
+    setHideTeam(teamFlag);
+    setHideMedal(medalFlag);
+    setHideWinner(winnerFlag);
+
+    // Extraer matchId de la URL
+    const matchIdIndex = params.findIndex(part => part === "matchid");
+    const extractedMatchId = matchIdIndex !== -1 && matchIdIndex < params.length - 1
+      ? params[matchIdIndex + 1]
+      : null;
+
+    if (!extractedMatchId) {
+      console.error("No matchId found in URL");
+      return;
+    }
+
+    // Cargar SOLO el match para obtener la información del curso
+    const matchData = await getMatchById(extractedMatchId);
+    if (matchData) {
+      setCourseDisplayName(matchData.courseDisplayName || "");
+      setTeeBoxDisplayName(matchData.teeBoxDisplayName || "");
+    }
+
+    // Cargar los scores de los jugadores usando los IDs de la URL
+    const scorePromises = scoresId.map(async (scoreId) => {
+      const scores = await getScoresByID(scoreId);
       const scoreModel = new ScoreViewModel();
       if (scores) {
         scoreModel.score = scores;
       }
+      return scoreModel;
+    });
 
-      score.push(scoreModel);
-    }
+    const scores = await Promise.all(scorePromises);
+    match.players = scores;
 
-    match.players = score;
-
-    if (score.length > 1) {
+    if (scores.length > 1) {
       match.calculateWinners();
     }
-    setHideMatch(m);
-    setHideMedal(medal);
-    setHideTeam(team);
-    setHideWinner(hideW);
+
     setTimeout(() => {
-      setMatchId("sadasdasdsa");
-    }, 500);
+      setMatchId(extractedMatchId);
+    }, 100);
   };
 
   useEffect(() => {
@@ -112,6 +131,8 @@ const MatchDetail: React.FC<IMatchDetailPageProps> = ({ user }) => {
             hideTeam={hideTeam}
             hideMedal={hideMedal}
             hideWinner={hideWinner}
+            courseDisplayName={courseDisplayName}
+            teeBoxDisplayName={teeBoxDisplayName}
           />
         )}
       </Box>

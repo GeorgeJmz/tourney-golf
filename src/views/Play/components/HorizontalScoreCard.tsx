@@ -18,6 +18,8 @@ interface HorizontalScoreCardProps {
   hideMedal?: boolean;
   isSmall?: boolean;
   hideWinner?: boolean;
+  courseDisplayName?: string;
+  teeBoxDisplayName?: string;
 }
 
 const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
@@ -27,6 +29,8 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   hideMedal,
   isSmall,
   hideWinner = false,
+  courseDisplayName,
+  teeBoxDisplayName,
 }) => {
   const stylesByIndex = (index: number, isHeader = false) => {
     if (index === 0) {
@@ -127,20 +131,26 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
 
     const indexHole = index > 9 ? index - 1 : index;
 
+    // Para Derby/TeamPlay/Dogfight usar handicap individual completo (teamScoreHolesHP)
+    // Para Match Play usar diferencia de handicaps (scoreHolesHP)
+    const handicapArray = hideMatch 
+      ? currentPlayer.score.teamScoreHolesHP 
+      : currentPlayer.score.scoreHolesHP;
+
     const hasHandicap =
       currentPlayer.score.scoreHoles[indexHole] &&
-      currentPlayer.score.scoreHolesHP[indexHole];
+      handicapArray[indexHole];
     // const getScoreWithHP = hasHandicap
     //   ? `${currentPlayer.score.scoreHoles[indexHole]}/${
     //       currentPlayer.score.scoreHoles[indexHole] -
-    //       currentPlayer.score.scoreHolesHP[indexHole]
+    //       handicapArray[indexHole]
     //     }`
     //   : currentPlayer.score.scoreHoles[indexHole];
     const getScoreWithHP = currentPlayer.score.scoreHoles[indexHole];
 
     const scoreComponent = (
       <div style={{ position: "relative" }}>
-        {currentPlayer.score.scoreHolesHP[indexHole] === 1 && (
+        {handicapArray[indexHole] === 1 && (
           <span
             style={{
               position: "absolute",
@@ -270,28 +280,57 @@ const HorizontalScoreCard: React.FC<HorizontalScoreCardProps> = ({
   const realWinner = match.match.winner.split("/");
 
   return (
-    <TableContainer component={Paper}>
-      <Table style={{ tableLayout: "fixed", marginBottom: "50px" }}>
-        <TableHead>{renderHoleHeaders()}</TableHead>
-        <TableBody>{renderPlayerRows()}</TableBody>
-        {!hideMatch && !isSmall && <TableBody>{renderResultsRows()}</TableBody>}
-        {match.match.winner !== "" && !hideWinner && (
-          <TableFooter>
-            <TableRow>
-              <TableCell
-                colSpan={isSmall ? 4 : 25}
-                align="right"
-                sx={{ border: 1, color: "rgb(118, 118, 118);", width: 80 }}
-              >
-                {!hideMatch && !hideMedal && match.match.winner}
-                {hideMatch && !hideMedal && (realWinner[1] || realWinner[0])}
-                {!hideMatch && hideMedal && realWinner[0]}
-              </TableCell>
-            </TableRow>
-          </TableFooter>
-        )}
-      </Table>
-    </TableContainer>
+    <>
+      {/* Header con información del campo - Solo si existe */}
+      {courseDisplayName && (
+        <TableContainer component={Paper} sx={{ marginBottom: 2 }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell
+                  align="center"
+                  sx={{
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    fontWeight: "bold",
+                    fontSize: "18px",
+                    padding: "16px",
+                    border: "none",
+                  }}
+                >
+                  {courseDisplayName}
+                  {teeBoxDisplayName && ` - ${teeBoxDisplayName}`}
+                </TableCell>
+              </TableRow>
+            </TableHead>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* Tabla del scorecard */}
+      <TableContainer component={Paper}>
+        <Table style={{ tableLayout: "fixed", marginBottom: "50px" }}>
+          <TableHead>{renderHoleHeaders()}</TableHead>
+          <TableBody>{renderPlayerRows()}</TableBody>
+          {!hideMatch && !isSmall && <TableBody>{renderResultsRows()}</TableBody>}
+          {match.match.winner !== "" && !hideWinner && (
+            <TableFooter>
+              <TableRow>
+                <TableCell
+                  colSpan={isSmall ? 4 : 25}
+                  align="right"
+                  sx={{ border: 1, color: "rgb(118, 118, 118);", width: 80 }}
+                >
+                  {!hideMatch && !hideMedal && match.match.winner}
+                  {hideMatch && !hideMedal && (realWinner[1] || realWinner[0])}
+                  {!hideMatch && hideMedal && realWinner[0]}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          )}
+        </Table>
+      </TableContainer>
+    </>
   );
 };
 

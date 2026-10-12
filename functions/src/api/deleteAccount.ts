@@ -33,7 +33,10 @@ export const deleteAccount = async (req: RequestGetCourses, res: Response) => {
     try {
       authUser = await admin.auth().getUserByEmail(email);
     } catch (authErr) {
-      logger.error("User not found in Firebase Auth", { email, error: authErr });
+      logger.error("User not found in Firebase Auth", {
+        email,
+        error: authErr,
+      });
       return res.status(404).json({ error: "User not found in Auth" });
     }
 
@@ -51,7 +54,10 @@ export const deleteAccount = async (req: RequestGetCourses, res: Response) => {
   }
 };
 
-export const reactivateAccount = async (req: RequestGetCourses, res: Response) => {
+export const reactivateAccount = async (
+  req: RequestGetCourses,
+  res: Response
+) => {
   const db = admin.firestore();
   const { userId } = req.body;
 
@@ -80,7 +86,10 @@ export const reactivateAccount = async (req: RequestGetCourses, res: Response) =
     try {
       authUser = await admin.auth().getUserByEmail(email);
     } catch (authErr) {
-      logger.error("User not found in Firebase Auth", { email, error: authErr });
+      logger.error("User not found in Firebase Auth", {
+        email,
+        error: authErr,
+      });
       return res.status(404).json({ error: "User not found in Auth" });
     }
 
@@ -100,7 +109,10 @@ export const reactivateAccount = async (req: RequestGetCourses, res: Response) =
   }
 };
 
-export const requestAccountReactivation = async (req: { body: { email: string } }, res: Response) => {
+export const requestAccountReactivation = async (
+  req: { body: { email: string } },
+  res: Response
+) => {
   const db = admin.firestore();
   const { email } = req.body;
 
@@ -152,7 +164,10 @@ export const requestAccountReactivation = async (req: { body: { email: string } 
   }
 };
 
-export const reactivateAccountWithToken = async (req: { body: { token: string } }, res: Response) => {
+export const reactivateAccountWithToken = async (
+  req: { body: { token: string } },
+  res: Response
+) => {
   const db = admin.firestore();
   const { token } = req.body;
 
@@ -192,7 +207,10 @@ export const reactivateAccountWithToken = async (req: { body: { token: string } 
     try {
       authUser = await admin.auth().getUserByEmail(email);
     } catch (authErr) {
-      logger.error("User not found in Firebase Auth", { email, error: authErr });
+      logger.error("User not found in Firebase Auth", {
+        email,
+        error: authErr,
+      });
       return res.status(404).json({ error: "User not found in Auth" });
     }
     // Reactivar usuario en Auth

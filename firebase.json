@@ -31,9 +31,6 @@
     "firestore": {
       "port": 8081
     },
-    "hosting": {
-      "port": 5004
-    },
     "ui": {
       "enabled": true
     },

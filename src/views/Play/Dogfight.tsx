@@ -17,7 +17,16 @@ import { ScoreTable } from "./components/ScoreTable";
 import HorizontalScoreCard from "./components/HorizontalScoreCard";
 import { useNavigate, useParams } from "react-router-dom";
 import type { IUser } from "../../models/User";
-import { Button, Typography } from "@mui/material";
+import {
+  Button,
+  Typography,
+  Paper,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material";
 import { getPlayersByTournamentId } from "../../services/firebase";
 import { ITournamentPlayer } from "../../models/Player";
 import { ScoreBeforeLeave } from "./components/ScoreBeforeLeave";
@@ -334,6 +343,34 @@ const Dogfight: React.FC<IPlayDogfightProps> = ({ user }) => {
         )}
         {playViewModel.currentStep === 2 && isRound && (
           <React.Fragment>
+            {/* Header con información del campo - Siempre visible */}
+            {playViewModel.matches.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            backgroundColor: "#4CAF50",
+                            color: "white",
+                            fontWeight: "bold",
+                            fontSize: "18px",
+                            padding: "16px",
+                            border: "none",
+                          }}
+                        >
+                          {playViewModel.matches[0].match.courseDisplayName} -{" "}
+                          {playViewModel.matches[0].match.teeBoxDisplayName}
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                  </Table>
+                </TableContainer>
+              </Box>
+            )}
+
             <Tabs value={value} onChange={handleChange} centered>
               <Tab label="Round" />
               <Tab label="Score" />
@@ -341,8 +378,9 @@ const Dogfight: React.FC<IPlayDogfightProps> = ({ user }) => {
             </Tabs>
             <TabPanel value={value} index={0}>
               <React.Fragment>
-                {playViewModel.matches.map((match) => (
+                {playViewModel.matches.map((match, index) => (
                   <HorizontalScoreCard
+                    key={`match-${index}`}
                     match={match}
                     hideMatch
                     hideTeam
@@ -419,8 +457,9 @@ const Dogfight: React.FC<IPlayDogfightProps> = ({ user }) => {
                 }
               >
                 <React.Fragment>
-                  {playViewModel.matches.map((match) => (
+                  {playViewModel.matches.map((match, index) => (
                     <HorizontalScoreCard
+                      key={`modal-match-${index}`}
                       match={match}
                       hideMatch={hideMatch}
                       hideTeam={hideTeam}
@@ -443,8 +482,9 @@ const Dogfight: React.FC<IPlayDogfightProps> = ({ user }) => {
                   }
                 >
                   <React.Fragment>
-                    {playViewModel.matches.map((match) => (
+                    {playViewModel.matches.map((match, index) => (
                       <HorizontalScoreCard
+                        key={`leave-modal-match-${index}`}
                         match={match}
                         hideMatch={hideMatch}
                         hideTeam={hideTeam}

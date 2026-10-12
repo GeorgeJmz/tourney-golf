@@ -75,10 +75,10 @@ const Login: React.FC = () => {
                 </Link> */}
               </div>
               <div>
-              <Link to="/request-account-reactivation">
-                  <Button 
-                    variant="text" 
-                    color="secondary" 
+                <Link to="/request-account-reactivation">
+                  <Button
+                    variant="text"
+                    color="secondary"
                     size="small"
                     sx={{ mt: 1, fontSize: "12px" }}
                   >

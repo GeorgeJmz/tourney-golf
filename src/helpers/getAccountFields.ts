@@ -7,7 +7,8 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const validatePassword = (password: string): boolean => {
-  const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{7,}$/;
+  // Minimum 8 characters, at least one uppercase letter and one number
+  const re = /^(?=.*\d)(?=.*[A-Z]).{8,}$/;
   return re.test(password);
 };
 
@@ -211,8 +212,8 @@ export interface IAccountElement {
   lastName: string;
   email: string;
   password: string;
-
-  [key: string]: string;
+  ghinNumber?: string;
+  [key: string]: string | undefined;
 }
 
 export const accountFieldsEmpty: IAccountElement = {
@@ -220,6 +221,7 @@ export const accountFieldsEmpty: IAccountElement = {
   lastName: "",
   email: "",
   password: "",
+  ghinNumber: "",
 };
 
 export const accountFieldsValidation: yup.ObjectSchema<IAccountElement> = yup
@@ -240,6 +242,10 @@ export const accountFieldsValidation: yup.ObjectSchema<IAccountElement> = yup
     password: yup
       .string()
       .required("No password provided.")
-      .min(8, "Password is too short - should be 8 chars minimum.")
-      .matches(/[a-zA-Z]/, "Password can only contain Latin letters."),
+      .min(8, "Password must contain 8 characters minimum")
+      .matches(
+        /^(?=.*\d)(?=.*[A-Z]).{8,}$/,
+        "At least One Capital letter and One number"
+      ),
+    ghinNumber: yup.string().optional(),
   });

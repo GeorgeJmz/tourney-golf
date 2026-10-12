@@ -14,6 +14,7 @@ interface DateInputProps {
   value: string | null;
   onChange: ((value: string | null) => void) | undefined;
   disabledPast?: boolean;
+  minDate?: string | null;
 }
 
 export const DateInput: React.FC<DateInputProps> = ({
@@ -22,6 +23,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   onChange,
   value,
   disabledPast,
+  minDate,
 }) => (
   <LocalizationProvider dateAdapter={AdapterDayjs}>
     <Grid
@@ -36,6 +38,7 @@ export const DateInput: React.FC<DateInputProps> = ({
           onChange={onChange}
           label={inputElement.placeholder}
           disablePast={disabledPast}
+          minDate={minDate ? (dayjs(minDate) as unknown as string) : undefined}
         />
       </FormControl>
     </Grid>

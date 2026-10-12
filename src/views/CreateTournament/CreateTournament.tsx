@@ -139,7 +139,7 @@ const CreateTournament: React.FC<ICreateTournamentProps> = ({ user }) => {
         (s) => s.label !== "Division Setup" && s.label !== "Conference Setup"
       );
     }
-    if (type === "dogfight") {
+    if (type === "dogfight" || type === "derby") {
       return steps.filter(
         (s) =>
           s.label !== "Division Setup" &&

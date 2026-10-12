@@ -130,7 +130,7 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
       !hideTeam ? "true" : "false"
     }-medal-${!hideMedal ? "true" : "false"}-winner-${
       isTeamPlay ? "false" : "true"
-    }`;
+    }-matchid-${match.id}`;
   };
 
   // const matrizValues = {
@@ -268,8 +268,12 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={nameStyles}>
-                        {" "}
-                        {convertMomentDate(match.date)}{" "}
+                        {convertMomentDate(match.date)}
+                        <br />
+                        <span style={{ fontSize: isMobile() ? "10px" : "13px", fontWeight: "normal", color: "rgb(100, 100, 100)" }}>
+                          {match.courseDisplayName}
+                          {match.teeBoxDisplayName && ` - ${match.teeBoxDisplayName}`}
+                        </span>
                       </TableCell>
                       {!isTeamPlay && (
                         <TableCell sx={headerStyles}>Match</TableCell>
@@ -380,8 +384,12 @@ const TournamentResults: React.FC<ITournamentStatsProps> = ({ user }) => {
                     <TableHead>
                       <TableRow>
                         <TableCell sx={nameStyles}>
-                          {" "}
-                          {convertMomentDate(match.date)}{" "}
+                          {convertMomentDate(match.date)}
+                          <br />
+                          <span style={{ fontSize: isMobile() ? "10px" : "13px", fontWeight: "normal", color: "rgb(100, 100, 100)" }}>
+                            {match.courseDisplayName}
+                            {match.teeBoxDisplayName && ` - ${match.teeBoxDisplayName}`}
+                          </span>
                         </TableCell>
                         <TableCell sx={headerStyles}>Match</TableCell>
                         <TableCell sx={headerStyles}>Gross</TableCell>

@@ -53,29 +53,39 @@ const RequestAccountReactivation: React.FC = () => {
 
   if (success) {
     return (
-      <Container sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-      }}>
-        <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100vh",
+        }}
+      >
+        <Box
+          sx={{
+            mt: 8,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Paper sx={{ p: 4, width: "100%" }}>
             <Typography variant="h5" component="h1" gutterBottom align="center">
               Reactivation Email Sent
             </Typography>
             <Typography variant="body1" align="center" sx={{ mb: 3 }}>
-              We've sent a reactivation link to your email address. 
-              Please check your inbox and click the link to reactivate your account.
+              We've sent a reactivation link to your email address. Please check
+              your inbox and click the link to reactivate your account.
             </Typography>
-            <Typography variant="body2" align="center" sx={{ mb: 3, color: "text.secondary" }}>
+            <Typography
+              variant="body2"
+              align="center"
+              sx={{ mb: 3, color: "text.secondary" }}
+            >
               The link will expire in 1 hour.
             </Typography>
             <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-              <Button
-                variant="contained"
-                onClick={() => navigate("/login")}
-              >
+              <Button variant="contained" onClick={() => navigate("/login")}>
                 Go to Login
               </Button>
               <Button
@@ -95,19 +105,29 @@ const RequestAccountReactivation: React.FC = () => {
   }
 
   return (
-    <Container sx={{
+    <Container
+      sx={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
-      }}>
-      <Box sx={{ mt: 8, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      }}
+    >
+      <Box
+        sx={{
+          mt: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Paper sx={{ p: 4, width: "100%" }}>
           <Typography variant="h5" component="h1" gutterBottom align="center">
             Request Account Reactivation
           </Typography>
           <Typography variant="body1" align="center" sx={{ mb: 3 }}>
-            Enter your email address and we'll send you a link to reactivate your account.
+            Enter your email address and we'll send you a link to reactivate
+            your account.
           </Typography>
 
           <form onSubmit={formik.handleSubmit}>
@@ -131,7 +151,9 @@ const RequestAccountReactivation: React.FC = () => {
               </Alert>
             )}
 
-            <Box sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box
+              sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}
+            >
               <Button
                 type="submit"
                 fullWidth
@@ -159,4 +181,4 @@ const RequestAccountReactivation: React.FC = () => {
   );
 };
 
-export default RequestAccountReactivation; 
+export default RequestAccountReactivation;

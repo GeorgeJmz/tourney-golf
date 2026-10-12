@@ -12,7 +12,17 @@ import { getCourses } from "../api/getCourses";
 import { createMatch } from "../api/createMatch";
 import { getBoard } from "../api/getBoard";
 import { getStats } from "../api/getStats";
-import { deleteAccount, reactivateAccount, requestAccountReactivation, reactivateAccountWithToken } from "../api/deleteAccount";
+import {
+  deleteAccount,
+  reactivateAccount,
+  requestAccountReactivation,
+  reactivateAccountWithToken,
+} from "../api/deleteAccount";
+import { getRules } from "../api/getRules";
+import { getResults } from "../api/getResults";
+import { getTeamboard } from "../api/getTeamboard";
+import { getPlayerBoard } from "../api/getPlayerBoard";
+import { getPlayoffs } from "../api/getPlayoffs";
 
 const MODO_PRUEBA_CORS_PERMISIVO = true;
 
@@ -118,6 +128,11 @@ routes.post("/deleteAccount", verifyToken, deleteAccount);
 routes.post("/reactivateAccount", verifyToken, reactivateAccount);
 routes.post("/requestAccountReactivation", requestAccountReactivation);
 routes.post("/reactivateAccountWithToken", reactivateAccountWithToken);
+routes.post("/getRules", verifyToken, getRules);
+routes.post("/getResults", verifyToken, getResults);
+routes.post("/getTeamboard", verifyToken, getTeamboard);
+routes.post("/getPlayerBoard", verifyToken, getPlayerBoard);
+routes.post("/getPlayoffs", verifyToken, getPlayoffs);
 
 routes.use((req, res) => {
   res.status(404).send("Not found");

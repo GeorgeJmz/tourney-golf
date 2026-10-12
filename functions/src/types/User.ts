@@ -15,6 +15,7 @@ export type UserType = {
   }[];
   sequentialUserId?: number;
   disabled?: boolean;
+  isAdmin?: boolean;
 };
 
 export type RequestAddUser = {

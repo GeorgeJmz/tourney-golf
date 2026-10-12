@@ -75,6 +75,24 @@ const Dashboard: React.FC<IDashboardProps> = ({ user }) => {
               </Link>
             </ListItem>
           )}
+          {user.user.isAdmin && (
+            <>
+              <ListItem sx={{ width: "auto" }}>
+                <Link to="/api-test">
+                  <Button variant="outlined" size="small">
+                    Api Test
+                  </Button>
+                </Link>
+              </ListItem>
+              <ListItem sx={{ width: "auto" }}>
+                <Link to="/admin-all-leagues">
+                  <Button variant="outlined" size="small">
+                    Admin All Leagues
+                  </Button>
+                </Link>
+              </ListItem>
+            </>
+          )}
         </Paper>
       )}
 

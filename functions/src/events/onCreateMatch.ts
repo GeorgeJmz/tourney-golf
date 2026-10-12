@@ -6,7 +6,36 @@ import { IMatchResults } from "../types/Match";
 exports.onCreateMatch = onDocumentCreated("match/{matchId}", async (event) => {
   const matchData = event.data?.data();
   const matchResults = matchData?.matchResults;
+  const tournamentId = matchData?.tournamentId;
 
+  // Update tournament lastActivityDate
+  if (tournamentId) {
+    try {
+      const tournamentRef = admin
+        .firestore()
+        .collection("tournament")
+        .where("id", "==", tournamentId)
+        .limit(1);
+
+      const tournamentSnapshot = await tournamentRef.get();
+
+      if (!tournamentSnapshot.empty) {
+        const tournamentDoc = tournamentSnapshot.docs[0];
+        await tournamentDoc.ref.update({
+          lastActivityDate: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        logger.info(
+          `✅ Updated lastActivityDate for tournament ${tournamentId}`
+        );
+      }
+    } catch (error) {
+      logger.error("Error updating tournament lastActivityDate:", error);
+      // No lanzar error para no romper la creación del match
+    }
+  }
+
+  // Update user lastCourses
   matchResults.forEach(async (matchResult: IMatchResults) => {
     const userId = matchResult.idPlayer;
     //   logger.info("MatchResults ---", { structuredData: true });
