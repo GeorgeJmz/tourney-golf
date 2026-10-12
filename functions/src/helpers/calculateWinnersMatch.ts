@@ -154,11 +154,8 @@ export const calculateNewWinners = (
     const leadingPlayer =
       currentMatchResult > 0 ? playersList[0].score : playersList[1].score;
     winnerMatchIds = [leadingPlayer.idPlayer];
-    const holesUp = Math.abs(currentMatchResult);
 
     let matchConcludedEarly = false;
-    const finalHolesUp = holesUp;
-    const finalHolesRemaining = 0;
 
     for (let i = 0; i < winByHoleResults.length; i++) {
       const resultAtHole = winByHoleResults[i];
