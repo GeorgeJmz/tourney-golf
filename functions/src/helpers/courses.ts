@@ -417,6 +417,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "RamsHillGolfClub",
+      name: "Rams Hill Golf Club",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "GoldRamsHillGolfClub",
+          color: "Gold",
+          length: "6826",
+        },
+      ],
+    },
+    {
       id: "RiverwalkGolfClub",
       name: "Riverwalk Golf Club",
       address: "1150 Fashion Valley Rd, San Diego, CA 92108",
@@ -1078,6 +1091,17 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       in: [3375, 36],
       out: [3246, 35],
       total: [6621, 71],
+    },
+    GoldRamsHillGolfClub: {
+      distance: [
+        415, 522, 454, 353, 196, 496, 352, 466, 145, 202, 534, 308, 438, 421,
+        470, 195, 301, 558,
+      ],
+      hcp: [3, 7, 5, 15, 9, 13, 11, 1, 17, 8, 12, 16, 6, 10, 2, 14, 18, 4],
+      par: [4, 5, 4, 4, 3, 5, 4, 4, 3, 3, 5, 4, 4, 4, 4, 3, 4, 5],
+      in: [3427, 36],
+      out: [3399, 36],
+      total: [6826, 72],
     },
     BlueSingingHillsWillowGlen: {
       distance: [
