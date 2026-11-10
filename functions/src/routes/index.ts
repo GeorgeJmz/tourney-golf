@@ -4,7 +4,7 @@ import { getUsers } from "../api/getUsers";
 import { getDashboardLeagues } from "../api/getDashBoardLeagues";
 import { getOpponents } from "../api/getOpponents";
 import { verifyToken } from "../middleware";
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v2";
 const routes = express();
 import cors = require("cors");
 import { getStandings } from "../api/getStandings";

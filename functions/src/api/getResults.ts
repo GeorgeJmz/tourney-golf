@@ -66,7 +66,7 @@ export const getResults = async (req: RequestGetBoard, res: Response) => {
           })),
         };
       })
-      .sort((a, b) => {
+      .sort((a: { date: string | string[] }, b: { date: string | string[] }) => {
         // Ordenar de más reciente a más antiguo (descendente)
         const dateA = parseInt(a.date[0]);
         const dateB = parseInt(b.date[0]);

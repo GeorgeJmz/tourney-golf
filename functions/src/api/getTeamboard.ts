@@ -4,7 +4,7 @@ import { RequestGetBoard } from "../types/Board";
 import { logger } from "firebase-functions/v2";
 import { ITournament } from "../types/DashboardLeagues";
 import { ITournamentPlayer } from "../types/Standings";
-import { normalizeDateToMMDDYYYY, normalizeStagesDates } from "../helpers/normalizeDateFormat";
+import { normalizeDateToMMDDYYYY } from "../helpers/normalizeDateFormat";
 
 interface Stage {
   id: string;
@@ -111,28 +111,6 @@ export const getTeamboard = async (req: RequestGetBoard, res: Response) => {
         start: normalizeDateToMMDDYYYY(tournament.championshipDate),
         end: normalizeDateToMMDDYYYY(tournament.championshipDate),
       });
-    }
-
-    // Determinar stage actual
-    const currentDate = normalizeDateToMMDDYYYY(new Date().toISOString());
-    let currentStage = "0";
-
-    for (const stage of stages) {
-      if (
-        stage.id !== "champ" &&
-        currentDate >= stage.start &&
-        currentDate <= stage.end
-      ) {
-        currentStage = stage.id;
-        break;
-      }
-    }
-
-    if (
-      tournament.championshipDate &&
-      normalizeDateToMMDDYYYY(tournament.championshipDate) === currentDate
-    ) {
-      currentStage = "champ";
     }
 
     // Agrupar jugadores por equipo

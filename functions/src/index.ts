@@ -11,7 +11,7 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 
 /* eslint-disable */
-const functions = require("firebase-functions");
+const functions = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const routes = require("./routes");
 // Start writing functions
