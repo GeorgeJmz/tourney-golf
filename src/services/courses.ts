@@ -292,6 +292,19 @@ export const getCourses = (): GolfCoursesResponse => ({
       ],
     },
     {
+      id: "IndianWellsCelebrity",
+      name: "Indian Wells Golf Resort / Celebrity Course",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "BlueIndianWellsCelebrity",
+          color: "Blue",
+          length: "6642",
+        },
+      ],
+    },
+    {
       id: "LaJollaCountryClub",
       name: "La Jolla Country Club",
       address: "",
@@ -319,6 +332,19 @@ export const getCourses = (): GolfCoursesResponse => ({
           id: "maderasGolfClubBlue",
           color: "Blue",
           length: "6670",
+        },
+      ],
+    },
+    {
+      id: "MarriottShadowRidge",
+      name: "Marriott Shadow Ridge",
+      address: "",
+      distance: "",
+      teeBoxes: [
+        {
+          id: "GreenMarriottShadowRidge",
+          color: "Green",
+          length: "6621",
         },
       ],
     },
@@ -1030,12 +1056,34 @@ export const getCourseDetail = (id: string): ICourseDetail => {
       out: [2924, 36],
       total: [5851, 72],
     },
+    BlueIndianWellsCelebrity: {
+      distance: [
+        364, 372, 375, 491, 413, 205, 424, 320, 421, 411, 348, 248, 334, 507,
+        446, 165, 425, 373,
+      ],
+      hcp: [15, 7, 11, 13, 1, 9, 5, 17, 3, 6, 16, 18, 12, 8, 2, 14, 4, 10],
+      par: [4, 4, 4, 5, 4, 3, 4, 4, 4, 4, 4, 4, 4, 5, 4, 3, 4, 4],
+      in: [3257, 36],
+      out: [3385, 36],
+      total: [6642, 72],
+    },
+    GreenMarriottShadowRidge: {
+      distance: [
+        381, 583, 306, 165, 396, 463, 204, 351, 397, 461, 366, 186, 328, 518,
+        428, 506, 157, 425,
+      ],
+      hcp: [9, 1, 15, 17, 7, 3, 13, 11, 5, 8, 12, 16, 14, 6, 10, 2, 18, 4],
+      par: [4, 5, 4, 3, 4, 4, 3, 4, 4, 4, 4, 3, 4, 5, 4, 5, 3, 4],
+      in: [3375, 36],
+      out: [3246, 35],
+      total: [6621, 71],
+    },
     BlueSingingHillsWillowGlen: {
       distance: [
         375, 330, 399, 325, 502, 185, 416, 544, 184, 506, 403, 174, 395, 358,
         409, 431, 547, 168,
       ],
-      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 2, 6, 4, 18],
+      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 6, 2, 4, 18],
       par: [4, 4, 4, 4, 5, 3, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3],
       in: [3391, 36],
       out: [3260, 36],
@@ -1046,7 +1094,7 @@ export const getCourseDetail = (id: string): ICourseDetail => {
         341, 311, 374, 310, 484, 165, 388, 517, 161, 490, 370, 149, 371, 340,
         367, 387, 525, 150,
       ],
-      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 2, 6, 4, 18],
+      hcp: [7, 13, 3, 11, 9, 15, 5, 1, 17, 12, 8, 16, 14, 10, 6, 2, 4, 18],
       par: [4, 4, 4, 4, 5, 3, 4, 5, 3, 5, 4, 3, 4, 4, 4, 4, 5, 3],
       in: [3149, 36],
       out: [3051, 36],
